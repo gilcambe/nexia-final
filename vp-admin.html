@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ Viajante Pro — Admin v12</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<style>
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#131829;
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.10);
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35);
+  --cyan:#00E5FF;--cbg:rgba(0,229,255,.07);--cbrd:rgba(0,229,255,.2);
+  --green:#00D68F;--gnbg:rgba(0,214,143,.08);--gnbrd:rgba(0,214,143,.22);
+  --blue:#0057FF;--bbg:rgba(0,87,255,.08);--bbrd:rgba(0,87,255,.22);
+  --gold:#DAA520;--gbg:rgba(218,165,32,.08);--gbrd:rgba(218,165,32,.22);
+  --red:#FF3D71;--rbg:rgba(255,61,113,.08);--rbrd:rgba(255,61,113,.22);
+  --purple:#9B5CF6;--pbg:rgba(155,92,246,.08);--pbrd:rgba(155,92,246,.22);
+  --orange:#F59E0B;--obg:rgba(245,158,11,.08);--obrd:rgba(245,158,11,.22);
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+  --sw:240px;--r:12px;
+  /* VP accent = CYAN */
+  --acc:var(--cyan);--accbg:var(--cbg);--accbrd:var(--cbrd);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);overflow:hidden}
+button{font-family:var(--ff);cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:var(--ff);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,229,255,.3);border-radius:2px}
+.shell{display:grid;grid-template-columns:var(--sw) 1fr;height:100vh;overflow:hidden}
+#sb{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.gem{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#00293d,#005577,var(--cyan));border:1px solid var(--cbrd);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(0,229,255,.25)}
+.gem i{color:#fff;font-size:16px}
+.sn{font-size:13px;font-weight:800;color:var(--text)}
+.ss{font-size:7.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);opacity:.9;margin-top:1px}
+.grp{margin-bottom:2px}
+.grp-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all .15s}
+.grp-btn:hover{color:var(--text2)}.grp-btn i.gi{font-size:15px;flex-shrink:0}
+.grp-btn .cv{font-size:13px;margin-left:auto;transition:transform .25s ease}
+.grp-btn.open .cv{transform:rotate(180deg)}.grp-btn.ha{color:var(--cyan)}
+.grp-items{display:none;flex-direction:column;padding:2px 0 6px;border-left:1px solid var(--brd);margin:0 14px 0 22px}
+.grp-items.open{display:flex}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border:1px solid transparent;margin:1px 0}
+.nav-item i{font-size:15px;flex-shrink:0;width:18px;text-align:center}
+.nav-item:hover{background:var(--cbg);color:var(--text)}
+.nav-item.active{background:var(--cbg);border-color:var(--cbrd);color:var(--cyan)}
+.nbadge{margin-left:auto;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nbadge.live{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.nbadge.hot{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.nbadge.cyan{background:var(--cbg);color:var(--cyan);border:1px solid var(--cbrd)}
+.nbadge.new{background:var(--cbg);color:var(--cyan);border:1px solid var(--cbrd)}
+.sdiv{height:1px;background:var(--brd);margin:8px 14px}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#005577,var(--cyan));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#000;flex-shrink:0}
+#main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 24px;background:rgba(7,9,14,.92);border-bottom:1px solid var(--brd);backdrop-filter:blur(16px)}
+#tb-title{font-size:15px;font-weight:800;color:var(--text)}
+.tbstat{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;font-family:var(--ffm)}
+.dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+.dg{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dc{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;border:1px solid transparent}
+.bc{background:var(--cbg);border-color:var(--cbrd);color:var(--cyan)}.bc:hover{background:rgba(0,229,255,.14)}
+.br{background:var(--rbg);border-color:var(--rbrd);color:var(--red)}.br:hover{background:rgba(255,61,113,.16)}
+.bg{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}.bg:hover{background:rgba(218,165,32,.16)}
+.bb{background:var(--bbg);border-color:var(--bbrd);color:var(--blue)}.bb:hover{background:rgba(0,87,255,.16)}
+.bgn{background:var(--gnbg);border-color:var(--gnbrd);color:var(--green)}.bgn:hover{background:rgba(0,214,143,.14)}
+.bo{background:var(--obg);border-color:var(--obrd);color:var(--orange)}
+.ab{width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.ab.c{background:var(--cbg);color:var(--cyan);border-color:var(--cbrd)}
+.ab.r{background:var(--rbg);color:var(--red);border-color:var(--rbrd)}
+.ab.g{background:var(--gnbg);color:var(--green);border-color:var(--gnbrd)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--ffm)}
+.pill.on{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.pill.off{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.pill.wait{background:var(--obg);color:var(--orange);border:1px solid var(--obrd)}
+.pill.cyan{background:var(--cbg);color:var(--cyan);border:1px solid var(--cbrd)}
+.pill.blue{background:var(--bbg);color:var(--blue);border:1px solid var(--bbrd)}
+.pill.pur{background:var(--pbg);color:var(--purple);border:1px solid var(--pbrd)}
+.pill.gld{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.content{flex:1;overflow:hidden}
+.page{display:none;height:100%;overflow-y:auto;padding:26px 28px;flex-direction:column;gap:20px}
+.page.active{display:flex}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.phl .ey{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.phl .pt{font-size:22px;font-weight:900;color:var(--text)}
+.ac{color:var(--cyan)}.pha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.chd{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ct{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.ct i{color:var(--cyan)}.cbd{padding:18px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kcard{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kcard.k-cyan::before{background:var(--cyan)}.kcard.k-green::before{background:var(--green)}
+.kcard.k-red::before{background:var(--red)}.kcard.k-gold::before{background:var(--gold)}
+.kcard.k-purple::before{background:var(--purple)}.kcard.k-orange::before{background:var(--orange)}
+.kval{font-size:26px;font-weight:900;font-family:var(--ffm);color:var(--text)}
+.klbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.kdelta{font-size:10px;font-weight:700;display:flex;align-items:center;gap:3px;margin-top:2px}
+.kdelta.up{color:var(--green)}.kdelta.dn{color:var(--red)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:9px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--brd);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--brd);transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:10px 14px;color:var(--text2);font-size:12px}
+tbody td:first-child{color:var(--text);font-weight:600}
+.srch{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.srch-wrap{position:relative;flex:1}
+.srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.srch-in{width:100%;padding:9px 14px 9px 38px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:12px}
+.srch-in:focus{border-color:var(--cyan)}.srch-in::placeholder{color:var(--text3)}
+select.sel{padding:8px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer}
+select.sel:focus{border-color:var(--cyan)}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(4px)}
+.mov.show{display:flex}
+.mo{background:var(--bg2);border:1px solid var(--brd2);border-radius:16px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.mo-hd{padding:20px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.mo-tt{font-size:15px;font-weight:800;color:var(--text)}
+.mo-x{width:28px;height:28px;border-radius:6px;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.mo-bd{padding:24px}.mo-ft{padding:16px 24px;border-top:1px solid var(--brd);display:flex;gap:10px;justify-content:flex-end}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:.05em}
+.fi{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:13px}
+.fi:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cbg)}.fi::placeholder{color:var(--text3)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+textarea.fi{resize:vertical;min-height:80px}
+.cortex-layout{display:flex;flex-direction:column;height:calc(100vh - 52px - 80px - 90px);min-height:350px}
+.cx-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg3);border-radius:12px 12px 0 0;border:1px solid var(--brd);border-bottom:none}
+.cx-msg{max-width:80%;display:flex;flex-direction:column;gap:4px}
+.cx-msg.ai{align-self:flex-start}.cx-msg.user{align-self:flex-end}
+.cx-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+.cx-msg.ai .cx-bubble{background:var(--bg4);border:1px solid var(--brd);color:var(--text);border-radius:4px 12px 12px 12px}
+.cx-msg.user .cx-bubble{background:var(--cbg);border:1px solid var(--cbrd);color:var(--text);border-radius:12px 4px 12px 12px}
+.cx-meta{font-size:10px;color:var(--text3);font-family:var(--ffm)}.cx-msg.user .cx-meta{text-align:right}
+.cx-input-row{display:flex;gap:8px;padding:12px;background:var(--bg2);border:1px solid var(--brd);border-radius:0 0 12px 12px}
+.cx-in{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:13px;resize:none;height:42px}
+.cx-in:focus{border-color:var(--cyan)}
+.cx-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:bounce 1.2s infinite}
+.cx-dot:nth-child(2){animation-delay:.2s}.cx-dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.chart-wrap{position:relative;height:220px}
+/* ROOMING LIST */
+.room-card{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:14px;cursor:grab;transition:border-color .15s}
+.room-card:hover{border-color:var(--cbrd)}
+.room-card.drag-over{border-color:var(--cyan);background:var(--cbg)}
+/* GPS TRACKER */
+.gps-pin{position:absolute;width:16px;height:16px;border-radius:50%;border:3px solid white;transform:translate(-50%,-50%);animation:gpspulse 2s infinite}
+@keyframes gpspulse{0%,100%{box-shadow:0 0 0 0 rgba(0,229,255,.4)}50%{box-shadow:0 0 0 12px rgba(0,229,255,0)}}
+/* PABX SOFTPHONE */
+.dial-btn{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;transition:all .15s}
+.dial-btn:hover{transform:scale(1.05)}
+.dial-num{background:var(--bg3);border:1px solid var(--cbrd);color:var(--text)}
+.dial-call{background:linear-gradient(135deg,var(--green),#006a44);color:white;box-shadow:0 0 20px rgba(0,214,143,.3)}
+.dial-end{background:linear-gradient(135deg,var(--red),#8a0025);color:white;box-shadow:0 0 20px rgba(255,61,113,.3)}
+/* TOGGLE */
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg4);border:1px solid var(--brd);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--cyan);border-color:var(--cbrd)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .2s}
+.toggle.on::after{transform:translateX(16px)}
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--cbrd);border-radius:10px;padding:12px 18px;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+/* SPLASH */
+.splash-ov{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;transition:opacity .5s}
+.splash-ov.fade{opacity:0;pointer-events:none}
+.splash-gem{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#00293d,#005577,var(--cyan));border:1px solid var(--cbrd);display:flex;align-items:center;justify-content:center;font-size:24px;animation:sglow 2s ease-in-out infinite}
+@keyframes sglow{0%,100%{box-shadow:0 0 16px rgba(0,229,255,.3)}50%{box-shadow:0 0 40px rgba(0,229,255,.6)}}
+.splash-txt{font-size:20px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+.splash-sub{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--cyan);opacity:.8}
+.splash-bar{width:200px;height:2px;background:var(--brd);border-radius:1px;overflow:hidden}
+.splash-prog{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:1px;animation:prog 1.2s ease-out forwards}
+@keyframes prog{0%{width:0}100%{width:100%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){
+  .kgrid{grid-template-columns:repeat(2,1fr)}
+  .kgrid3{grid-template-columns:1fr}
+  .shell{grid-template-columns:1fr!important}
+  #sb{position:fixed!important;top:0;left:-280px!important;height:100vh;z-index:1000;width:260px!important;transition:left .3s;box-shadow:4px 0 30px rgba(0,0,0,.5)}
+  #sb.open{left:0!important}
+  .main-area{grid-column:1!important;margin-left:0!important}
+  .topbar,.tb,.header{padding-left:60px!important}
+}
+@media(max-width:540px){
+  .kgrid{grid-template-columns:1fr!important}
+  .modal,.mov .modal{width:96vw!important;padding:16px!important}
+  #toast{left:10px;right:10px;bottom:14px}
+}
+/* MOBILE HAMBURGER */
+#vp-mob-btn{display:none;position:fixed;top:12px;left:12px;z-index:2000;width:42px;height:42px;border-radius:10px;background:#0A1628;border:1px solid rgba(0,229,255,.3);color:#00E5FF;font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+#vp-mob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999}
+@media(max-width:900px){#vp-mob-btn{display:flex}}
+</style>
+</head>
+<body>
+
+<div class="splash-ov" id="splash">
+  <div class="splash-gem">✈️</div>
+  <div><div class="splash-txt">Viajante <span style="color:var(--cyan)">Pro</span></div><div class="splash-sub">Admin · NEXIA OS v12</div></div>
+  <div class="splash-bar"><div class="splash-prog"></div></div>
+</div>
+
+<div class="shell">
+<aside id="sb">
+  <div class="sb-logo">
+    <div class="gem"><i class="ri-plane-line"></i></div>
+    <div><div class="sn">Viajante Pro</div><div class="ss">Admin · v12</div></div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn open ha" onclick="tg(this)"><i class="ri-dashboard-line gi"></i><span>Visão Geral</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items open">
+      <div class="nav-item active" onclick="nav('dashboard',this)"><i class="ri-layout-masonry-line"></i>Dashboard<span class="nbadge live">LIVE</span></div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn open ha" onclick="tg(this)"><i class="ri-route-line gi"></i><span>Operação</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items open">
+      <div class="nav-item" onclick="nav('roteiros',this)"><i class="ri-map-2-line"></i>Roteiros & Pacotes<span class="nbadge cyan" id="badge-roteiros">0</span></div>
+      <div class="nav-item" onclick="nav('rooming',this)"><i class="ri-hotel-line"></i>Rooming List<span class="nbadge new">DRAG</span></div>
+      <div class="nav-item" onclick="nav('checkin',this)"><i class="ri-user-follow-line"></i>Check-in PAX</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-user-line gi"></i><span>Passageiros</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('pipeline',this)"><i class="ri-kanban-view"></i>Pipeline CRM</div>
+      <div class="nav-item" onclick="nav('passageiros',this)"><i class="ri-group-line"></i>Base de Pax</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-map-pin-line gi"></i><span>GPS & Guia</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('gps',this)"><i class="ri-navigation-line"></i>GPS Tempo Real<span class="nbadge live">LIVE</span></div>
+      <div class="nav-item" onclick="nav('pabx',this)"><i class="ri-phone-line"></i>PABX Cloud<span class="nbadge new">VOIP</span></div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-money-dollar-circle-line gi"></i><span>Financeiro</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('financeiro',this)"><i class="ri-bank-card-line"></i>NEXIA Pay Split</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-robot-line gi"></i><span>CORTEX AI</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('cortex',this)"><i class="ri-chat-ai-line"></i>Co-Pilot<span class="nbadge live">IA</span></div>
+      <div class="nav-item" onclick="nav('predictive',this)"><i class="ri-alarm-warning-line"></i>Alertas Preditivos<span class="nbadge hot">!</span></div>
+    </div>
+  </div>
+  <div class="sdiv"></div>
+  <div class="nav-item" style="margin:4px 14px" onclick="nav('configuracoes',this)"><i class="ri-tools-line"></i>Configurações</div>
+  <div class="sb-footer">
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="avatar">VP</div>
+      <div><div style="font-size:12px;font-weight:700">VP Admin</div><div style="font-size:9px;color:var(--cyan);font-family:var(--ffm)">TURISMO & VIAGENS</div></div>
+    </div>
+  </div>
+</aside>
+
+<div id="main">
+  <div class="topbar">
+    <div id="tb-title">✈️ Dashboard</div>
+    <div class="tbstat"><div class="dot dc"></div><span style="font-size:11px;color:var(--cyan)">VIAJANTE PRO</span></div>
+    <div class="tbstat"><div class="dot dg"></div><span id="stat-pax" style="color:var(--text2)">— pax</span></div>
+    <div class="tbr">
+      <select class="sel" style="font-size:10px" onchange="setLang(this.value)">
+        <option value="pt">🇧🇷 PT</option><option value="en">🇺🇸 EN</option><option value="es">🇪🇸 ES</option>
+      </select>
+      <button class="btn bc" onclick="om('m-novo-roteiro')"><i class="ri-add-line"></i>Novo Roteiro</button>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="pg-dashboard">
+    <div class="ph">
+      <div class="phl"><div class="ey">VIAJANTE PRO · NEXIA OS v12</div><div class="pt">Dashboard <span class="ac">Operações</span></div></div>
+      <div class="pha">
+        <div class="pill cyan"><i class="ri-plane-line"></i><span id="kpi-pill">0 pacotes</span></div>
+        <button class="btn bc" onclick="loadDashboard()"><i class="ri-refresh-line"></i>Atualizar</button>
+      </div>
+    </div>
+    <div class="kgrid">
+      <div class="kcard k-cyan"><div class="klbl">Receita do Mês</div><div class="kval" id="kpi-receita">R$ 0</div><div class="kdelta up"><i class="ri-arrow-up-s-line"></i>Mês atual</div></div>
+      <div class="kcard k-green"><div class="klbl">PAX Embarcados</div><div class="kval" id="kpi-pax">0</div><div class="kdelta up"><i class="ri-arrow-up-s-line"></i>Este mês</div></div>
+      <div class="kcard k-purple"><div class="klbl">Ocupação Média</div><div class="kval" id="kpi-ocup">0%</div><div class="kdelta">Todos os pacotes</div></div>
+      <div class="kcard k-orange"><div class="klbl">Roteiros Ativos</div><div class="kval" id="kpi-roteiros">0</div><div class="kdelta"><i class="ri-route-line"></i>Em execução</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-bar-chart-2-line"></i>Receita por Mês</div></div><div class="cbd"><div class="chart-wrap"><canvas id="chart-rec"></canvas></div></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-pie-chart-2-line"></i>Destinos Populares</div></div><div class="cbd"><div class="chart-wrap"><canvas id="chart-dest"></canvas></div></div></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-robot-line"></i>CORTEX Insights — Viajante Pro</div><div class="pill cyan">IA Preditiva</div></div>
+      <div class="cbd"><div id="cortex-insight" style="font-size:13px;color:var(--text2);line-height:1.7;background:var(--cbg);border:1px solid var(--cbrd);border-radius:8px;padding:14px"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block"></i> Carregando análise CORTEX...</div></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-route-line"></i>Próximas Viagens</div><button class="btn bc" onclick="nav('roteiros',null)">Ver todas</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Destino</th><th>Saída</th><th>Retorno</th><th>PAX</th><th>Ocupação</th><th>Receita</th><th>Status</th></tr></thead><tbody id="dash-tbody"><tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text3)">Carregando...</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ROTEIROS -->
+  <div class="page" id="pg-roteiros">
+    <div class="ph">
+      <div class="phl"><div class="ey">OPERAÇÃO</div><div class="pt">Roteiros & <span class="ac">Pacotes</span></div></div>
+      <div class="pha"><button class="btn bc" onclick="om('m-novo-roteiro')"><i class="ri-add-line"></i>Novo Pacote</button><button class="btn bgn" onclick="exportCSV()"><i class="ri-download-2-line"></i>Exportar CSV</button></div>
+    </div>
+    <div class="srch">
+      <div class="srch-wrap"><i class="ri-search-line srch-ic"></i><input class="srch-in" id="srch-r" placeholder="Buscar destino, pacote..." oninput="filterR()"></div>
+      <select class="sel" id="fil-status-r" onchange="filterR()"><option value="">Todos os status</option><option value="ativo">Ativo</option><option value="confirmado">Confirmado</option><option value="em_viagem">Em Viagem</option><option value="encerrado">Encerrado</option></select>
+    </div>
+    <div class="tbl-wrap card">
+      <table>
+        <thead><tr><th>Destino / Pacote</th><th>Tipo</th><th>Saída</th><th>Retorno</th><th>PAX Total</th><th>Confirmados</th><th>Receita</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="roteiros-tbody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ROOMING LIST -->
+  <div class="page" id="pg-rooming">
+    <div class="ph">
+      <div class="phl"><div class="ey">HOSPEDAGEM</div><div class="pt">Rooming <span class="ac">List</span> — Drag & Drop</div></div>
+      <div class="pha">
+        <select class="sel" id="room-roteiro" onchange="loadRooming()"><option value="">Selecione um roteiro</option></select>
+        <button class="btn bc" onclick="om('m-novo-quarto')"><i class="ri-add-line"></i>Novo Quarto</button>
+        <button class="btn bgn" onclick="exportRooming()"><i class="ri-file-excel-line"></i>Exportar</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 3fr;gap:18px;min-height:400px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-user-unfollow-line"></i>Sem Quarto</div><span id="room-sem-count" style="font-size:11px;color:var(--red);font-family:var(--ffm)">0</span></div>
+        <div class="cbd" id="pax-sem-quarto" ondragover="event.preventDefault()" ondrop="dropPax(event,'sem')" style="min-height:100px;display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:20px;color:var(--text3)">Selecione um roteiro</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-hotel-line"></i>Quartos</div></div>
+        <div class="cbd" id="quartos-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECK-IN -->
+  <div class="page" id="pg-checkin">
+    <div class="ph">
+      <div class="phl"><div class="ey">EMBARQUE</div><div class="pt">Check-in <span class="ac">PAX</span></div></div>
+      <div class="pha">
+        <select class="sel" id="ci-roteiro"><option value="">Selecione roteiro</option></select>
+        <button class="btn bc" onclick="loadCheckin()"><i class="ri-refresh-line"></i>Carregar</button>
+        <button class="btn bgn" onclick="exportCheckinCSV()"><i class="ri-download-2-line"></i>Export CSV</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:18px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-qr-scan-2-line"></i>Scanner QR</div></div>
+        <div class="cbd" style="text-align:center">
+          <div style="width:160px;height:160px;background:var(--cbg);border:2px dashed var(--cbrd);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden">
+            📷
+            <div style="position:absolute;left:0;right:0;height:2px;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:scan 2s ease-in-out infinite"></div>
+          </div>
+          @keyframes scan{0%{top:10%}50%{top:85%}100%{top:10%}}
+          <button class="btn bc" style="width:100%;justify-content:center;margin-bottom:8px" onclick="simScan()"><i class="ri-qr-scan-line"></i>Simular Scan</button>
+          <input class="fi" id="ci-manual" placeholder="Nome ou código...">
+          <button class="btn bgn" style="width:100%;justify-content:center;margin-top:8px" onclick="ciManual()"><i class="ri-search-line"></i>Confirmar</button>
+        </div>
+        <div class="chd" style="border-top:1px solid var(--brd)"><div class="ct">Progresso</div><span id="ci-pct" style="font-size:11px;color:var(--cyan);font-family:var(--ffm)">0%</span></div>
+        <div class="cbd"><div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden"><div id="ci-bar" style="height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0%;border-radius:4px;transition:width 1s"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--ffm)" id="ci-ok">0</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase">Check-in OK</div></div>
+          <div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--orange);font-family:var(--ffm)" id="ci-pend">0</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase">Pendentes</div></div>
+        </div></div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-history-line"></i>Histórico de Check-ins</div></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>Documento</th><th>Quarto</th><th>Horário</th><th>Status</th></tr></thead><tbody id="ci-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="page" id="pg-pipeline">
+    <div class="ph">
+      <div class="phl"><div class="ey">CRM</div><div class="pt">Pipeline de <span class="ac">Leads</span></div></div>
+      <div class="pha"><button class="btn bc" onclick="om('m-novo-lead')"><i class="ri-add-line"></i>Novo Lead</button></div>
+    </div>
+    <div id="kanban" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;min-height:400px"></div>
+  </div>
+
+  <!-- PASSAGEIROS -->
+  <div class="page" id="pg-passageiros">
+    <div class="ph">
+      <div class="phl"><div class="ey">BASE</div><div class="pt">Base de <span class="ac">Passageiros</span></div></div>
+      <div class="pha"><button class="btn bc" onclick="om('m-novo-pax')"><i class="ri-user-add-line"></i>Novo PAX</button><button class="btn bgn" onclick="exportCSV()"><i class="ri-download-2-line"></i>CSV</button></div>
+    </div>
+    <div class="srch">
+      <div class="srch-wrap"><i class="ri-search-line srch-ic"></i><input class="srch-in" id="srch-pax" placeholder="Buscar passageiro..." oninput="filterPax()"></div>
+    </div>
+    <div class="tbl-wrap card">
+      <table>
+        <thead><tr><th>Nome</th><th>Email</th><th>WhatsApp</th><th>Documento</th><th>Viagens</th><th>Última Viagem</th><th>Status</th><th>Ação</th></tr></thead>
+        <tbody id="pax-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- GPS -->
+  <div class="page" id="pg-gps">
+    <div class="ph">
+      <div class="phl"><div class="ey">RASTREAMENTO</div><div class="pt">GPS <span class="ac">Tempo Real</span></div></div>
+      <div class="pha">
+        <div class="pill on"><div class="dot dg"></div>Tracking Ativo</div>
+        <select class="sel" id="gps-roteiro"><option value="">Todos os roteiros</option></select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:18px">
+      <div class="card" style="overflow:hidden">
+        <div class="chd"><div class="ct"><i class="ri-map-2-line"></i>Mapa ao Vivo</div><div class="pill on"><div class="dot dg"></div>Tempo Real</div></div>
+        <div style="position:relative;height:400px;background:var(--bg3);overflow:hidden">
+          <!-- Simulated Map -->
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0d1f35 50%,#0a1628 100%);overflow:hidden">
+            <!-- Grid lines -->
+            <svg width="100%" height="100%" style="position:absolute;opacity:.15"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,229,255,.5)" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>
+            <!-- Roads (simulated) -->
+            <svg width="100%" height="100%" style="position:absolute;opacity:.3">
+              <path d="M 0,200 Q 200,180 400,200 T 800,200" stroke="rgba(0,229,255,.6)" stroke-width="2" fill="none"/>
+              <path d="M 300,0 Q 320,200 300,400" stroke="rgba(0,229,255,.4)" stroke-width="1.5" fill="none"/>
+              <path d="M 0,300 L 800,300" stroke="rgba(255,255,255,.2)" stroke-width="1" fill="none"/>
+            </svg>
+            <!-- GPS Pins -->
+            <div id="gps-pins" style="position:absolute;inset:0"></div>
+          </div>
+          <div style="position:absolute;bottom:12px;left:12px;background:rgba(10,13,22,.9);border:1px solid var(--cbrd);border-radius:8px;padding:8px 12px;font-size:11px">
+            <div style="color:var(--cyan);font-weight:700;margin-bottom:4px">🔴 Veículo em trânsito</div>
+            <div style="color:var(--text3)">Última atualização: <span id="gps-last-update" style="color:var(--text)">agora</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-bus-line"></i>Frota Ativa</div></div>
+          <div class="cbd" id="frota-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-history-line"></i>Eventos Recentes</div></div>
+          <div style="max-height:180px;overflow-y:auto" id="gps-events"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PABX -->
+  <div class="page" id="pg-pabx">
+    <div class="ph">
+      <div class="phl"><div class="ey">TELEFONIA</div><div class="pt">PABX <span class="ac">Cloud</span> — Softphone</div></div>
+      <div class="pha"><div id="pabx-status" class="pill off"><div class="dot"></div>Offline</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:18px">
+      <!-- Softphone -->
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-phone-line"></i>Discador Web</div></div>
+        <div class="cbd" style="text-align:center">
+          <div style="font-size:22px;font-weight:900;font-family:var(--ffm);color:var(--cyan);min-height:36px;margin-bottom:16px;background:var(--bg3);border:1px solid var(--cbrd);border-radius:8px;padding:8px;letter-spacing:.1em" id="dial-display">_</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+            <div class="dial-btn dial-num" onclick="dialPress('1')">1</div>
+            <div class="dial-btn dial-num" onclick="dialPress('2')">2 <span style="font-size:8px;display:block;color:var(--text3)">ABC</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('3')">3 <span style="font-size:8px;display:block;color:var(--text3)">DEF</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('4')">4 <span style="font-size:8px;display:block;color:var(--text3)">GHI</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('5')">5 <span style="font-size:8px;display:block;color:var(--text3)">JKL</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('6')">6 <span style="font-size:8px;display:block;color:var(--text3)">MNO</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('7')">7 <span style="font-size:8px;display:block;color:var(--text3)">PQRS</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('8')">8 <span style="font-size:8px;display:block;color:var(--text3)">TUV</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('9')">9 <span style="font-size:8px;display:block;color:var(--text3)">WXYZ</span></div>
+            <div class="dial-btn dial-num" onclick="dialPress('*')">*</div>
+            <div class="dial-btn dial-num" onclick="dialPress('0')">0</div>
+            <div class="dial-btn dial-num" onclick="dialPress('#')">#</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="dial-btn dial-call" id="btn-call" onclick="toggleCall()" style="border-radius:12px;font-size:14px"><i class="ri-phone-line"></i> Ligar</div>
+            <div class="dial-btn dial-end" onclick="hangup()" style="border-radius:12px;font-size:14px"><i class="ri-phone-off-line"></i> Encerrar</div>
+          </div>
+          <div style="margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:12px">Disponível para receber</span>
+              <div class="toggle" id="tog-online" onclick="toggleOnline(this)"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text3);font-family:var(--ffm)" id="call-status">Sem chamada ativa</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="kgrid3">
+          <div class="kcard k-cyan"><div class="klbl">Chamadas Hoje</div><div class="kval" id="pabx-today">0</div></div>
+          <div class="kcard k-green"><div class="klbl">Duração Média</div><div class="kval" id="pabx-dur">0 min</div></div>
+          <div class="kcard k-purple"><div class="klbl">Ramais Ativos</div><div class="kval" id="pabx-ramais">0</div></div>
+        </div>
+
+        <div class="card">
+          <div class="chd">
+            <div class="ct"><i class="ri-history-line"></i>Histórico de Chamadas</div>
+            <button class="btn bc" onclick="loadCallHistory()"><i class="ri-refresh-line"></i>Atualizar</button>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>De</th><th>Para</th><th>Duração</th><th>Tipo</th><th>Transcrição</th><th>Data</th></tr></thead><tbody id="calls-tbody"></tbody></table></div>
+        </div>
+
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-flow-chart"></i>URAs Configuradas</div><button class="btn bc" onclick="om('m-nova-ura')"><i class="ri-add-line"></i>Criar URA</button></div>
+          <div style="padding:14px" id="uras-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div class="page" id="pg-financeiro">
+    <div class="ph">
+      <div class="phl"><div class="ey">FINANCEIRO</div><div class="pt">NEXIA Pay <span class="ac">Split</span> — Comissões</div></div>
+      <div class="pha"><button class="btn bc" onclick="exportDRE()"><i class="ri-file-excel-line"></i>Exportar DRE</button></div>
+    </div>
+    <div class="kgrid">
+      <div class="kcard k-cyan"><div class="klbl">Receita Total</div><div class="kval" id="fin-total">R$ 0</div><div class="kdelta up"><i class="ri-arrow-up-s-line"></i>Este mês</div></div>
+      <div class="kcard k-green"><div class="klbl">Comissões Guias</div><div class="kval" id="fin-guias">R$ 0</div><div class="kdelta up">Split automático</div></div>
+      <div class="kcard k-gold"><div class="klbl">Repasse Hotels</div><div class="kval" id="fin-hotels">R$ 0</div><div class="kdelta">Parceiros</div></div>
+      <div class="kcard k-purple"><div class="klbl">Margem Líquida</div><div class="kval" id="fin-margem">0%</div><div class="kdelta up">Após splits</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-line-chart-line"></i>Fluxo de Caixa</div></div><div class="cbd"><div class="chart-wrap"><canvas id="chart-fin"></canvas></div></div></div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-split-cells-horizontal"></i>Motor de Split</div><button class="btn bc" onclick="om('m-nova-split')"><i class="ri-add-line"></i>Nova Regra</button></div>
+        <div class="cbd" id="split-rules" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-bill-line"></i>Transações</div></div><div class="tbl-wrap"><table><thead><tr><th>Descrição</th><th>PAX</th><th>Valor</th><th>Split</th><th>Status</th><th>Data</th></tr></thead><tbody id="fin-tbody"></tbody></table></div></div>
+  </div>
+
+  <!-- CORTEX -->
+  <div class="page" id="pg-cortex">
+    <div class="ph">
+      <div class="phl"><div class="ey">IA</div><div class="pt">CORTEX <span class="ac">Co-Pilot</span> — Viajante Pro</div></div>
+      <div class="pha"><button class="btn br" onclick="clearChat()"><i class="ri-delete-bin-line"></i>Limpar</button></div>
+    </div>
+    <div class="cortex-layout">
+      <div class="cx-msgs" id="cx-msgs">
+        <div class="cx-msg ai"><div class="cx-bubble">✈️ <strong>CORTEX Viajante Pro</strong> ativo. Especialista em turismo e viagens corporativas. Posso analisar ocupação, prever cancelamentos, sugerir precificação e otimizar roteiros. Como posso ajudar?</div><div class="cx-meta">CORTEX · v12</div></div>
+      </div>
+      <div class="cx-input-row">
+        <textarea class="cx-in" id="cx-input" placeholder="Qual a ocupação média dos roteiros?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();cxSend()}"></textarea>
+        <button class="btn bc" onclick="cxSend()"><i class="ri-send-plane-fill"></i></button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn bb" onclick="cxQ('Quais roteiros têm menor ocupação agora?')">📊 Menor ocupação</button>
+      <button class="btn bb" onclick="cxQ('Analise riscos de cancelamento nos próximos 30 dias')">⚠️ Risco cancelamento</button>
+      <button class="btn bb" onclick="cxQ('Sugira estratégia de precificação dinâmica')">💰 Precificação</button>
+      <button class="btn bb" onclick="cxQ('Gere relatório executivo do mês')">📋 Relatório</button>
+    </div>
+  </div>
+
+  <!-- PREDICTIVE -->
+  <div class="page" id="pg-predictive">
+    <div class="ph">
+      <div class="phl"><div class="ey">CORTEX PREDITIVO</div><div class="pt">Alertas <span class="ac">Inteligentes</span></div></div>
+      <div class="pha"><div class="pill on"><div class="dot dg"></div>IA Monitorando</div></div>
+    </div>
+    <div class="kgrid3">
+      <div class="kcard k-red"><div class="klbl">Alertas Críticos</div><div class="kval" id="pred-crit">0</div><div class="kdelta dn">Ação imediata</div></div>
+      <div class="kcard k-orange"><div class="klbl">Alertas Médios</div><div class="kval" id="pred-med">0</div><div class="kdelta">Monitorar</div></div>
+      <div class="kcard k-green"><div class="klbl">Score Saúde</div><div class="kval" id="pred-score">0%</div><div class="kdelta up">Operações OK</div></div>
+    </div>
+    <div id="alertas-list" style="display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div class="page" id="pg-configuracoes">
+    <div class="ph"><div class="phl"><div class="ey">SISTEMA</div><div class="pt">Configurações <span class="ac">Viajante Pro</span></div></div><div class="pha"><button class="btn bc" onclick="saveSettings()"><i class="ri-save-line"></i>Salvar</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-robot-line"></i>Anthropic API (CORTEX)</div></div><div class="cbd"><div class="fg"><label class="fl">API Key</label><input class="fi" type="password" id="cfg-key" placeholder="sk-ant-api..."></div><button class="btn bc" style="width:100%;justify-content:center" onclick="testAPI()"><i class="ri-test-tube-line"></i>Testar Conexão</button></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-phone-line"></i>PABX / VoIP</div></div><div class="cbd"><div class="fg"><label class="fl">Provider</label><select class="fi sel"><option>Twilio</option><option>Zenvia</option><option>Outro</option></select></div><div class="fg"><label class="fl">SIP URI / Account SID</label><input class="fi" id="cfg-voip" placeholder="ACxxxxxxx..."></div><div class="fg"><label class="fl">Auth Token</label><input class="fi" type="password" id="cfg-voip-token" placeholder="..."></div></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-database-line"></i>Firebase</div></div><div class="cbd"><div class="fg"><label class="fl">Tenant</label><input class="fi" value="viajante-pro" readonly></div><div class="fg"><label class="fl">Coleção</label><input class="fi" value="data/viajante-pro/*" readonly></div></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-notification-3-line"></i>Alertas Preditivos</div></div><div class="cbd">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:12px">Alertar ocupação &lt; 70%</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:12px">Notificar risco de voo</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px">GPS tracking automático</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div></div>
+    </div>
+  </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="mov" id="m-novo-roteiro">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-route-line" style="color:var(--cyan)"></i> Novo Pacote / Roteiro</div><div class="mo-x" onclick="cm('m-novo-roteiro')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="fg"><label class="fl">Nome do Roteiro</label><input class="fi" id="nr-nome" placeholder="Chapada dos Veadeiros 5D/4N"></div>
+      <div class="frow"><div class="fg"><label class="fl">Destino Principal</label><input class="fi" id="nr-destino" placeholder="Goiás, Brasil"></div><div class="fg"><label class="fl">Tipo</label><select class="fi sel" id="nr-tipo"><option value="nacional">Nacional</option><option value="internacional">Internacional</option><option value="cruzeiro">Cruzeiro</option></select></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Data Saída</label><input class="fi" id="nr-saida" type="date"></div><div class="fg"><label class="fl">Data Retorno</label><input class="fi" id="nr-retorno" type="date"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Capacidade PAX</label><input class="fi" id="nr-cap" type="number" placeholder="48"></div><div class="fg"><label class="fl">Valor por PAX (R$)</label><input class="fi" id="nr-valor" type="number" placeholder="2500"></div></div>
+      <div class="fg"><label class="fl">Descrição / Itinerário</label><textarea class="fi" id="nr-desc" placeholder="Dia 1: Traslado aeroporto..."></textarea></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-roteiro')">Cancelar</button><button class="btn bc" onclick="salvarRoteiro()"><i class="ri-save-line"></i>Salvar</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-novo-lead">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-user-add-line" style="color:var(--cyan)"></i> Novo Lead</div><div class="mo-x" onclick="cm('m-novo-lead')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="lead-nome"></div><div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="lead-wpp" placeholder="(21) 99999-0000"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Email</label><input class="fi" id="lead-email"></div><div class="fg"><label class="fl">Pax (pessoas)</label><input class="fi" id="lead-pax" type="number" placeholder="2" min="1"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Destino de Interesse</label><input class="fi" id="lead-dest" placeholder="Fernando de Noronha..."></div><div class="fg"><label class="fl">Budget (R$)</label><input class="fi" id="lead-bud" type="number" placeholder="3000"></div></div>
+      <div class="fg"><label class="fl">Stage</label><select class="fi sel" id="lead-stage"><option>Lead</option><option>Cotação</option><option>Proposta</option><option>Pagamento</option><option>Emitido</option></select></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-lead')">Cancelar</button><button class="btn bc" onclick="salvarLead()"><i class="ri-save-line"></i>Salvar</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-novo-quarto">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-hotel-line" style="color:var(--cyan)"></i> Novo Quarto</div><div class="mo-x" onclick="cm('m-novo-quarto')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="frow"><div class="fg"><label class="fl">Hotel</label><input class="fi" id="qt-hotel" placeholder="Hotel Serra Azul"></div><div class="fg"><label class="fl">Nº Quarto</label><input class="fi" id="qt-numero" placeholder="101"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Tipo</label><select class="fi sel" id="qt-tipo"><option value="single">Single</option><option value="double">Double</option><option value="triple">Triple</option><option value="suite">Suíte</option></select></div><div class="fg"><label class="fl">Capacidade</label><input class="fi" id="qt-cap" type="number" placeholder="2" min="1" max="4"></div></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-quarto')">Cancelar</button><button class="btn bc" onclick="salvarQuarto()"><i class="ri-save-line"></i>Salvar</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-nova-ura">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-flow-chart" style="color:var(--cyan)"></i> Criar URA</div><div class="mo-x" onclick="cm('m-nova-ura')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="fg"><label class="fl">Nome da URA</label><input class="fi" id="ura-nome" placeholder="Atendimento Viajante Pro"></div>
+      <div class="fg"><label class="fl">Mensagem de Boas-Vindas</label><textarea class="fi" id="ura-msg" placeholder="Bem-vindo à Viajante Pro! Pressione 1 para Vendas, 2 para Suporte..."></textarea></div>
+      <div class="fg"><label class="fl">Opção 1 → Ramal</label><input class="fi" id="ura-op1" placeholder="100 - Vendas"></div>
+      <div class="fg"><label class="fl">Opção 2 → Ramal</label><input class="fi" id="ura-op2" placeholder="200 - Suporte"></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-nova-ura')">Cancelar</button><button class="btn bc" onclick="salvarURA()"><i class="ri-save-line"></i>Criar URA</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-nova-split">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-split-cells-horizontal" style="color:var(--cyan)"></i> Nova Regra de Split</div><div class="mo-x" onclick="cm('m-nova-split')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="fg"><label class="fl">Beneficiário</label><input class="fi" id="sp-nome" placeholder="Guia Carlos Silva"></div>
+      <div class="frow"><div class="fg"><label class="fl">Percentual (%)</label><input class="fi" id="sp-pct" type="number" placeholder="8" min="1" max="100"></div><div class="fg"><label class="fl">Aplicar em</label><select class="fi sel" id="sp-aplica"><option value="todos">Todos os roteiros</option><option value="nacional">Nacionais</option><option value="internacional">Internacionais</option></select></div></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-nova-split')">Cancelar</button><button class="btn bc" onclick="salvarSplit()"><i class="ri-save-line"></i>Ativar Split</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-novo-pax">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-user-add-line" style="color:var(--cyan)"></i> Novo Passageiro</div><div class="mo-x" onclick="cm('m-novo-pax')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="frow"><div class="fg"><label class="fl">Nome Completo *</label><input class="fi" id="pax-nome" placeholder="Maria da Silva"></div><div class="fg"><label class="fl">Email</label><input class="fi" id="pax-email" type="email" placeholder="maria@email.com"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="pax-wpp" placeholder="(21) 99999-0000"></div><div class="fg"><label class="fl">Documento (CPF/Passaporte)</label><input class="fi" id="pax-doc" placeholder="123.456.789-00"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Data de Nascimento</label><input class="fi" id="pax-nasc" type="date"></div><div class="fg"><label class="fl">Status</label><select class="fi sel" id="pax-status"><option value="ativo">Ativo</option><option value="vip">VIP</option><option value="inativo">Inativo</option></select></div></div>
+      <div class="fg"><label class="fl">Observações</label><textarea class="fi" id="pax-obs" placeholder="Restrições alimentares, necessidades especiais..."></textarea></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-pax')">Cancelar</button><button class="btn bc" onclick="salvarPax()"><i class="ri-save-line"></i>Salvar Passageiro</button></div>
+  </div>
+</div>
+
+<div id="toast"><i class="ri-check-line" style="color:var(--cyan)"></i><span id="toast-msg"></span></div>
+
+
+<script>
+// ── FIREBASE ──
+const fbCfg={apiKey:"AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",authDomain:"nexia-c8710.firebaseapp.com",projectId:"nexia-c8710",storageBucket:"nexia-c8710.firebasestorage.app",messagingSenderId:"623044447905",appId:"1:623044447905:web:13f70e1584fb0fcf8d2ae0"};
+try{firebase.initializeApp(fbCfg);}catch(e){}
+const db=firebase.firestore();
+const T='viajante-pro';
+const COL=c=>db.collection('data').doc(T).collection(c);
+
+// ── STATE ──
+// anthropicKey não armazenada no browser — CORTEX via /api/cortex usa chave segura do servidor
+let roteirosData=[],leadsData=[],paxData=[],quartosData=[],callsData=[];
+let splitRules=[];
+let chartR,chartD,chartFin;
+let callActive=false,dialStr='';
+
+// ── SPLASH ──
+setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('fade');setTimeout(()=>s.remove(),500);},1200);
+
+// ── UTILS ──
+const fmtBRL=v=>'R$ '+Number(v||0).toLocaleString('pt-BR');
+const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('pt-BR');};
+
+// ── NAV ──
+function nav(p,el){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const pg=document.getElementById('pg-'+p);if(pg)pg.classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'✈️ Dashboard',roteiros:'🗺️ Roteiros & Pacotes',rooming:'🏨 Rooming List',checkin:'✅ Check-in PAX',pipeline:'👥 Pipeline CRM',passageiros:'👤 Passageiros',gps:'📍 GPS Tempo Real',pabx:'📞 PABX Cloud',financeiro:'💰 NEXIA Pay Split',cortex:'🤖 CORTEX Co-Pilot',predictive:'⚠️ Alertas Preditivos',configuracoes:'⚙️ Configurações'};
+  document.getElementById('tb-title').textContent=titles[p]||p;
+  if(p==='dashboard')loadDashboard();
+  if(p==='roteiros')loadRoteiros();
+  if(p==='pipeline')loadPipeline();
+  if(p==='passageiros')loadPassageiros();
+  if(p==='rooming')initRooming();
+  if(p==='gps')initGPS();
+  if(p==='pabx')loadPABX();
+  if(p==='financeiro')loadFinanceiro();
+  if(p==='predictive')loadPredictive();
+}
+function tg(b){b.classList.toggle('open');const n=b.nextElementSibling;if(n)n.classList.toggle('open');}
+function om(id){document.getElementById(id).classList.add('show');}
+function cm(id){document.getElementById(id).classList.remove('show');}
+function toast(msg,err=false){const t=document.getElementById('toast');t.style.borderColor=err?'var(--rbrd)':'var(--cbrd)';document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function setLang(l){}
+
+// ── DEFAULT DATA ──
+function getDefaultRoteiros(){return[
+  {id:'r1',nome:'Chapada dos Veadeiros 5D/4N',destino:'Goiás, Brasil',tipo:'nacional',saida:'2026-04-10',retorno:'2026-04-14',cap:48,confirmados:38,valor:2800,status:'confirmado'},
+  {id:'r2',nome:'Fernando de Noronha Mergulho',destino:'Pernambuco, Brasil',tipo:'nacional',saida:'2026-04-20',retorno:'2026-04-26',cap:30,confirmados:30,valor:5200,status:'em_viagem'},
+  {id:'r3',nome:'Buenos Aires Cultural',destino:'Argentina',tipo:'internacional',saida:'2026-05-05',retorno:'2026-05-10',cap:40,confirmados:22,valor:3900,status:'ativo'},
+  {id:'r4',nome:'Foz do Iguaçu Família',destino:'Paraná, Brasil',tipo:'nacional',saida:'2026-05-15',retorno:'2026-05-18',cap:56,confirmados:14,valor:1800,status:'ativo'},
+];}
+
+function getDefaultLeads(){return[
+  {id:'l1',nome:'Mariana Alves',email:'mari@email.com',wpp:'21999990001',dest:'Fernando de Noronha',bud:5500,pax:2,stage:'Cotação'},
+  {id:'l2',nome:'João Ferreira',email:'joao@email.com',wpp:'21999990002',dest:'Europa',bud:12000,pax:3,stage:'Proposta'},
+  {id:'l3',nome:'Ana Paula Ramos',email:'ana@email.com',wpp:'21999990003',dest:'Chapada',bud:3000,pax:4,stage:'Emitido'},
+  {id:'l4',nome:'Carlos Mendes',email:'carlos@email.com',wpp:'21999990004',dest:'Buenos Aires',bud:4000,pax:2,stage:'Lead'},
+];}
+
+// ── DASHBOARD ──
+async function loadDashboard(){
+  try{const s=await COL('roteiros').orderBy('criadoEm','desc').limit(20).get();roteirosData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){if(!roteirosData.length)roteirosData=getDefaultRoteiros();}
+  const totalRec=roteirosData.reduce((s,r)=>s+(r.confirmados||0)*(r.valor||0),0);
+  const totalPax=roteirosData.reduce((s,r)=>s+(r.confirmados||0),0);
+  const avgOcup=roteirosData.length?Math.round(roteirosData.reduce((s,r)=>s+(r.cap?((r.confirmados||0)/r.cap*100):0),0)/roteirosData.length):0;
+  const ativos=roteirosData.filter(r=>r.status==='ativo'||r.status==='em_viagem'||r.status==='confirmado').length;
+  document.getElementById('kpi-receita').textContent=fmtBRL(totalRec);
+  document.getElementById('kpi-pax').textContent=totalPax;
+  document.getElementById('kpi-ocup').textContent=avgOcup+'%';
+  document.getElementById('kpi-roteiros').textContent=ativos;
+  document.getElementById('kpi-pill').textContent=roteirosData.length+' pacotes';
+  document.getElementById('stat-pax').textContent=totalPax+' pax';
+  document.getElementById('badge-roteiros').textContent=ativos;
+  renderDashTable(roteirosData.slice(0,5));
+  initDashCharts();
+  loadInsight();
+}
+
+function renderDashTable(data){
+  const sc={ativo:'cyan',confirmado:'on',em_viagem:'pur',encerrado:'off'};
+  document.getElementById('dash-tbody').innerHTML=data.map(r=>{
+    const ocup=r.cap?Math.round((r.confirmados||0)/r.cap*100):0;
+    return`<tr>
+      <td>${r.nome||r.destino||'—'}</td><td>${r.saida||'—'}</td><td>${r.retorno||'—'}</td>
+      <td>${r.confirmados||0}/${r.cap||0}</td>
+      <td><span class="pill ${ocup>80?'on':ocup>50?'wait':'off'}">${ocup}%</span></td>
+      <td style="color:var(--cyan);font-family:var(--ffm)">${fmtBRL((r.confirmados||0)*(r.valor||0))}</td>
+      <td><span class="pill ${sc[r.status]||'cyan'}">${r.status||'—'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function initDashCharts(){
+  if(chartR)chartR.destroy();if(chartD)chartD.destroy();
+  chartR=new Chart(document.getElementById('chart-rec'),{type:'bar',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun'],datasets:[{label:'Receita',data:[85000,102000,78000,134000,98000,165000],backgroundColor:'rgba(0,229,255,.4)',borderColor:'var(--cyan)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)',font:{size:10},callback:v=>'R$'+v/1000+'k'}}}}});
+  chartD=new Chart(document.getElementById('chart-dest'),{type:'doughnut',data:{labels:['Nordeste','Sul/SE','Internacional','Amazônia'],datasets:[{data:[38,28,22,12],backgroundColor:['rgba(0,229,255,.7)','rgba(0,214,143,.7)','rgba(155,92,246,.7)','rgba(245,158,11,.7)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'rgba(232,240,255,.6)',font:{size:10}}}}}});
+}
+
+async function loadInsight(){
+  const el=document.getElementById('cortex-insight');
+  if(true){ // API key agora no servidor via /api/cortex
+    // if(!anthropicKey){
+    const baixaOcup=roteirosData.filter(r=>r.cap&&((r.confirmados||0)/r.cap)<0.7);
+    el.innerHTML=`✈️ <strong>CORTEX VP:</strong> ${roteirosData.length} roteiro(s) no sistema. ${baixaOcup.length?baixaOcup.length+' com ocupação abaixo de 70% — ação recomendada.':''} Configure API Key em <strong>Configurações</strong> para análise preditiva.`;
+    return;
+  }
+  el.innerHTML='<i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block"></i> CORTEX analisando...';
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'viajante-pro',mode:'insight',message:`Especialista em turismo e gestão de viagens. Analise: ${JSON.stringify(roteirosData.slice(0,5).map(r=>({nome:r.nome,saida:r.saida,pax:r.confirmados,cap:r.cap,ocup:r.cap?Math.round((r.confirmados||0)/r.cap*100)+'%':'—',status:r.status})))}. Dê 3 insights rápidos e diretos em português.`})});
+    const d=await r.json();
+    el.innerHTML='✈️ '+(d.response||d.content||'Análise concluída.').replace(/\n/g,'<br>');
+  }catch(e){el.innerHTML='⚠️ CORTEX indisponível — verifique /api/cortex.';}
+}
+
+// ── ROTEIROS ──
+async function loadRoteiros(){
+  try{const s=await COL('roteiros').orderBy('criadoEm','desc').get();roteirosData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){if(!roteirosData.length)roteirosData=getDefaultRoteiros();}
+  renderRoteiros(roteirosData);
+  populateRoteiroSelects();
+}
+
+function renderRoteiros(data){
+  const sc={ativo:'cyan',confirmado:'on',em_viagem:'pur',encerrado:'off'};
+  document.getElementById('roteiros-tbody').innerHTML=data.length?data.map(r=>{
+    const ocup=r.cap?Math.round((r.confirmados||0)/r.cap*100):0;
+    return`<tr>
+      <td>${r.nome||'—'}</td><td><span class="pill cyan">${r.tipo||'nacional'}</span></td>
+      <td style="font-family:var(--ffm)">${r.saida||'—'}</td><td style="font-family:var(--ffm)">${r.retorno||'—'}</td>
+      <td>${r.cap||0}</td><td><span class="pill ${ocup>80?'on':ocup>50?'wait':'off'}">${r.confirmados||0} (${ocup}%)</span></td>
+      <td style="color:var(--cyan);font-family:var(--ffm)">${fmtBRL((r.confirmados||0)*(r.valor||0))}</td>
+      <td><span class="pill ${sc[r.status]||'cyan'}">${r.status||'—'}</span></td>
+      <td><button class="btn bc" style="padding:4px 10px" onclick="editarRoteiro('${r.id}')"><i class="ri-edit-line"></i></button>
+          <button class="btn br" style="padding:4px 10px" onclick="deletarRoteiro('${r.id}')"><i class="ri-delete-bin-line"></i></button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Nenhum roteiro cadastrado.</td></tr>';
+}
+
+function filterR(){
+  const q=document.getElementById('srch-r').value.toLowerCase();
+  const st=document.getElementById('fil-status-r').value;
+  renderRoteiros(roteirosData.filter(r=>(!q||(r.nome||'').toLowerCase().includes(q)||(r.destino||'').toLowerCase().includes(q))&&(!st||r.status===st)));
+}
+
+async function salvarRoteiro(){
+  const p={nome:document.getElementById('nr-nome').value,destino:document.getElementById('nr-destino').value,tipo:document.getElementById('nr-tipo').value,saida:document.getElementById('nr-saida').value,retorno:document.getElementById('nr-retorno').value,cap:parseInt(document.getElementById('nr-cap').value)||0,valor:parseFloat(document.getElementById('nr-valor').value)||0,desc:document.getElementById('nr-desc').value,confirmados:0,status:'ativo',criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await COL('roteiros').add(p);}catch(e){roteirosData.push({...p,id:'r'+Date.now()});}
+  toast('Roteiro cadastrado!');cm('m-novo-roteiro');loadRoteiros();
+}
+
+async function deletarRoteiro(id){
+  nexiaConfirm('Excluir este roteiro?', function(){
+  try{await COL('roteiros').doc(id).delete();}catch(e){roteirosData=roteirosData.filter(r=>r.id!==id);}
+  toast('Removido.');loadRoteiros();
+}
+
+function editarRoteiro(id){
+  const r=roteirosData.find(x=>x.id===id);
+  if(!r){toast('Roteiro não encontrado.',true);return;}
+  document.getElementById('nr-nome').value=r.nome||'';
+  document.getElementById('nr-destino').value=r.destino||'';
+  document.getElementById('nr-tipo').value=r.tipo||'nacional';
+  document.getElementById('nr-saida').value=r.saida||'';
+  document.getElementById('nr-retorno').value=r.retorno||'';
+  document.getElementById('nr-cap').value=r.cap||0;
+  document.getElementById('nr-valor').value=r.valor||0;
+  document.getElementById('nr-desc').value=r.desc||'';
+  document.getElementById('m-novo-roteiro').classList.add('show');
+}
+
+function populateRoteiroSelects(){
+  const selects=['room-roteiro','ci-roteiro','gps-roteiro'];
+  selects.forEach(sid=>{
+    const el=document.getElementById(sid);if(!el)return;
+    const cur=el.value;
+    el.innerHTML='<option value="">Selecionar roteiro</option>'+roteirosData.map(r=>`<option value="${r.id}">${r.nome||r.destino}</option>`).join('');
+    if(cur)el.value=cur;
+  });
+}
+
+function exportCSV(){
+  if(!roteirosData.length){toast('Sem roteiros para exportar.',true);return;}
+  const rows=[['Nome','Destino','Tipo','Saída','Retorno','Pax','Capacidade','Valor (R$)','Ocupação %','Status']];
+  roteirosData.forEach(r=>{
+    const ocup=r.cap?Math.round((r.confirmados||0)/r.cap*100):0;
+    rows.push([r.nome||'',r.destino||'',r.tipo||'',r.saida||'',r.retorno||'',r.confirmados||0,r.cap||0,(r.valor||0).toFixed(2),ocup+'%',r.status||'']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(v=>JSON.stringify(String(v))).join(',')).join('
+');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='roteiros-viajante-pro.csv';a.click();
+  toast('📥 Roteiros exportados!');
+}
+
+// ── ROOMING LIST ──
+let roomData={quartos:[],paxSemQuarto:[]};
+let roomDragId=null;
+
+async function initRooming(){
+  if(!roteirosData.length)await loadRoteiros();
+  populateRoteiroSelects();
+  document.getElementById('quartos-grid').innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);grid-column:span 3">Selecione um roteiro para carregar o Rooming List</div>';
+}
+
+async function loadRooming(){
+  const roteiroId=document.getElementById('room-roteiro').value;
+  if(!roteiroId)return;
+  try{
+    const [qs,ps]=await Promise.all([COL('quartos').where('roteiroId','==',roteiroId).get(),COL('pax').where('roteiroId','==',roteiroId).get()]);
+    roomData.quartos=qs.docs.map(d=>({id:d.id,...d.data()}));
+    roomData.paxSemQuarto=ps.docs.map(d=>({id:d.id,...d.data()})).filter(p=>!p.quartoId);
+  }catch(e){
+    roomData.quartos=[{id:'q1',hotel:'Hotel Serra Azul',numero:'101',tipo:'double',cap:2,paxIds:[]},{id:'q2',hotel:'Hotel Serra Azul',numero:'102',tipo:'single',cap:1,paxIds:[]},{id:'q3',hotel:'Hotel Serra Azul',numero:'103',tipo:'triple',cap:3,paxIds:[]}];
+    roomData.paxSemQuarto=[{id:'p1',nome:'Maria Silva'},{id:'p2',nome:'João Souza'},{id:'p3',nome:'Ana Lima'},{id:'p4',nome:'Pedro Costa'}];
+  }
+  renderRooming();
+}
+
+function renderRooming(){
+  document.getElementById('room-sem-count').textContent=roomData.paxSemQuarto.length;
+  document.getElementById('pax-sem-quarto').innerHTML=roomData.paxSemQuarto.length?roomData.paxSemQuarto.map(p=>`<div draggable="true" ondragstart="roomDrag(event,'${p.id}')" style="background:var(--bg3);border:1px solid var(--rbrd);border-radius:8px;padding:10px 12px;font-size:12px;font-weight:600;cursor:grab;display:flex;align-items:center;gap:8px"><i class="ri-user-line" style="color:var(--red)"></i>${p.nome}</div>`).join(''):'<div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">Todos alocados!</div>';
+  document.getElementById('quartos-grid').innerHTML=roomData.quartos.length?roomData.quartos.map(q=>{
+    const paxIds=q.paxIds||[];
+    const paxNomes=paxIds.map(pid=>{const p=roomData.paxSemQuarto.find(x=>x.id===pid);return p?p.nome:'';}).filter(Boolean);
+    const full=paxIds.length>=q.cap;
+    return`<div style="background:var(--bg3);border:1px solid ${full?'var(--cbrd)':'var(--brd)'};border-radius:10px;padding:14px;min-height:120px" ondragover="event.preventDefault()" ondrop="roomDrop(event,'${q.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-size:12px;font-weight:700">${q.hotel||'Hotel'} · ${q.numero}</div><div style="font-size:10px;color:var(--text3)">${q.tipo} · ${paxIds.length}/${q.cap}</div></div>
+        <span class="pill ${full?'on':'wait'}">${full?'Full':'${paxIds.length}/${q.cap}'}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${paxNomes.map(n=>`<div style="background:var(--cbg);border:1px solid var(--cbrd);border-radius:6px;padding:6px 10px;font-size:11px"><i class="ri-user-line" style="color:var(--cyan)"></i> ${n}</div>`).join('')}
+        ${!full?`<div style="border:1px dashed var(--brd);border-radius:6px;padding:8px;text-align:center;font-size:10px;color:var(--text3)">Arraste aqui</div>`:''}
+      </div>
+    </div>`;
+  }).join(''):'<div style="text-align:center;padding:40px;color:var(--text3);grid-column:span 3">Nenhum quarto cadastrado.</div>';
+}
+
+function roomDrag(e,id){roomDragId=id;}
+function roomDrop(e,quartoId){
+  if(!roomDragId)return;
+  const quarto=roomData.quartos.find(q=>q.id===quartoId);
+  if(!quarto||(quarto.paxIds||[]).length>=quarto.cap){toast('Quarto cheio!',true);roomDragId=null;return;}
+  quarto.paxIds=[...(quarto.paxIds||[]),roomDragId];
+  roomData.paxSemQuarto=roomData.paxSemQuarto.filter(p=>p.id!==roomDragId);
+  try{COL('quartos').doc(quartoId).update({paxIds:quarto.paxIds});}catch(e){}
+  roomDragId=null;renderRooming();toast('Passageiro alocado!');
+}
+// Alias: zona "sem quarto" aceita drop de volta
+function dropPax(e,zone){
+  if(!roomDragId)return;
+  if(zone==='sem'){
+    // Remover pax do quarto onde está
+    roomData.quartos.forEach(q=>{
+      if((q.paxIds||[]).includes(roomDragId)){
+        q.paxIds=q.paxIds.filter(id=>id!==roomDragId);
+        try{COL('quartos').doc(q.id).update({paxIds:q.paxIds});}catch(e){}
+      }
+    });
+    // Se não estava na lista sem quarto, adicionar
+    if(!roomData.paxSemQuarto.find(p=>p.id===roomDragId)){
+      roomData.paxSemQuarto.push({id:roomDragId,nome:roomDragId});
+    }
+    roomDragId=null;renderRooming();toast('Passageiro removido do quarto.');
+  }
+}
+
+async function salvarQuarto(){
+  const p={roteiroId:document.getElementById('room-roteiro').value,hotel:document.getElementById('qt-hotel').value,numero:document.getElementById('qt-numero').value,tipo:document.getElementById('qt-tipo').value,cap:parseInt(document.getElementById('qt-cap').value)||2,paxIds:[]};
+  try{await COL('quartos').add(p);}catch(e){roomData.quartos.push({...p,id:'q'+Date.now()});}
+  toast('Quarto adicionado!');cm('m-novo-quarto');renderRooming();
+}
+
+function exportRooming(){
+  const quartos=roomData?.quartos||[];
+  if(!quartos.length){toast('Sem rooming list para exportar.',true);return;}
+  const rows=[['Quarto','Tipo','Pax 1','Pax 2','Check-in','Check-out','Observação']];
+  quartos.forEach(q=>{
+    rows.push([q.numero||q.quarto||'',q.tipo||'',q.pax1||'',q.pax2||'',q.checkin||'',q.checkout||'',q.obs||'']);
+  });
+  const sem=roomData?.paxSemQuarto||[];
+  if(sem.length) rows.push(['','','','','','','--- Sem quarto: '+sem.map(p=>p.nome||p).join(', ')]);
+  const csv='﻿'+rows.map(r=>r.map(v=>JSON.stringify(String(v))).join(',')).join('
+');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='rooming-viajante-pro.csv';a.click();
+  toast('📥 Rooming list exportada!');
+}
+
+// ── CHECK-IN ──
+let ciData=[];
+function loadCheckin(){
+  const r=document.getElementById('ci-roteiro').value;
+  ciData=[
+    {nome:'Mariana Alves',doc:'123.456.789-00',quarto:'101',ok:true,hora:'08:15'},
+    {nome:'João Ferreira',doc:'987.654.321-00',quarto:'102',ok:true,hora:'08:22'},
+    {nome:'Ana Lima',doc:'456.789.123-00',quarto:'103',ok:false,hora:'—'},
+  ];
+  renderCI();
+}
+
+function renderCI(){
+  const total=ciData.length,ok=ciData.filter(c=>c.ok).length;
+  document.getElementById('ci-ok').textContent=ok;
+  document.getElementById('ci-pend').textContent=total-ok;
+  document.getElementById('ci-pct').textContent=total?Math.round(ok/total*100)+'%':'0%';
+  document.getElementById('ci-bar').style.width=total?Math.round(ok/total*100)+'%':'0%';
+  document.getElementById('ci-tbody').innerHTML=ciData.map(c=>`<tr>
+    <td>${c.nome}</td><td style="font-family:var(--ffm)">${c.doc}</td><td>${c.quarto}</td>
+    <td style="font-family:var(--ffm);color:var(--text3)">${c.hora}</td>
+    <td><span class="pill ${c.ok?'on':'wait'}">${c.ok?'OK':'Pendente'}</span></td>
+  </tr>`).join('');
+}
+
+function simScan(){
+  const pend=ciData.find(c=>!c.ok);if(!pend){toast('Todos já fizeram check-in!');return;}
+  pend.ok=true;pend.hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  toast('Check-in: '+pend.nome);renderCI();
+}
+
+function ciManual(){
+  const q=document.getElementById('ci-manual').value.toLowerCase();
+  const p=ciData.find(c=>c.nome.toLowerCase().includes(q));
+  if(p){p.ok=true;p.hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});toast('Check-in: '+p.nome);renderCI();}
+  else toast('Passageiro não encontrado.',true);
+}
+
+function exportCheckinCSV(){
+  if(!ciData.length){toast('Sem dados de check-in.',true);return;}
+  const rows=[['Nome','Documento','Assento','Check-in','Horário','Status']];
+  ciData.forEach(p=>{
+    rows.push([p.nome||'',p.doc||p.cpf||'',p.assento||'',p.checkin?'Sim':'Não',p.horario||p.hora||'',p.status||'confirmado']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(v=>JSON.stringify(String(v))).join(',')).join('
+');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='checkin-viajante-pro.csv';a.click();
+  toast('📥 Check-in exportado!');
+}
+
+// ── PIPELINE ──
+const VP_STAGES=['Lead','Cotação','Proposta','Pagamento','Emitido'];
+async function loadPipeline(){
+  try{const s=await COL('leads').orderBy('criadoEm','desc').get();leadsData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){if(!leadsData.length)leadsData=getDefaultLeads();}
+  renderVPKanban();
+}
+
+function renderVPKanban(){
+  const kb=document.getElementById('kanban');
+  kb.innerHTML=VP_STAGES.map(st=>{
+    const cards=leadsData.filter(l=>l.stage===st);
+    return`<div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">${st}</span>
+        <span style="font-size:11px;color:var(--cyan);font-family:var(--ffm)">${cards.length}</span>
+      </div>
+      <div ondragover="event.preventDefault()" ondrop="dropLead(event,'${st}')" style="display:flex;flex-direction:column;gap:6px;min-height:80px">
+        ${cards.map(l=>`<div draggable="true" ondragstart="dragLead(event,'${l.id}')" style="background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:10px;cursor:grab">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">${l.nome}</div>
+          <div style="font-size:10px;color:var(--text3)">${l.dest||'—'}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px">
+            <span style="font-size:11px;color:var(--cyan);font-family:var(--ffm)">${fmtBRL(l.bud||l.budget||0)}</span>
+            <span style="font-size:10px;color:var(--text3)">${l.pax||1} pax</span>
+          </div>
+          <button class="btn br" style="width:100%;justify-content:center;padding:3px;margin-top:6px;font-size:10px" onclick="deletarLead('${l.id}')"><i class="ri-delete-bin-line"></i></button>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let dragLeadId=null;
+function dragLead(e,id){dragLeadId=id;}
+function dropLead(e,st){
+  if(!dragLeadId)return;
+  moverLead(dragLeadId,st);dragLeadId=null;
+}
+async function moverLead(id,st){
+  try{await COL('leads').doc(id).update({stage:st});}catch(e){}
+  leadsData=leadsData.map(l=>l.id===id?{...l,stage:st}:l);
+  renderVPKanban();
+}
+async function salvarLead(){
+  const p={nome:document.getElementById('lead-nome').value,email:document.getElementById('lead-email').value,wpp:document.getElementById('lead-wpp').value,dest:document.getElementById('lead-dest').value,bud:parseFloat(document.getElementById('lead-bud').value)||0,pax:parseInt(document.getElementById('lead-pax').value)||1,stage:document.getElementById('lead-stage').value,criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await COL('leads').add(p);}catch(e){leadsData.push({...p,id:'l'+Date.now()});}
+  toast('Lead adicionado!');cm('m-novo-lead');loadPipeline();
+}
+async function deletarLead(id){
+  try{await COL('leads').doc(id).delete();}catch(e){leadsData=leadsData.filter(l=>l.id!==id);}
+  renderVPKanban();
+}
+
+// ── PASSAGEIROS ──
+async function loadPassageiros(){
+  try{const s=await COL('pax').orderBy('criadoEm','desc').get();paxData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){paxData=[{id:'p1',nome:'Mariana Alves',email:'mariana@email.com',wpp:'21999990001',doc:'123.456.789-00',viagens:3,ultima:'2026-03-10',status:'ativo'},{id:'p2',nome:'João Ferreira',email:'joao@email.com',wpp:'21999990002',doc:'987.654.321-00',viagens:1,ultima:'2026-04-20',status:'ativo'},{id:'p3',nome:'Ana Lima',email:'ana@email.com',wpp:'21999990003',doc:'456.789.123-00',viagens:5,ultima:'2026-02-15',status:'vip'}];}
+  renderPax(paxData);
+  document.getElementById('stat-pax').textContent=paxData.length+' pax';
+}
+
+function renderPax(data){
+  const sc={ativo:'on',vip:'pur',inativo:'off'};
+  document.getElementById('pax-tbody').innerHTML=data.length?data.map(p=>`<tr>
+    <td>${p.nome}</td><td>${p.email||'—'}</td><td>${p.wpp||'—'}</td>
+    <td style="font-family:var(--ffm);color:var(--text3)">${p.doc||'—'}</td>
+    <td style="text-align:center">${p.viagens||0}</td>
+    <td style="color:var(--text3)">${p.ultima||'—'}</td>
+    <td><span class="pill ${sc[p.status]||'cyan'}">${p.status||'ativo'}</span></td>
+    <td><button class="btn bc" style="padding:4px 10px" onclick="perfilPax('${p.id}')"><i class="ri-user-line"></i></button></td>
+  </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">Nenhum passageiro.</td></tr>';
+}
+async function salvarPax(){
+  const nome=document.getElementById('pax-nome').value.trim();
+  if(!nome){toast('Nome obrigatório.',true);return;}
+  const p={nome,email:document.getElementById('pax-email').value,wpp:document.getElementById('pax-wpp').value,doc:document.getElementById('pax-doc').value,nasc:document.getElementById('pax-nasc').value,status:document.getElementById('pax-status').value,obs:document.getElementById('pax-obs').value,viagens:0,ultima:'—',criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await COL('pax').add(p);}catch(e){paxData.push({...p,id:'pax'+Date.now()});}
+  toast('Passageiro '+nome+' cadastrado!');cm('m-novo-pax');
+  ['pax-nome','pax-email','pax-wpp','pax-doc','pax-nasc','pax-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  loadPassageiros();
+}
+
+function filterPax(){const q=document.getElementById('srch-pax').value.toLowerCase();renderPax(paxData.filter(p=>!q||(p.nome||'').toLowerCase().includes(q)));}
+function perfilPax(id){
+  const p=paxData.find(x=>x.id===id);
+  if(!p){toast('Passageiro não encontrado.',true);return;}
+  const info=[
+    `Nome: ${p.nome||'—'}`,
+    `E-mail: ${p.email||'—'}`,
+    `WhatsApp: ${p.wpp||'—'}`,
+    `Documento: ${p.doc||'—'}`,
+    `Viagens: ${p.viagens||0}`,
+    `Última viagem: ${p.ultima||'—'}`,
+    `Status: ${p.status||'—'}`,
+  ].join('\n');
+  const _t1 = document.createElement('div');
+  _t1.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px;max-width:480px;width:90%;z-index:9999;color:#c4d4ee;font-size:14px;line-height:1.6;white-space:pre-wrap;box-shadow:0 8px 32px rgba(0,0,0,.6)';
+  _t1.innerHTML = '<div style="font-weight:700;color:#00e5ff;margin-bottom:12px">👤 Perfil do Passageiro</div>' + _t1.textContent;
+  _t1.textContent = info;
+  _t1.innerHTML = '<div style="font-weight:700;color:#00e5ff;margin-bottom:12px">👤 Perfil do Passageiro</div><div>' + info.replace(/\n/g,'<br>') + '</div><button onclick="this.parentElement.remove()" style="margin-top:16px;background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:8px 20px;cursor:pointer;display:block;margin-left:auto">Fechar</button>';
+  document.body.appendChild(_t1);
+}
+
+// ── GPS ──
+let gpsInterval=null;
+function initGPS(){
+  document.getElementById('frota-list').innerHTML=[
+    {nome:'Ônibus VP-01',guia:'Carlos Silva',status:'em_rota',rota:'Chapada Veadeiros',pax:38},
+    {nome:'Van VP-05',guia:'Maria Santos',status:'parado',rota:'Parque Itatiaia',pax:12},
+  ].map(v=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid ${v.status==='em_rota'?'var(--gnbrd)':'var(--brd)'};border-radius:8px;margin-bottom:6px">
+    <div style="width:8px;height:8px;border-radius:50%;background:${v.status==='em_rota'?'var(--green)':'var(--text3)'};flex-shrink:0;${v.status==='em_rota'?'animation:pulse 2s infinite':''}"></div>
+    <div style="flex:1"><div style="font-size:12px;font-weight:700">${v.nome}</div><div style="font-size:10px;color:var(--text3)">${v.guia} · ${v.pax} pax</div></div>
+    <span class="pill ${v.status==='em_rota'?'on':'wait'}">${v.status==='em_rota'?'Em Rota':'Parado'}</span>
+  </div>`).join('');
+  renderGPSPins();
+  if(gpsInterval)clearInterval(gpsInterval);
+  gpsInterval=setInterval(()=>{renderGPSPins();document.getElementById('gps-last-update').textContent='agora';addGPSEvent();},5000);
+  document.getElementById('gps-events').innerHTML='';
+}
+
+function renderGPSPins(){
+  const pins=document.getElementById('gps-pins');
+  const vehicles=[{x:35,y:45,label:'VP-01',color:'var(--green)'},{x:65,y:30,label:'VP-05',color:'var(--cyan)'}];
+  pins.innerHTML=vehicles.map(v=>`<div style="position:absolute;left:${v.x}%;top:${v.y}%;transform:translate(-50%,-50%)">
+    <div style="width:14px;height:14px;border-radius:50%;background:${v.color};border:3px solid white;box-shadow:0 0 0 0 ${v.color};animation:gpspulse 2s infinite"></div>
+    <div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:rgba(10,13,22,.9);border:1px solid var(--cbrd);border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;color:var(--text);white-space:nowrap">${v.label}</div>
+  </div>`).join('');
+  const style=document.getElementById('gps-style');
+  if(!style){const s=document.createElement('style');s.id='gps-style';s.textContent='@keyframes gpspulse{0%,100%{box-shadow:0 0 0 0 rgba(0,229,255,.4)}50%{box-shadow:0 0 0 10px rgba(0,229,255,0)}}';document.head.appendChild(s);}
+}
+
+function addGPSEvent(){
+  const events=['VP-01 chegou ao ponto de parada','VP-05 retomou rota','VP-01 velocidade: 72km/h'];
+  const el=document.getElementById('gps-events');
+  el.insertAdjacentHTML('afterbegin',`<div style="padding:8px 14px;border-bottom:1px solid var(--brd);font-size:11px;display:flex;align-items:center;gap:8px"><div class="dot dc" style="flex-shrink:0"></div><span style="color:var(--text2)">${events[Math.floor(Math.random()*events.length)]}</span><span style="margin-left:auto;color:var(--text3);font-family:var(--ffm)">${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`);
+  const kids=[...el.children];if(kids.length>8)kids[kids.length-1].remove();
+}
+
+// ── PABX ──
+async function loadPABX(){
+  callsData=[
+    {de:'(21) 99999-0001',para:'(21) 3344-5566',dur:'4min 23s',tipo:'saída',data:'2026-03-27 14:32'},
+    {de:'(21) 99888-0002',para:'VP Suporte',dur:'1min 08s',tipo:'entrada',data:'2026-03-27 11:20'},
+    {de:'(21) 97777-0003',para:'(21) 3344-5566',dur:'0min 45s',tipo:'perdida',data:'2026-03-27 09:05'},
+  ];
+  document.getElementById('pabx-today').textContent=callsData.length;
+  document.getElementById('pabx-dur').textContent='2.2 min';
+  document.getElementById('pabx-ramais').textContent='3';
+  document.getElementById('calls-tbody').innerHTML=callsData.map(c=>`<tr>
+    <td>${c.de}</td><td>${c.para}</td>
+    <td style="font-family:var(--ffm)">${c.dur}</td>
+    <td><span class="pill ${c.tipo==='saída'?'cyan':c.tipo==='entrada'?'on':'off'}">${c.tipo}</span></td>
+    <td><button class="btn bc" style="padding:3px 8px;font-size:10px" onclick="transcricaoIA(this)"><i class="ri-robot-line"></i>IA</button></td>
+    <td style="color:var(--text3)">${c.data}</td>
+  </tr>`).join('');
+  document.getElementById('uras-list').innerHTML='<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)"><i class="ri-flow-chart" style="color:var(--cyan);font-size:18px"></i><div style="flex:1"><div style="font-size:13px;font-weight:700">Atendimento Principal</div><div style="font-size:11px;color:var(--text3)">1 → Vendas · 2 → Suporte</div></div><span class="pill on">Ativa</span></div><div style="text-align:center;padding:12px;font-size:12px;color:var(--text3)">+ Criar URA com botão acima</div>';
+}
+
+function loadCallHistory(){loadPABX();}
+
+function dialPress(d){
+  dialStr+=d;
+  document.getElementById('dial-display').textContent=dialStr||'_';
+}
+
+function toggleCall(){
+  if(!callActive){
+    if(!dialStr){toast('Digite um número primeiro.',true);return;}
+    callActive=true;
+    document.getElementById('call-status').textContent='📞 Chamando: '+dialStr;
+    document.getElementById('btn-call').innerHTML='<i class="ri-phone-line"></i> Em Ligação';
+    document.getElementById('btn-call').style.background='linear-gradient(135deg,var(--orange),#a06000)';
+    toast('Chamada simulada para '+dialStr);
+  }
+}
+
+function hangup(){
+  if(callActive){callActive=false;dialStr='';document.getElementById('dial-display').textContent='_';document.getElementById('call-status').textContent='Sem chamada ativa';document.getElementById('btn-call').innerHTML='<i class="ri-phone-line"></i> Ligar';document.getElementById('btn-call').style.background='';toast('Chamada encerrada.');}
+}
+
+function toggleOnline(el){
+  el.classList.toggle('on');
+  const on=el.classList.contains('on');
+  document.getElementById('pabx-status').className='pill '+(on?'on':'off');
+  document.getElementById('pabx-status').innerHTML=(on?'<div class="dot dg"></div>Online':'<div class="dot" style="background:var(--red)"></div>Offline');
+  toast(on?'Você está disponível para chamadas.':'Você saiu do ar.');
+}
+
+async function salvarURA(){
+  const nome=document.getElementById('ura-nome').value||'URA';
+  toast('URA "'+nome+'" criada!');cm('m-nova-ura');
+}
+
+// ── FINANCEIRO ──
+async function loadFinanceiro(){
+  if(chartFin)chartFin.destroy();
+  const rec=roteirosData.reduce((s,r)=>s+(r.confirmados||0)*(r.valor||0),0)||348000;
+  document.getElementById('fin-total').textContent=fmtBRL(rec);
+  document.getElementById('fin-guias').textContent=fmtBRL(rec*0.08);
+  document.getElementById('fin-hotels').textContent=fmtBRL(rec*0.35);
+  document.getElementById('fin-margem').textContent=Math.round((1-0.08-0.35)*100-12)+'%';
+  // split rules
+  splitRules=[{nome:'Guia Carlos Silva',pct:8,aplica:'Nacionais'},{nome:'Guia Maria Santos',pct:8,aplica:'Todos'},{nome:'Hotel Serra Azul',pct:35,aplica:'Chapada'}];
+  document.getElementById('split-rules').innerHTML=splitRules.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px"><div style="flex:1"><div style="font-size:12px;font-weight:700">${s.nome}</div><div style="font-size:10px;color:var(--text3)">${s.aplica}</div></div><span class="pill cyan">${s.pct}%</span></div>`).join('');
+  document.getElementById('fin-tbody').innerHTML=[
+    {desc:'Fernando de Noronha — 30 PAX',pax:30,val:156000,split:'8% guia',status:'pago'},
+    {desc:'Chapada Veadeiros — 38 PAX',pax:38,val:106400,split:'8%+35%',status:'processando'},
+  ].map(t=>`<tr><td>${t.desc}</td><td>${t.pax}</td><td style="color:var(--cyan);font-family:var(--ffm)">${fmtBRL(t.val)}</td><td style="color:var(--text3)">${t.split}</td><td><span class="pill ${t.status==='pago'?'on':'wait'}">${t.status}</span></td><td>${new Date().toLocaleDateString('pt-BR')}</td></tr>`).join('');
+  chartFin=new Chart(document.getElementById('chart-fin'),{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun'],datasets:[{label:'Receita Bruta',data:[85000,102000,78000,134000,98000,165000],borderColor:'var(--cyan)',tension:.4,fill:true,backgroundColor:'rgba(0,229,255,.07)'},{label:'Repasses',data:[37000,44000,34000,58000,43000,72000],borderColor:'var(--orange)',tension:.4,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(232,240,255,.6)',font:{size:10}}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)',callback:v=>'R$'+v/1000+'k'}}}}});
+}
+
+async function salvarSplit(){
+  const p={nome:document.getElementById('sp-nome').value,pct:parseFloat(document.getElementById('sp-pct').value)||0,aplica:document.getElementById('sp-aplica').value};
+  splitRules.push(p);
+  toast('Regra de split ativa!');cm('m-nova-split');loadFinanceiro();
+}
+
+// ── PREDICTIVE ──
+async function loadPredictive(){
+  const alertas=[{tipo:'critico',titulo:'Fernando de Noronha — Voo com risco',desc:'Companhia aérea com 3 cancelamentos na rota esta semana. Acione plano B.',icon:'ri-plane-line'},{tipo:'medio',titulo:'Buenos Aires — Ocupação em 55%',desc:'15 dias para embarque. Sugerido: desconto last minute ou campanha WhatsApp.',icon:'ri-user-follow-line'},{tipo:'medio',titulo:'Transferência pendente — Carlos (Guia)',desc:'Comissão de R$ 8.512 não processada. Vencimento em 2 dias.',icon:'ri-money-dollar-circle-line'}];
+  document.getElementById('pred-crit').textContent=alertas.filter(a=>a.tipo==='critico').length;
+  document.getElementById('pred-med').textContent=alertas.filter(a=>a.tipo==='medio').length;
+  document.getElementById('pred-score').textContent='78%';
+  document.getElementById('alertas-list').innerHTML=alertas.map(a=>`<div style="display:flex;gap:14px;padding:16px;background:var(--bg2);border:1px solid ${a.tipo==='critico'?'var(--rbrd)':'var(--obrd)'};border-radius:12px">
+    <div style="width:40px;height:40px;border-radius:8px;background:${a.tipo==='critico'?'var(--rbg)':'var(--obg)'};border:1px solid ${a.tipo==='critico'?'var(--rbrd)':'var(--obrd)'};display:flex;align-items:center;justify-content:center;color:${a.tipo==='critico'?'var(--red)':'var(--orange)'};font-size:18px;flex-shrink:0"><i class="${a.icon}"></i></div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:4px">${a.titulo}</div><div style="font-size:12px;color:var(--text2);line-height:1.6">${a.desc}</div></div>
+    <span class="pill ${a.tipo==='critico'?'off':'wait'}">${a.tipo==='critico'?'CRÍTICO':'MÉDIO'}</span>
+  </div>`).join('');
+}
+
+// ── CORTEX CHAT ──
+async function cxSend(){
+  const i=document.getElementById('cx-input'),msg=i.value.trim();if(!msg)return;
+  i.value='';appendMsg(msg,'user');const tp=appendTyping();
+  const ctx={roteiros:roteirosData.length,totalPax:roteirosData.reduce((s,r)=>s+(r.confirmados||0),0),tenant:'Viajante Pro Turismo'};
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'viajante-pro',mode:'copilot',message:msg,systemPrompt:`Você é o CORTEX Co-Pilot especializado em turismo e viagens para a Viajante Pro. Contexto: ${JSON.stringify(ctx)}. Responda em português.`})});
+    const d=await r.json();removeTyping(tp);appendMsg(d.response||d.content||'...','ai');
+  }catch(e){removeTyping(tp);appendMsg('Erro ao contatar CORTEX.','ai');}
+}
+function cxQ(msg){document.getElementById('cx-input').value=msg;cxSend();}
+function clearChat(){document.getElementById('cx-msgs').innerHTML='';}
+function appendMsg(text,type){const el=document.getElementById('cx-msgs'),t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});el.innerHTML+=`<div class="cx-msg ${type}"><div class="cx-bubble">${text.replace(/\n/g,'<br>')}</div><div class="cx-meta">${type==='ai'?'CORTEX':'Você'} · ${t}</div></div>`;el.scrollTop=el.scrollHeight;}
+function appendTyping(){const el=document.getElementById('cx-msgs');const d=document.createElement('div');d.className='cx-msg ai';d.id='cx-tp';d.innerHTML='<div style="display:flex;gap:4px;padding:10px 14px"><div class="cx-dot"></div><div class="cx-dot"></div><div class="cx-dot"></div></div>';el.appendChild(d);el.scrollTop=el.scrollHeight;return d;}
+function removeTyping(el){if(el&&el.parentNode)el.remove();}
+
+// ── SETTINGS ──
+function saveSettings(){
+  // key não armazenada no browser — CORTEX usa chave do servidor
+  toast('Configurações salvas!');
+}
+async function testAPI(){
+  try{const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'viajante-pro',mode:'ping',message:'ping'})});
+  if(r.ok){toast('✅ CORTEX OK!');}else toast('CORTEX indisponível.',true);
+  }catch(e){toast('Erro: '+e.message,true);}
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',()=>{
+  // anthropicKey removido do browser — CORTEX via /api/cortex seguro no servidor
+  setTimeout(loadDashboard,400);
+  try{COL('audit_logs').add({acao:'LOGIN',userId:'admin@viajantepro.com.br',ip:'client',modulo:'Admin',timestamp:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}
+
+  // Mobile hamburger
+  const btn = document.createElement('button');
+  btn.id = 'vp-mob-btn';
+  btn.innerHTML = '<i class="ri-menu-line"></i>';
+  const ov = document.createElement('div');
+  ov.id = 'vp-mob-ov';
+  btn.onclick = () => {
+    const sb = document.getElementById('sb') || document.querySelector('aside');
+    if(sb){ sb.classList.toggle('open'); ov.style.display = sb.classList.contains('open') ? 'block':'none'; }
+  };
+  ov.onclick = () => {
+    const sb = document.getElementById('sb') || document.querySelector('aside');
+    if(sb) sb.classList.remove('open');
+    ov.style.display = 'none';
+  };
+  document.body.prepend(ov);
+  document.body.prepend(btn);
+  function applyMob(){ btn.style.display = window.innerWidth<=900?'flex':'none'; }
+  window.addEventListener('resize', applyMob);
+  applyMob();
+});
+
+// ── EXPORT DRE ──
+function exportDRE(){
+  if(!roteirosData.length){toast('Sem dados para exportar.',true);return;}
+  const rows=[['Roteiro','Destino','Saída','Pax','Capacidade','Valor','Status']];
+  roteirosData.forEach(r=>rows.push([r.nome||'',r.destino||'',r.saida||'',r.confirmados||0,r.cap||0,r.valor||0,r.status||'']));
+  const csv=rows.map(r=>r.map(v=>JSON.stringify(String(v))).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='dre-viajante-pro.csv';a.click();
+  toast('📥 DRE exportado!');
+}
+
+// ── TRANSCRIÇÃO IA ──
+async function transcricaoIA(btn){
+  const row=btn.closest('tr');
+  const name=row?.cells?.[0]?.textContent||'ligação';
+  btn.disabled=true;btn.textContent='···';
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'viajante-pro',mode:'transcription',message:`Simule a transcrição resumida de uma ligação de vendas para turismo com o cliente "${name}". 3 bullet points. Português.`})});
+    const d=await r.json();
+    const _txt = d.response||d.content||'Sem resposta.';
+    const _t2 = document.createElement('div');
+    _t2.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px;max-width:560px;width:92%;max-height:70vh;overflow-y:auto;z-index:9999;color:#c4d4ee;font-size:14px;line-height:1.7;box-shadow:0 8px 32px rgba(0,0,0,.6)';
+    _t2.innerHTML = '<div style="font-weight:700;color:#00e5ff;margin-bottom:12px">📝 Transcrição IA</div><div>' + _txt.replace(/\n/g,'<br>') + '</div><button onclick="this.parentElement.remove()" style="margin-top:16px;background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:8px 20px;cursor:pointer;display:block;margin-left:auto">Fechar</button>';
+    document.body.appendChild(_t2);
+  }catch(e){toast('Erro: '+e.message,true);}
+  finally{btn.disabled=false;btn.innerHTML='<i class="ri-robot-line"></i>IA';}
+}
+
+</script>
+  <script src="../core/nexia-engine.js"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

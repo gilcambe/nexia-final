@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#18160f">
+<title>Viajante Pro — Guia Operacional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
+<style>
+:root {
+  --bg:  #F7F4EF; --bg2: #EFECE6; --bg3: #E5E1D8;
+  --sur: #FFFFFF; --brd: rgba(0,0,0,.07); --brd2: rgba(0,0,0,.14);
+  --ink: #0E0E0D; --ink2: #2C2B27; --ink3: #3D3C38; --ink4: #8A8780; --ink5: #C0BDB5;
+  --gold: #B8935A; --gold2: rgba(184,147,90,.12); --gold3: #DAA520;
+  --grn:  #1F7A4A; --grn2:  rgba(31,122,74,.09);
+  --red:  #C0392B; --red2:  rgba(192,57,43,.08);
+  --blu:  #1A4080; --blu2:  rgba(26,64,128,.08);
+  --amb:  #B5620A; --amb2:  rgba(181,98,10,.09);
+  --pur:  #5B2D8E; --pur2:  rgba(91,45,142,.08);
+  --ff:   'Sora', system-ui, sans-serif;
+  --ffs:  'DM Serif Display', Georgia, serif;
+  --ffm:  'JetBrains Mono', monospace;
+  --nh: 72px; --bar: 64px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: #18160f; min-height: 100vh; display: flex; align-items: center; justify-content: center; -webkit-font-smoothing: antialiased; }
+body { width: 100%; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: var(--ff); }
+
+/* ── SHELL ─────────────────────────────────────────────────────── */
+#shell { position: relative; width: 100%; max-width: 400px; height: 100vh; max-height: 900px; background: var(--bg); overflow: hidden; display: flex; flex-direction: column; }
+@media(min-width:460px) { #shell { border-radius: 48px; box-shadow: 0 40px 120px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.06), inset 0 1px 0 rgba(255,255,255,.1); height: 900px; } }
+@media(max-width:460px) { html { background: var(--bg); } }
+
+/* ── STATUS BAR ─────────────────────────────────────────────────── */
+.sbar { height: 44px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 22px 9px; background: #18160f; }
+.sbar-time { font-family: var(--ffm); font-size: 11px; font-weight: 500; color: rgba(255,255,255,.65); }
+.sbar-ico  { font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: 2px; }
+
+/* ── TOP BAR ────────────────────────────────────────────────────── */
+#topbar { flex-shrink: 0; background: #18160f; padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.tb-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.tb-wordmark { font-family: var(--ffs); font-style: italic; font-size: 1.1rem; color: rgba(255,255,255,.9); }
+.tb-role { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; padding: 3px 10px; background: var(--gold3); color: #fff; border-radius: 4px; }
+.tb-menu { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.6); font-size: 16px; cursor: pointer; }
+.tb-row2 { display: flex; align-items: center; gap: 10px; }
+.tb-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#B8860B,#DAA520); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.tb-guide-label { font-size: 10px; color: rgba(255,255,255,.4); }
+.tb-guide-name  { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.9); }
+
+/* PROGRESS STRIP */
+#prog-strip { flex-shrink: 0; background: #18160f; padding: 10px 20px 14px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.ps-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.ps-label { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.35); }
+.ps-count { font-family: var(--ffm); font-size: 1.1rem; color: var(--gold3); }
+.ps-bar { height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+.ps-fill { height: 100%; background: var(--gold3); border-radius: 2px; transition: width .55s var(--ease); }
+
+/* GROUP SELECTOR */
+.grp-row { display: flex; gap: 8px; padding: 10px 20px; background: #18160f; border-bottom: 1px solid rgba(255,255,255,.06); }
+.grp-btn { flex: 1; padding: 8px 4px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); font-family: var(--ff); font-size: 9px; font-weight: 600; color: rgba(255,255,255,.35); cursor: pointer; text-align: center; transition: all .18s; line-height: 1.3; border-radius: 8px; }
+.grp-btn.active { border-color: var(--gold3); color: #fff; background: rgba(218,165,32,.12); }
+
+/* ── SCROLL AREA ─────────────────────────────────────────────── */
+#scroll-area { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(var(--bar) + 16px); }
+#scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── SCREENS ────────────────────────────────────────────────────── */
+.screen { display: none; padding: 16px 16px 4px; }
+.screen.active { display: block; }
+.scr-title { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink4); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+
+/* ── CHECK-IN SCREEN ────────────────────────────────────────────── */
+/* QR scan area */
+.qr-scanner-card { background: var(--ink); border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 16px; position: relative; overflow: hidden; }
+.qr-scanner-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(218,165,32,.12) 0%, transparent 70%); }
+.qr-frame { width: 140px; height: 140px; margin: 0 auto 16px; border: 2px solid var(--gold3); border-radius: 18px; position: relative; display: flex; align-items: center; justify-content: center; }
+.qr-frame-corner { position: absolute; width: 24px; height: 24px; border-color: var(--gold3); border-style: solid; }
+.qr-frame-corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 6px 0 0 0; }
+.qr-frame-corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-radius: 0 6px 0 0; }
+.qr-frame-corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-radius: 0 0 0 6px; }
+.qr-frame-corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 6px 0; }
+.qr-scan-line { position: absolute; left: 4px; right: 4px; height: 2px; background: var(--gold3); border-radius: 1px; animation: scan 2s ease-in-out infinite; box-shadow: 0 0 8px var(--gold3); }
+@keyframes scan { 0%,100%{top:10%}50%{top:85%} }
+.qr-icon { font-size: 48px; color: rgba(255,255,255,.12); }
+.qr-label { font-size: 12px; color: rgba(255,255,255,.5); margin-bottom: 12px; }
+.qr-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; background: linear-gradient(135deg,#B8860B,#DAA520); color: #fff; font-family: var(--ff); font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: opacity .18s; }
+.qr-btn:active { opacity: .85; }
+
+/* Manual search */
+.manual-input-wrap { position: relative; margin-bottom: 14px; }
+.manual-input { width: 100%; padding: 12px 16px 12px 40px; background: var(--sur); border: 1px solid var(--brd2); border-radius: 12px; font-family: var(--ff); font-size: 13px; color: var(--ink); transition: border .18s; }
+.manual-input:focus { outline: none; border-color: var(--gold); }
+.manual-input::placeholder { color: var(--ink5); }
+.manual-input-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--ink4); font-size: 16px; pointer-events: none; }
+
+/* Passenger checkin list */
+.pax-checkin-list { display: flex; flex-direction: column; gap: 8px; }
+.pci-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--sur); border: 1px solid var(--brd); border-radius: 14px; transition: all .18s; }
+.pci-item.checked { background: var(--grn2); border-color: rgba(31,122,74,.2); }
+.pci-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--gold); flex-shrink: 0; }
+.pci-info { flex: 1; }
+.pci-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.pci-seat { font-size: 10px; color: var(--ink4); margin-top: 1px; font-family: var(--ffm); }
+.pci-check-btn { width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--brd2); background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .18s; flex-shrink: 0; font-size: 16px; -webkit-tap-highlight-color: transparent; }
+.pci-check-btn.done { background: var(--grn); border-color: var(--grn); color: #fff; }
+.pci-check-btn:not(.done) { color: var(--ink5); }
+.pci-check-btn:active { transform: scale(.9); }
+
+/* ── LISTA DE PRESENÇA ──────────────────────────────────────────── */
+.presence-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+.ps-card { background: var(--sur); border: 1px solid var(--brd); border-radius: 12px; padding: 12px 10px; text-align: center; }
+.ps-card-val { font-family: var(--ffm); font-size: 22px; font-weight: 500; }
+.ps-card-lbl { font-size: 9px; color: var(--ink4); text-transform: uppercase; letter-spacing: .1em; margin-top: 3px; }
+.group-tab-bar { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.group-tab-bar::-webkit-scrollbar { display: none; }
+.gtab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--brd2); background: none; font-family: var(--ff); font-size: 11px; font-weight: 600; color: var(--ink4); cursor: pointer; white-space: nowrap; transition: all .18s; }
+.gtab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* Full presence list */
+.presence-list { display: flex; flex-direction: column; gap: 6px; }
+.pres-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--sur); border: 1px solid var(--brd); border-radius: 12px; }
+.pres-num { font-family: var(--ffm); font-size: 11px; color: var(--ink5); width: 20px; flex-shrink: 0; }
+.pres-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--gold); flex-shrink: 0; }
+.pres-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--ink); }
+.pres-status { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 6px; flex-shrink: 0; }
+.ps-ok   { background: var(--grn2); color: var(--grn); }
+.ps-pend { background: var(--amb2); color: var(--amb); }
+.ps-abs  { background: var(--red2); color: var(--red); }
+
+/* ── DESPESAS ────────────────────────────────────────────────────── */
+.expense-total-card { background: var(--ink); border-radius: 18px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.etc-label { font-size: 10px; color: rgba(255,255,255,.4); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+.etc-value { font-family: var(--ffm); font-size: 24px; font-weight: 500; color: var(--gold3); }
+.etc-count { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 3px; }
+.etc-add-btn { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg,#B8860B,#DAA520); border: none; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: opacity .18s; }
+.etc-add-btn:active { opacity: .85; }
+
+/* Expense category filter */
+.exp-cats { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.exp-cats::-webkit-scrollbar { display: none; }
+.exp-cat { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--brd2); background: none; font-family: var(--ff); font-size: 10px; font-weight: 700; color: var(--ink4); cursor: pointer; white-space: nowrap; transition: all .18s; }
+.exp-cat.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* Expense items */
+.expense-list { display: flex; flex-direction: column; gap: 8px; }
+.exp-item { background: var(--sur); border: 1px solid var(--brd); border-radius: 14px; padding: 14px 14px; display: flex; align-items: center; gap: 12px; }
+.exp-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.exp-info { flex: 1; }
+.exp-desc { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.exp-meta { font-size: 11px; color: var(--ink4); }
+.exp-amount { text-align: right; }
+.exp-val  { font-family: var(--ffm); font-size: 14px; font-weight: 500; color: var(--ink); }
+.exp-curr { font-size: 10px; color: var(--ink4); margin-top: 1px; }
+.exp-st   { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; margin-top: 4px; display: inline-block; }
+.es-ok    { background: var(--grn2); color: var(--grn); }
+.es-pend  { background: var(--amb2); color: var(--amb); }
+
+/* Add expense form */
+.add-exp-form { display: flex; flex-direction: column; gap: 12px; }
+.aef-label { font-size: 11px; font-weight: 700; color: var(--ink3); margin-bottom: 4px; display: block; }
+.aef-input { width: 100%; padding: 11px 14px; border: 1px solid var(--brd2); border-radius: 10px; font-family: var(--ff); font-size: 13px; color: var(--ink); background: var(--bg); transition: border .18s; }
+.aef-input:focus { outline: none; border-color: var(--gold); }
+.aef-input option { background: #fff; }
+.aef-cats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.aef-cat { padding: 10px 4px; background: var(--bg2); border: 1px solid var(--brd); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all .18s; border-radius: 10px; }
+.aef-cat.selected { background: var(--gold2); border-color: rgba(184,147,90,.35); }
+.aef-cat i { font-size: 18px; color: var(--ink4); }
+.aef-cat.selected i { color: var(--gold); }
+.aef-cat span { font-size: 9px; font-weight: 600; color: var(--ink4); }
+.aef-cat.selected span { color: var(--gold); }
+.aef-submit { padding: 13px; background: linear-gradient(135deg,#B8860B,#DAA520); color: #fff; border: none; border-radius: 12px; font-family: var(--ff); font-size: 13px; font-weight: 800; cursor: pointer; transition: opacity .18s; }
+.aef-submit:active { opacity: .85; }
+
+/* ── BOTTOM NAV ─────────────────────────────────────────────────── */
+#bottom-nav { flex-shrink: 0; height: var(--bar); background: rgba(255,255,255,.92); backdrop-filter: blur(16px); border-top: 1px solid var(--brd); display: flex; align-items: stretch; padding: 0 4px; }
+@media(min-width:460px) { #bottom-nav { border-radius: 0 0 48px 48px; } }
+.nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: none; -webkit-tap-highlight-color: transparent; }
+.nav-tab i { font-size: 20px; color: var(--ink5); transition: all .18s; }
+.nav-tab span { font-size: 9px; font-weight: 600; letter-spacing: .03em; color: var(--ink5); transition: all .18s; }
+.nav-tab.active i, .nav-tab.active span { color: var(--gold); }
+.nav-tab:active { opacity: .7; }
+
+/* ── SHEET MODAL ────────────────────────────────────────────────── */
+.sheet-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 100; display: none; }
+.sheet-overlay.open { display: block; }
+.sheet { position: absolute; bottom: 0; left: 0; right: 0; background: var(--sur); border-radius: 28px 28px 0 0; z-index: 101; padding: 0 20px 32px; transform: translateY(100%); transition: transform .35s var(--ease); max-height: 85%; overflow-y: auto; }
+.sheet.open { transform: translateY(0); }
+.sheet-handle { width: 36px; height: 4px; background: var(--brd2); border-radius: 2px; margin: 12px auto 20px; }
+.sheet-title { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 20px; }
+
+/* ── TOAST ──────────────────────────────────────────────────────── */
+#guide-toast { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 12px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 200; pointer-events: none; white-space: nowrap; }
+#guide-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#guide-toast.gold { background: var(--gold3); color: #fff; }
+#guide-toast.ok   { background: var(--grn); }
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- Status bar -->
+  <div class="sbar">
+    <span class="sbar-time" id="sb-time">9:41</span>
+    <span class="sbar-ico">▲ ▲ ⬛</span>
+  </div>
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <div class="tb-row1">
+      <span class="tb-wordmark">Viajante Pro</span>
+      <span class="tb-role">GUIA</span>
+      <div class="tb-menu"><i class="ri-more-2-fill"></i></div>
+    </div>
+    <div class="tb-row2">
+      <div class="tb-avatar" id="guide-avatar">G</div>
+      <div>
+        <div class="tb-guide-label">Guia Operacional</div>
+        <div class="tb-guide-name" id="guide-name">Carlos Andrade</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress strip -->
+  <div id="prog-strip">
+    <div class="ps-row">
+      <span class="ps-label">CHECK-IN PROGRESS</span>
+      <span class="ps-count"><span id="checkin-count">0</span>/48</span>
+    </div>
+    <div class="ps-bar"><div class="ps-fill" id="checkin-bar" style="width:0%"></div></div>
+  </div>
+
+  <!-- Group selector -->
+  <div class="grp-row">
+    <button class="grp-btn active" onclick="selectGroup(this,'CES 2027')">CES 2027<br>Las Vegas</button>
+    <button class="grp-btn" onclick="selectGroup(this,'MWC 2027')">MWC 2027<br>Barcelona</button>
+    <button class="grp-btn" onclick="selectGroup(this,'Orlando')">Orlando<br>Incentivo</button>
+  </div>
+
+  <!-- Scroll area -->
+  <div id="scroll-area">
+
+    <!-- ── CHECK-IN SCREEN ──────────────────────────────────── -->
+    <div class="screen active" id="screen-checkin">
+
+      <!-- QR Scanner card -->
+      <div class="qr-scanner-card">
+        <div class="qr-frame">
+          <div class="qr-frame-corner tl"></div>
+          <div class="qr-frame-corner tr"></div>
+          <div class="qr-frame-corner bl"></div>
+          <div class="qr-frame-corner br"></div>
+          <div class="qr-icon"><i class="ri-qr-code-line"></i></div>
+          <div class="qr-scan-line"></div>
+        </div>
+        <div class="qr-label">Aponte para o QR Code do passageiro</div>
+        <button class="qr-btn" onclick="showToast('Câmera — disponível no app nativo instalado','gold')">
+          <i class="ri-camera-line"></i> Escanear QR Code
+        </button>
+      </div>
+
+      <!-- Manual search -->
+      <div class="manual-input-wrap">
+        <i class="ri-search-line manual-input-icon"></i>
+        <input class="manual-input" id="pax-search" type="text" placeholder="Buscar passageiro por nome ou documento..." oninput="filterPaxCheckin()">
+      </div>
+
+      <!-- Passenger list -->
+      <div class="pax-checkin-list" id="pax-checkin-list">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ── LISTA DE PRESENÇA ────────────────────────────────── -->
+    <div class="screen" id="screen-presenca">
+
+      <!-- Summary -->
+      <div class="presence-summary">
+        <div class="ps-card">
+          <div class="ps-card-val" style="color:var(--grn)" id="pres-ok">0</div>
+          <div class="ps-card-lbl">Presentes</div>
+        </div>
+        <div class="ps-card">
+          <div class="ps-card-val" style="color:var(--amb)" id="pres-pend">0</div>
+          <div class="ps-card-lbl">Pendentes</div>
+        </div>
+        <div class="ps-card">
+          <div class="ps-card-val" style="color:var(--red)" id="pres-abs">0</div>
+          <div class="ps-card-lbl">Ausentes</div>
+        </div>
+      </div>
+
+      <!-- Group tabs -->
+      <div class="group-tab-bar">
+        <button class="gtab active" onclick="filterPresenca(this,'todos')">Todos (48)</button>
+        <button class="gtab" onclick="filterPresenca(this,'presentes')">Presentes</button>
+        <button class="gtab" onclick="filterPresenca(this,'pendentes')">Pendentes</button>
+        <button class="gtab" onclick="filterPresenca(this,'ausentes')">Ausentes</button>
+      </div>
+
+      <!-- Full list -->
+      <div class="presence-list" id="presenca-list">
+        <!-- rendered by JS -->
+      </div>
+
+      <!-- Export button -->
+      <button onclick="exportPresenca()" style="width:100%;padding:13px;margin-top:16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:14px;font-family:var(--ff);font-size:12px;font-weight:700;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="ri-download-line"></i> Exportar Lista PDF
+      </button>
+    </div>
+
+    <!-- ── DESPESAS ──────────────────────────────────────────── -->
+    <div class="screen" id="screen-despesas">
+
+      <!-- Total card -->
+      <div class="expense-total-card">
+        <div>
+          <div class="etc-label">Total lançado</div>
+          <div class="etc-value" id="exp-total">USD 0,00</div>
+          <div class="etc-count" id="exp-count">0 despesas · pendente aprovação</div>
+        </div>
+        <button class="etc-add-btn" onclick="openAddExpense()"><i class="ri-add-line"></i></button>
+      </div>
+
+      <!-- Category filter -->
+      <div class="exp-cats">
+        <button class="exp-cat active" onclick="filterExp(this,'todos')">Todas</button>
+        <button class="exp-cat" onclick="filterExp(this,'transporte')">🚖 Transporte</button>
+        <button class="exp-cat" onclick="filterExp(this,'alimentacao')">🍽️ Alimentação</button>
+        <button class="exp-cat" onclick="filterExp(this,'hospedagem')">🏨 Hospedagem</button>
+        <button class="exp-cat" onclick="filterExp(this,'operacional')">⚙️ Operacional</button>
+        <button class="exp-cat" onclick="filterExp(this,'outros')">📦 Outros</button>
+      </div>
+
+      <!-- Expense list -->
+      <div class="expense-list" id="expense-list">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ── OPERACIONAL (dashboard rápido do guia) ─────────── -->
+    <div class="screen" id="screen-operacional">
+      <div class="scr-title"><i class="ri-broadcast-line"></i>Status da Operação</div>
+
+      <!-- Mission info card -->
+      <div style="background:var(--ink);border-radius:18px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(218,165,32,.15) 0%,transparent 70%)"></div>
+        <div style="position:relative;z-index:1">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px">Missão Atual</div>
+          <div style="font-family:var(--ffs);font-style:italic;font-size:1.3rem;color:#fff;margin-bottom:4px">CES 2027 — Las Vegas</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5)">06–09 jan 2027 · Harry Reid Int'l Airport</div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <div style="flex:1;background:rgba(255,255,255,.06);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:rgba(255,255,255,.4);margin-bottom:4px">Passageiros</div>
+              <div style="font-family:var(--ffm);font-size:20px;color:var(--gold3)">48</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,.06);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:rgba(255,255,255,.4);margin-bottom:4px">Dias</div>
+              <div style="font-family:var(--ffm);font-size:20px;color:var(--gold3)">4</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,.06);border-radius:10px;padding:12px">
+              <div style="font-size:10px;color:rgba(255,255,255,.4);margin-bottom:4px">Alertas</div>
+              <div style="font-family:var(--ffm);font-size:20px;color:var(--red)" id="op-alerts">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <button onclick="goScreen('checkin',document.querySelector('[onclick*=checkin]'))" style="padding:16px;background:var(--gold2);border:1px solid rgba(184,147,90,.25);border-radius:14px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;font-family:var(--ff);text-align:left;-webkit-tap-highlight-color:transparent">
+          <i class="ri-qr-scan-line" style="font-size:22px;color:var(--gold)"></i>
+          <span style="font-size:12px;font-weight:700;color:var(--ink)">Check-in QR</span>
+          <span style="font-size:10px;color:var(--ink4)"><span id="op-checkin">0</span>/48 feitos</span>
+        </button>
+        <button onclick="goScreen('presenca',document.querySelector('[onclick*=presenca]'))" style="padding:16px;background:var(--grn2);border:1px solid rgba(31,122,74,.2);border-radius:14px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;font-family:var(--ff);text-align:left;-webkit-tap-highlight-color:transparent">
+          <i class="ri-list-check-3" style="font-size:22px;color:var(--grn)"></i>
+          <span style="font-size:12px;font-weight:700;color:var(--ink)">Presença</span>
+          <span style="font-size:10px;color:var(--ink4)">Atualizado em tempo real</span>
+        </button>
+        <button onclick="openAddExpense()" style="padding:16px;background:var(--blu2);border:1px solid rgba(26,64,128,.2);border-radius:14px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;font-family:var(--ff);text-align:left;-webkit-tap-highlight-color:transparent">
+          <i class="ri-receipt-line" style="font-size:22px;color:var(--blu)"></i>
+          <span style="font-size:12px;font-weight:700;color:var(--ink)">+ Despesa</span>
+          <span style="font-size:10px;color:var(--ink4)">Lançar gasto</span>
+        </button>
+        <button onclick="showToast('Relatório diário gerado!','ok')" style="padding:16px;background:var(--pur2);border:1px solid rgba(91,45,142,.2);border-radius:14px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;font-family:var(--ff);text-align:left;-webkit-tap-highlight-color:transparent">
+          <i class="ri-file-chart-line" style="font-size:22px;color:var(--pur)"></i>
+          <span style="font-size:12px;font-weight:700;color:var(--ink)">Relatório</span>
+          <span style="font-size:10px;color:var(--ink4)">Gerar diário</span>
+        </button>
+      </div>
+
+      <!-- Today's schedule -->
+      <div class="scr-title"><i class="ri-calendar-event-line"></i>Hoje — 06 Jan</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:var(--sur);border:1px solid var(--brd);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center">
+          <div style="font-family:var(--ffm);font-size:14px;color:var(--gold);flex-shrink:0;width:44px">07:30</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">Reunião de briefing com guia</div><div style="font-size:10px;color:var(--ink4)">Lobby do Wynn</div></div>
+          <span style="font-size:9px;font-weight:700;padding:2px 7px;background:var(--grn2);color:var(--grn);border-radius:5px">Feito</span>
+        </div>
+        <div style="background:rgba(184,147,90,.06);border:1px solid rgba(184,147,90,.2);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center">
+          <div style="font-family:var(--ffm);font-size:14px;color:var(--gold);flex-shrink:0;width:44px">08:00</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--ink)">Check-in do grupo · LVCC</div><div style="font-size:10px;color:var(--ink4)">South Hall · Entrada C</div></div>
+          <span style="font-size:9px;font-weight:700;padding:2px 7px;background:var(--gold2);color:var(--gold);border-radius:5px">Agora</span>
+        </div>
+        <div style="background:var(--sur);border:1px solid var(--brd);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center">
+          <div style="font-family:var(--ffm);font-size:14px;color:var(--ink4);flex-shrink:0;width:44px">13:00</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">Almoço coordenado</div><div style="font-size:10px;color:var(--ink4)">Tech District · Main Hall</div></div>
+          <span style="font-size:9px;font-weight:700;padding:2px 7px;background:var(--bg2);color:var(--ink4);border-radius:5px">Próximo</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scroll-area -->
+
+  <!-- Bottom nav -->
+  <nav id="bottom-nav">
+    <button class="nav-tab active" onclick="goScreen('checkin',this)"><i class="ri-qr-scan-line"></i><span>Check-in</span></button>
+    <button class="nav-tab" onclick="goScreen('presenca',this)"><i class="ri-list-check-3"></i><span>Presença</span></button>
+    <button class="nav-tab" onclick="goScreen('despesas',this)"><i class="ri-receipt-line"></i><span>Despesas</span></button>
+    <button class="nav-tab" onclick="goScreen('operacional',this)"><i class="ri-dashboard-2-line"></i><span>Operação</span></button>
+  </nav>
+
+</div><!-- /shell -->
+
+<!-- Sheet modal -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()">
+  <div class="sheet" id="sheet-content" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">Lançar Despesa</div>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<div id="guide-toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/bridge.js"></script>
+<script>
+'use strict';
+const VP_SLUG = 'viajante-pro';
+
+// ── Clock ────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('sb-time').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+setInterval(updateClock, 10000);
+updateClock();
+
+// ── Dados mockados de passageiros (em produção: onSnapshot) ──────
+const MOCK_PAX = [
+  { id:'p01', nome:'Adriana Souza',     assento:'24A', doc:'AB1234567', status:'presente' },
+  { id:'p02', nome:'Bruno Carvalho',    assento:'24B', doc:'CD8901234', status:'presente' },
+  { id:'p03', nome:'Carla Mendonça',    assento:'25A', doc:'EF5678901', status:'presente' },
+  { id:'p04', nome:'Diego Ferreira',    assento:'25B', doc:'GH2345678', status:'pendente' },
+  { id:'p05', nome:'Elena Rodrigues',   assento:'26A', doc:'IJ9012345', status:'pendente' },
+  { id:'p06', nome:'Felipe Andrade',    assento:'26B', doc:'KL6789012', status:'presente' },
+  { id:'p07', nome:'Gabriela Torres',   assento:'27A', doc:'MN3456789', status:'ausente'  },
+  { id:'p08', nome:'Henrique Lima',     assento:'27B', doc:'OP0123456', status:'presente' },
+  { id:'p09', nome:'Isabella Martins',  assento:'28A', doc:'QR7890123', status:'pendente' },
+  { id:'p10', nome:'João Paulo Silva',  assento:'28B', doc:'ST4567890', status:'presente' },
+  { id:'p11', nome:'Kamila Oliveira',   assento:'29A', doc:'UV1234567', status:'presente' },
+  { id:'p12', nome:'Lucas Nascimento',  assento:'29B', doc:'WX8901234', status:'pendente' },
+];
+
+const MOCK_EXPENSES = [
+  { id:'e01', desc:'Transfer aeroporto × 3 vans', cat:'transporte', value:420, curr:'USD', status:'aprovado', data:'06/jan' },
+  { id:'e02', desc:'Almoço grupo LVCC — 48 pax',  cat:'alimentacao', value:2160, curr:'USD', status:'pendente', data:'06/jan' },
+  { id:'e03', desc:'Credenciais extras CES',        cat:'operacional', value:320, curr:'USD', status:'aprovado', data:'05/jan' },
+  { id:'e04', desc:'Seguro complementar grupo',     cat:'outros',      value:890, curr:'USD', status:'aprovado', data:'04/jan' },
+  { id:'e05', desc:'Jantar STK Steakhouse',          cat:'alimentacao', value:3840, curr:'USD', status:'pendente', data:'06/jan' },
+];
+
+const CAT_ICONS = { transporte:'ri-car-line', alimentacao:'ri-restaurant-line', hospedagem:'ri-hotel-line', operacional:'ri-settings-3-line', outros:'ri-box-3-line' };
+const CAT_COLORS = { transporte:'var(--blu)', alimentacao:'var(--amb)', hospedagem:'var(--pur)', operacional:'var(--grn)', outros:'var(--ink4)' };
+const CAT_BG     = { transporte:'var(--blu2)', alimentacao:'var(--amb2)', hospedagem:'var(--pur2)', operacional:'var(--grn2)', outros:'rgba(0,0,0,.04)' };
+
+let _checkinState = {};  // { paxId: true/false }
+let _currentExpCat = 'todos';
+let _selectedExpCat = 'transporte';
+
+// ── Init data ─────────────────────────────────────────────────────
+MOCK_PAX.forEach(p => { _checkinState[p.id] = p.status === 'presente'; });
+
+// ── Navigation ────────────────────────────────────────────────────
+function goScreen(name, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  const sc = document.getElementById('screen-' + name);
+  if (sc) sc.classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+function selectGroup(btn, name) {
+  document.querySelectorAll('.grp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showToast('Grupo: ' + name, 'gold');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+function showToast(msg, type = '') {
+  const t = document.getElementById('guide-toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+// ── Sheet modal ───────────────────────────────────────────────────
+function openSheet(title, bodyHTML) {
+  document.getElementById('sheet-title').textContent = title;
+  document.getElementById('sheet-body').innerHTML = bodyHTML;
+  document.getElementById('sheet-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('sheet-content').classList.add('open'), 10);
+}
+function closeSheet() {
+  document.getElementById('sheet-content').classList.remove('open');
+  setTimeout(() => document.getElementById('sheet-overlay').classList.remove('open'), 350);
+}
+
+// ── CHECK-IN ──────────────────────────────────────────────────────
+function renderPaxCheckin(filter = '') {
+  const list = document.getElementById('pax-checkin-list');
+  const items = MOCK_PAX.filter(p =>
+    !filter || p.nome.toLowerCase().includes(filter) || p.doc.toLowerCase().includes(filter)
+  );
+  list.innerHTML = items.map(p => {
+    const checked = _checkinState[p.id];
+    return `
+      <div class="pci-item ${checked ? 'checked' : ''}" id="pci-${p.id}">
+        <div class="pci-avatar">${p.nome[0]}</div>
+        <div class="pci-info">
+          <div class="pci-name">${p.nome}</div>
+          <div class="pci-seat">Assento ${p.assento} · Passaporte ${p.doc}</div>
+        </div>
+        <button class="pci-check-btn ${checked ? 'done' : ''}" id="btn-${p.id}" onclick="toggleCheckin('${p.id}')">
+          ${checked ? '<i class="ri-check-line"></i>' : '<i class="ri-checkbox-blank-circle-line"></i>'}
+        </button>
+      </div>`;
+  }).join('');
+  updateCheckinProgress();
+}
+
+function toggleCheckin(id) {
+  _checkinState[id] = !_checkinState[id];
+  const pax = MOCK_PAX.find(p => p.id === id);
+  if (_checkinState[id]) {
+    showToast('✓ Check-in: ' + pax.nome, 'ok');
+    // Em produção: gravar no Firestore
+    if (window.NEXIA && NEXIA._ready && NEXIA.db) {
+      NEXIA.db.collection('tenants').doc(VP_SLUG).collection('passengers').doc(id)
+        .set({ checkin: true, checkinAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true })
+        .catch(() => {});
+    }
+  }
+  renderPaxCheckin(document.getElementById('pax-search').value.toLowerCase());
+  renderPresenca();
+}
+
+function filterPaxCheckin() {
+  renderPaxCheckin(document.getElementById('pax-search').value.toLowerCase());
+}
+
+function updateCheckinProgress() {
+  const done  = Object.values(_checkinState).filter(Boolean).length;
+  const total = MOCK_PAX.length;
+  const pct   = Math.round((done / total) * 100);
+  document.getElementById('checkin-count').textContent = done;
+  document.getElementById('checkin-bar').style.width = pct + '%';
+  const opEl = document.getElementById('op-checkin');
+  if (opEl) opEl.textContent = done;
+}
+
+// ── PRESENÇA ──────────────────────────────────────────────────────
+function renderPresenca(filter = 'todos') {
+  const presentes = MOCK_PAX.filter(p => _checkinState[p.id]).length;
+  const pendentes = MOCK_PAX.filter(p => !_checkinState[p.id] && MOCK_PAX.find(x => x.id === p.id)?.status !== 'ausente').length;
+  const ausentes  = MOCK_PAX.filter(p => p.status === 'ausente' && !_checkinState[p.id]).length;
+
+  document.getElementById('pres-ok').textContent   = presentes;
+  document.getElementById('pres-pend').textContent  = pendentes;
+  document.getElementById('pres-abs').textContent   = ausentes;
+
+  const items = MOCK_PAX.filter(p => {
+    if (filter === 'todos')      return true;
+    if (filter === 'presentes')  return _checkinState[p.id];
+    if (filter === 'pendentes')  return !_checkinState[p.id] && p.status !== 'ausente';
+    if (filter === 'ausentes')   return p.status === 'ausente' && !_checkinState[p.id];
+    return true;
+  });
+
+  const list = document.getElementById('presenca-list');
+  list.innerHTML = items.map((p, i) => {
+    const isPresente = _checkinState[p.id];
+    const isAusente  = p.status === 'ausente' && !isPresente;
+    const stCls  = isPresente ? 'ps-ok' : isAusente ? 'ps-abs' : 'ps-pend';
+    const stTxt  = isPresente ? 'Presente' : isAusente ? 'Ausente' : 'Pendente';
+    return `<div class="pres-row">
+      <span class="pres-num">${i+1}</span>
+      <div class="pres-avatar">${p.nome[0]}</div>
+      <span class="pres-name">${p.nome}</span>
+      <span class="pres-status ${stCls}">${stTxt}</span>
+    </div>`;
+  }).join('');
+}
+
+function filterPresenca(btn, filter) {
+  document.querySelectorAll('.gtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPresenca(filter);
+}
+
+function exportPresenca() {
+  showToast('Lista exportada em PDF!', 'ok');
+}
+
+// ── DESPESAS ──────────────────────────────────────────────────────
+function renderExpenses(cat = 'todos') {
+  _currentExpCat = cat;
+  const items = cat === 'todos' ? MOCK_EXPENSES : MOCK_EXPENSES.filter(e => e.cat === cat);
+  const total = MOCK_EXPENSES.reduce((s, e) => s + e.value, 0);
+  document.getElementById('exp-total').textContent = 'USD ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  document.getElementById('exp-count').textContent = MOCK_EXPENSES.length + ' despesas · ' + MOCK_EXPENSES.filter(e => e.status === 'pendente').length + ' pendentes aprovação';
+
+  const list = document.getElementById('expense-list');
+  list.innerHTML = items.map(e => `
+    <div class="exp-item">
+      <div class="exp-icon" style="background:${CAT_BG[e.cat]};color:${CAT_COLORS[e.cat]}">
+        <i class="${CAT_ICONS[e.cat]||'ri-box-3-line'}"></i>
+      </div>
+      <div class="exp-info">
+        <div class="exp-desc">${e.desc}</div>
+        <div class="exp-meta">${e.data} · ${e.cat}</div>
+      </div>
+      <div class="exp-amount">
+        <div class="exp-val">${e.value.toLocaleString('pt-BR')}</div>
+        <div class="exp-curr">${e.curr}</div>
+        <span class="exp-st ${e.status === 'aprovado' ? 'es-ok' : 'es-pend'}">${e.status === 'aprovado' ? '✓ Aprovado' : 'Pendente'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterExp(btn, cat) {
+  document.querySelectorAll('.exp-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderExpenses(cat);
+}
+
+function openAddExpense() {
+  openSheet('Lançar Despesa', `
+    <div class="add-exp-form">
+      <div>
+        <label class="aef-label">Categoria</label>
+        <div class="aef-cats">
+          <div class="aef-cat selected" onclick="selectExpCat(this,'transporte')"><i class="ri-car-line"></i><span>Transporte</span></div>
+          <div class="aef-cat" onclick="selectExpCat(this,'alimentacao')"><i class="ri-restaurant-line"></i><span>Alimentação</span></div>
+          <div class="aef-cat" onclick="selectExpCat(this,'hospedagem')"><i class="ri-hotel-line"></i><span>Hospedagem</span></div>
+          <div class="aef-cat" onclick="selectExpCat(this,'operacional')"><i class="ri-settings-3-line"></i><span>Operacional</span></div>
+          <div class="aef-cat" onclick="selectExpCat(this,'outros')"><i class="ri-box-3-line"></i><span>Outros</span></div>
+        </div>
+      </div>
+      <div>
+        <label class="aef-label" for="aef-desc">Descrição *</label>
+        <input class="aef-input" id="aef-desc" type="text" placeholder="Ex: Transfer aeroporto × 2 vans">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="aef-label" for="aef-val">Valor *</label>
+          <input class="aef-input" id="aef-val" type="number" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <div>
+          <label class="aef-label" for="aef-curr">Moeda</label>
+          <select class="aef-input" id="aef-curr">
+            <option value="USD">USD — Dólar</option>
+            <option value="BRL">BRL — Real</option>
+            <option value="EUR">EUR — Euro</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="aef-label" for="aef-nota">Nota / Observação</label>
+        <input class="aef-input" id="aef-nota" type="text" placeholder="Número da nota fiscal, fornecedor...">
+      </div>
+      <button class="aef-submit" onclick="submitExpense()">
+        <i class="ri-send-plane-line"></i> Lançar Despesa
+      </button>
+    </div>
+  `);
+}
+
+function selectExpCat(el, cat) {
+  document.querySelectorAll('.aef-cat').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  _selectedExpCat = cat;
+}
+
+function submitExpense() {
+  const desc = document.getElementById('aef-desc')?.value?.trim();
+  const val  = parseFloat(document.getElementById('aef-val')?.value || '0');
+  const curr = document.getElementById('aef-curr')?.value || 'USD';
+
+  if (!desc || !val) { showToast('Preencha descrição e valor', ''); return; }
+
+  const newExp = {
+    id: 'e' + Date.now(),
+    desc, cat: _selectedExpCat,
+    value: val, curr, status: 'pendente',
+    data: new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'short' })
+  };
+  MOCK_EXPENSES.unshift(newExp);
+
+  // Grava no Firestore se disponível
+  if (window.NEXIA && NEXIA._ready && NEXIA.db) {
+    NEXIA.db.collection('tenants').doc(VP_SLUG).collection('expenses').add({
+      ...newExp,
+      guia:      firebase.auth?.()?.currentUser?.email || 'guide',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
+  }
+
+  closeSheet();
+  renderExpenses(_currentExpCat);
+  showToast('✓ Despesa lançada: ' + curr + ' ' + val.toFixed(2), 'ok');
+}
+
+// ── Alertas em tempo real ─────────────────────────────────────────
+function watchAlerts() {
+  if (!window.NEXIA || !NEXIA._ready || !NEXIA.db) { setTimeout(watchAlerts, 500); return; }
+  NEXIA.db.collection('tenants').doc(VP_SLUG).collection('alerts')
+    .where('active', '==', true)
+    .onSnapshot(snap => {
+      const el = document.getElementById('op-alerts');
+      if (el) el.textContent = snap.size;
+      if (snap.size > 0) showToast('⚠️ ' + snap.size + ' alerta(s) ativo(s)!', '');
+    }, () => {});
+}
+
+// ── Boot ──────────────────────────────────────────────────────────
+// P4 FIX: Auth guard + role check — requer user autenticado com role 'guide'
+function _vpGuideGuard(callback) {
+  firebase.auth().onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = '../login.html?redirect=' + encodeURIComponent(location.pathname);
+      return;
+    }
+    // Verificar role no Firestore
+    try {
+      const snap = await firebase.firestore().collection('users').doc(user.uid).get();
+      const profile = snap.exists ? snap.data() : {};
+      const role = profile.role || profile.tenantRole || '';
+      if (role !== 'guide' && role !== 'admin' && role !== 'master') {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0f;color:#ff3d71;font-family:sans-serif;text-align:center;padding:2rem"><div><h2>Acesso Negado</h2><p>Esta área é exclusiva para guias do Viajante Pro.</p><a href="../login.html" style="color:#00e5ff">← Voltar ao login</a></div></div>';
+        return;
+      }
+      callback(user, profile);
+    } catch (e) {
+      console.warn('[VP] Erro ao verificar role de guia:', e.message);
+      callback(user, {});
+    }
+  });
+}
+
+function initGuideApp() {
+  NEXIA.setTenant('viajante-pro');
+  _vpGuideGuard((user, profile) => {
+    const name = user.displayName || user.email?.split('@')[0] || 'Guia';
+    document.getElementById('guide-name').textContent = name;
+    document.getElementById('guide-avatar').textContent = name[0].toUpperCase();
+    renderPaxCheckin();
+    renderPresenca();
+    renderExpenses();
+    watchAlerts();
+    NexiaBridge.audit('guide_access', { page: 'vp-guide', role: profile.role || 'guide' });
+  });
+}
+
+if (window.NEXIA) NEXIA.onReady(initGuideApp);
+else { const iv = setInterval(() => { if (window.NEXIA) { clearInterval(iv); NEXIA.onReady(initGuideApp); } }, 300); }
+</script>
+  <script src="../core/nexia-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viajante Pro — Agência de Viagens de Luxo | B2B & B2C | NEXIA OS</title>
+  <meta name="description" content="Viajante Pro: agência premium de viagens de luxo. Roteiros sob medida, grupos corporativos, lua-de-mel. IA ATLAS + 15.000 agentes NEXIA.">
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Playfair Display',serif;background:#fafaf8;color:#1a1a1a;}
+    :root{--gold:#DAA520;--gold2:#B8860B;--blue:#0057FF;--bg:#07090E;--bg2:#0A0D16;}
+
+    @keyframes hero-slide{0%{opacity:0}8%{opacity:1}30%{opacity:1}38%{opacity:0}100%{opacity:0}}
+    @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes neon-pulse{0%,100%{box-shadow:0 0 20px rgba(218,165,32,.3)}50%{box-shadow:0 0 40px rgba(218,165,32,.6),0 0 80px rgba(218,165,32,.2)}}
+    @keyframes fab-pop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+    @keyframes sponsor-in{0%{opacity:0;transform:translateX(30px)}10%{opacity:1;transform:translateX(0)}85%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(30px)}}
+    @keyframes strip-roll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes float-badge{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+    /* NAV */
+    #vpNav{position:fixed;top:0;left:0;right:0;z-index:200;transition:.3s;padding:0 60px;}
+    #vpNav.scrolled{background:rgba(10,10,15,.97);backdrop-filter:blur(24px);border-bottom:1px solid rgba(218,165,32,.15);}
+    .nav-links a{color:rgba(255,255,255,.85);font-size:14px;text-decoration:none;font-family:Inter,sans-serif;font-weight:500;transition:.2s;}
+    .nav-links a:hover{color:#DAA520;}
+
+    /* HERO */
+    .hero-wrap{position:relative;height:100vh;min-height:700px;overflow:hidden;}
+    .hero-slide{position:absolute;inset:0;opacity:0;}
+    .hero-slide:nth-child(1){animation:hero-slide 24s infinite 0s;}
+    .hero-slide:nth-child(2){animation:hero-slide 24s infinite 6s;}
+    .hero-slide:nth-child(3){animation:hero-slide 24s infinite 12s;}
+    .hero-slide:nth-child(4){animation:hero-slide 24s infinite 18s;}
+    .hero-slide img{width:100%;height:100%;object-fit:cover;}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 100%);}
+
+    /* PHOTO STRIP */
+    .strip-outer{overflow:hidden;padding:0;}
+    .strip-inner{display:flex;gap:12px;animation:strip-roll 35s linear infinite;width:max-content;}
+    .strip-inner img{width:280px;height:190px;object-fit:cover;border-radius:0;flex-shrink:0;}
+
+    /* TICKER */
+    .ticker-bar{background:#07090E;border-top:1px solid rgba(218,165,32,.15);border-bottom:1px solid rgba(218,165,32,.15);padding:10px 0;overflow:hidden;}
+    .ticker-inner{display:flex;gap:60px;animation:ticker 28s linear infinite;white-space:nowrap;}
+    .ticker-item{font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:1px;display:flex;align-items:center;gap:8px;}
+    .ticker-item i{color:#DAA520;}
+
+    /* FAB */
+    #nexia-widget-btn{position:fixed;bottom:28px;right:28px;z-index:9998;}
+    #nexia-fab{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#B8860B,#DAA520);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(184,134,11,.45);animation:neon-pulse 3s infinite;position:relative;transition:.3s;}
+    #nexia-fab:hover{transform:scale(1.09);}
+    #fab-badge{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#ff3d71;border:2px solid #07090E;display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-size:10px;font-weight:800;color:#fff;}
+    #nexia-widget-menu{position:absolute;bottom:70px;right:0;display:flex;flex-direction:column;gap:10px;opacity:0;pointer-events:none;transform:translateY(10px);transition:.3s;}
+    #nexia-widget-menu.open{opacity:1;pointer-events:all;transform:translateY(0);}
+    .fab-item{display:flex;align-items:center;gap:10px;background:rgba(10,10,15,.97);border:1px solid rgba(218,165,32,.25);border-radius:12px;padding:10px 16px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(16px);text-decoration:none;}
+    .fab-item span{font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#fff;}
+    .fab-item i{font-size:18px;color:#DAA520;}
+
+    /* SPONSOR POPUP */
+    #sponsor-popup{position:fixed;top:86px;right:24px;z-index:9999;max-width:300px;pointer-events:none;}
+    .spon-card{background:rgba(7,9,14,.97);border:1px solid rgba(218,165,32,.4);border-radius:14px;padding:12px 16px;backdrop-filter:blur(20px);display:flex;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,.6);animation:sponsor-in 7s forwards;}
+
+    /* FOOTER */
+    #nexia-footer{background:#07090E;border-top:1px solid rgba(255,255,255,.06);}
+    .ft-grid{max-width:1300px;margin:0 auto;padding:64px 60px 40px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;}
+    .ft-col h4{font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:18px;}
+    .ft-col a{display:block;font-family:Inter,sans-serif;font-size:13px;color:rgba(255,255,255,.48);text-decoration:none;margin-bottom:10px;transition:.2s;}
+    .ft-col a:hover{color:#DAA520;}
+    .ft-social a{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:rgba(255,255,255,.4);text-decoration:none;transition:.2s;margin-right:8px;font-size:16px;}
+    .ft-social a:hover{background:rgba(218,165,32,.15);color:#DAA520;border-color:rgba(218,165,32,.3);}
+    .ft-bottom{max-width:1300px;margin:0 auto;padding:20px 60px 36px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
+
+    /* PROOF TOAST */
+    #vp-sp{position:fixed;bottom:100px;left:20px;z-index:9000;max-width:280px;opacity:0;transform:translateY(16px);transition:all .4s cubic-bezier(.22,1,.36,1);}
+
+    @media(max-width:900px){
+      #vpNav{padding:0 20px;}
+      .nav-links{display:none;}
+      .ft-grid{grid-template-columns:1fr 1fr;padding:40px 20px 20px;gap:28px;}
+      .ft-bottom{flex-direction:column;gap:12px;text-align:center;padding:20px;}
+    }
+    @media(max-width:600px){
+      .ft-grid{grid-template-columns:1fr!important;}
+      .hero-title,.vp-h1,[class*="hero"] h1,[class*="title"]{font-size:clamp(1.6rem,7vw,2.8rem)!important;line-height:1.2!important}
+      .section-grid,[class*="grid"]{grid-template-columns:1fr!important}
+      [class*="hero"]{padding:100px 20px 60px!important}
+      [class*="section"]{padding:50px 20px!important}
+      [class*="cards"],[class*="features"]{flex-direction:column!important}
+    }
+    @media(max-width:400px){
+      #vpNav{padding:0 12px;}
+      [class*="cta"],[class*="btn"]{width:100%!important;text-align:center!important;justify-content:center!important}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SPONSOR FLASH POPUP ── -->
+<div id="sponsor-popup"></div>
+
+<!-- ── SOCIAL PROOF TOAST ── -->
+<div id="vp-sp">
+  <div style="background:rgba(10,10,15,.97);border:1px solid rgba(218,165,32,.3);border-radius:12px;padding:11px 14px;backdrop-filter:blur(16px);display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+    <div id="vp-sp-av" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#B8860B,#DAA520);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#000">JP</div>
+    <div><div id="vp-sp-txt" style="font-size:11px;color:rgba(255,255,255,.6);line-height:1.4;font-family:Inter,sans-serif"><strong style="color:#fff">João P.</strong> reservou um pacote Dubai</div><div style="font-size:9px;color:#DAA520;margin-top:2px;font-family:Inter,sans-serif">agora mesmo · via Viajante Pro</div></div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav id="vpNav">
+  <div style="max-width:1300px;margin:0 auto;height:72px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:42px;height:42px;background:linear-gradient(135deg,#B8860B,#DAA520);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;font-family:Inter,sans-serif;">VP</div>
+      <div>
+        <div style="font-weight:700;font-size:18px;color:#fff;letter-spacing:-.5px;">Viajante Pro</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.65);letter-spacing:2px;text-transform:uppercase;font-family:Inter,sans-serif;">Luxury Travel · NEXIA OS</div>
+      </div>
+    </div>
+    <div class="nav-links" style="display:flex;gap:28px;align-items:center;">
+      <a href="#ces2027" style="color:rgba(255,255,255,.9);font-size:13px;text-decoration:none;font-family:Inter,sans-serif;font-weight:700;background:rgba(0,87,255,.18);border:1px solid rgba(0,87,255,.4);border-radius:20px;padding:7px 16px;animation:float-badge 2.5s ease-in-out infinite;">🚀 CES 2027</a>
+      <a href="#destinos" class="nav-links" style="color:rgba(255,255,255,.8);font-size:14px;text-decoration:none;font-family:Inter,sans-serif;font-weight:500;">Destinos</a>
+      <a href="#pacotes" style="color:rgba(255,255,255,.8);font-size:14px;text-decoration:none;font-family:Inter,sans-serif;font-weight:500;">Pacotes</a>
+      <a href="#corporativo" style="color:rgba(255,255,255,.8);font-size:14px;text-decoration:none;font-family:Inter,sans-serif;font-weight:500;">Corporativo</a>
+      <a href="#contato" style="background:linear-gradient(135deg,#B8860B,#DAA520);color:#fff;padding:11px 24px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;">Proposta Grátis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     HERO — CAROUSEL 4 FOTOS EM LOOP AUTOMÁTICO
+══════════════════════════════════════════════════ -->
+<div class="hero-wrap">
+  <div class="hero-slide">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&auto=format&fit=crop&q=80" alt="Montanhas luxo">
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-slide">
+    <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1920&auto=format&fit=crop&q=80" alt="Dubai">
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-slide">
+    <img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1920&auto=format&fit=crop&q=80" alt="Maldivas">
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-slide">
+    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&auto=format&fit=crop&q=80" alt="Tóquio">
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div style="position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:0 60px;width:100%;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(184,134,11,.22);border:1px solid rgba(218,165,32,.48);border-radius:20px;padding:6px 18px;margin-bottom:24px;backdrop-filter:blur(10px);">
+      <span style="color:#DAA520;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:Inter,sans-serif;">✦ Powered by NEXIA OS</span>
+    </div>
+    <h1 style="font-size:clamp(40px,6vw,72px);font-weight:700;color:#fff;line-height:1.08;margin-bottom:20px;max-width:820px;">Viagens que <em style="color:#DAA520;">transformam</em> empresas</h1>
+    <p style="font-size:18px;color:rgba(255,255,255,.72);max-width:560px;line-height:1.72;margin-bottom:40px;font-family:Inter,sans-serif;font-weight:400;">Tecnologia de ponta para grupos corporativos e viajantes premium. App exclusivo para guias e passageiros, controle em tempo real, 15.000 agentes IA trabalhando pela sua viagem.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+      <a href="#ces2027" style="background:linear-gradient(135deg,#003FC7,#0057FF);color:#fff;padding:16px 36px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;display:flex;align-items:center;gap:9px;box-shadow:0 8px 32px rgba(0,87,255,.4);">🚀 Missão CES Las Vegas 2027</a>
+      <a href="#pacotes" style="background:linear-gradient(135deg,#B8860B,#DAA520);color:#fff;padding:16px 36px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;">Ver Pacotes</a>
+    </div>
+  </div>
+
+  <!-- Stats strip bottom -->
+  <div style="position:absolute;bottom:0;left:0;right:0;z-index:2;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);border-top:1px solid rgba(218,165,32,.12);">
+    <div style="max-width:1300px;margin:0 auto;display:flex;justify-content:space-around;padding:16px 60px;">
+      <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:#DAA520;font-family:Inter,sans-serif;">12.400+</div><div style="font-size:10px;color:rgba(255,255,255,.45);font-family:Inter,sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;">Passageiros</div></div>
+      <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:#DAA520;font-family:Inter,sans-serif;">380</div><div style="font-size:10px;color:rgba(255,255,255,.45);font-family:Inter,sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;">Grupos Corp.</div></div>
+      <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:#DAA520;font-family:Inter,sans-serif;">67</div><div style="font-size:10px;color:rgba(255,255,255,.45);font-family:Inter,sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;">Destinos</div></div>
+      <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:#DAA520;font-family:Inter,sans-serif;">98.7%</div><div style="font-size:10px;color:rgba(255,255,255,.45);font-family:Inter,sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;">Satisfação</div></div>
+      <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:#DAA520;font-family:Inter,sans-serif;">15.000</div><div style="font-size:10px;color:rgba(255,255,255,.45);font-family:Inter,sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;">Agentes IA</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TICKER NOVIDADES
+══════════════════════════════════════════════════ -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    <span class="ticker-item"><i class="ri-rocket-2-fill"></i> Missão Executiva CES Las Vegas 2027 · Vagas limitadas</span>
+    <span class="ticker-item"><i class="ri-plane-fill"></i> 380 grupos corporativos atendidos em 2025</span>
+    <span class="ticker-item"><i class="ri-star-fill"></i> 98.7% de satisfação · NPS 87</span>
+    <span class="ticker-item"><i class="ri-robot-2-fill"></i> 15.000 agentes IA monitorando sua viagem 24/7</span>
+    <span class="ticker-item"><i class="ri-map-pin-2-fill"></i> 67 destinos premium curados pela equipe VP</span>
+    <span class="ticker-item"><i class="ri-shield-check-fill"></i> SOS Global · Resposta em 8 segundos</span>
+    <span class="ticker-item"><i class="ri-rocket-2-fill"></i> Missão Executiva CES Las Vegas 2027 · Vagas limitadas</span>
+    <span class="ticker-item"><i class="ri-plane-fill"></i> 380 grupos corporativos atendidos em 2025</span>
+    <span class="ticker-item"><i class="ri-star-fill"></i> 98.7% de satisfação · NPS 87</span>
+    <span class="ticker-item"><i class="ri-robot-2-fill"></i> 15.000 agentes IA monitorando sua viagem 24/7</span>
+    <span class="ticker-item"><i class="ri-map-pin-2-fill"></i> 67 destinos premium curados pela equipe VP</span>
+    <span class="ticker-item"><i class="ri-shield-check-fill"></i> SOS Global · Resposta em 8 segundos</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     CES 2027 — POSICIONADO LOGO APÓS HERO ✅ CORRIGIDO
+══════════════════════════════════════════════════ -->
+<div id="ces2027" style="background:linear-gradient(135deg,#050810 0%,#0A0D1F 40%,#080518 100%);padding:100px clamp(20px,5vw,80px);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(0,87,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,87,255,.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent 80%)"></div>
+  <div style="position:absolute;width:600px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,87,255,.08),transparent 70%);top:50%;left:30%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(60px)"></div>
+  <div style="max-width:1280px;margin:0 auto;position:relative;z-index:2">
+
+    <div style="display:flex;justify-content:center;margin-bottom:20px">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,87,255,.08);border:1px solid rgba(0,87,255,.25);border-radius:50px;padding:8px 20px">
+        <div style="width:7px;height:7px;background:#0057FF;border-radius:50%;animation:pulse-dot 1.5s infinite"></div>
+        <span style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0057FF;font-family:Inter,sans-serif">VIAJANTE PRO × CES · PARCERIA EXCLUSIVA</span>
+      </div>
+    </div>
+
+    <h2 style="text-align:center;font-size:clamp(36px,5vw,68px);font-weight:800;color:#fff;line-height:1.08;letter-spacing:-2px;margin-bottom:18px;font-family:Inter,sans-serif">Missão Executiva<br><span style="background:linear-gradient(135deg,#0057FF,#7B5CFA);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">CES Las Vegas 2027</span></h2>
+    <p style="text-align:center;font-size:18px;color:rgba(255,255,255,.6);max-width:620px;margin:0 auto 52px;line-height:1.7;font-family:Inter,sans-serif">A Viajante Pro lidera a delegação brasileira para o maior evento de tecnologia do planeta. Vagas limitadas para CEOs, diretores e líderes de transformação digital.</p>
+
+    <!-- Photo grid -->
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:200px 200px;gap:12px;margin-bottom:60px;border-radius:16px;overflow:hidden">
+      <div style="grid-row:1/3;position:relative;overflow:hidden"><img src="https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?w=800&auto=format&fit=crop&q=80" alt="Las Vegas Strip" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.5),transparent 50%)"></div><div style="position:absolute;bottom:20px;left:20px;font-size:18px;font-weight:700;color:#fff;font-family:Inter,sans-serif">Las Vegas Strip</div></div>
+      <div style="position:relative;overflow:hidden"><img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=600&auto=format&fit=crop&q=80" alt="CES Convention" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:rgba(0,0,0,.3)"></div><div style="position:absolute;bottom:12px;left:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);font-family:Inter,sans-serif">LVCC Convention Center</div></div>
+      <div style="position:relative;overflow:hidden"><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&auto=format&fit=crop&q=80" alt="Networking" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:rgba(0,0,0,.3)"></div><div style="position:absolute;bottom:12px;left:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);font-family:Inter,sans-serif">Networking Executivo</div></div>
+      <div style="position:relative;overflow:hidden"><img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=80" alt="Tech Innovation" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:rgba(0,0,0,.3)"></div><div style="position:absolute;bottom:12px;left:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);font-family:Inter,sans-serif">Inovação & Tech</div></div>
+      <div style="position:relative;overflow:hidden"><img src="https://images.unsplash.com/photo-1561489413-985b06da5bee?w=600&auto=format&fit=crop&q=80" alt="Luxury Hotel" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:rgba(0,0,0,.3)"></div><div style="position:absolute;bottom:12px;left:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);font-family:Inter,sans-serif">Hospedagem Premium</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(0,87,255,.8);text-transform:uppercase;margin-bottom:16px;font-family:Inter,sans-serif">CONTADOR REGRESSIVO — CES 2027</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="text-align:center;background:rgba(0,87,255,.06);border:1px solid rgba(0,87,255,.18);border-radius:12px;padding:20px 24px"><div style="font-size:42px;font-weight:800;color:#fff;font-family:'Space Mono',monospace;line-height:1" id="cnt-days">000</div><div style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-top:6px;font-family:Inter,sans-serif">Dias</div></div>
+          <div style="text-align:center;background:rgba(0,87,255,.06);border:1px solid rgba(0,87,255,.18);border-radius:12px;padding:20px 24px"><div style="font-size:42px;font-weight:800;color:#fff;font-family:'Space Mono',monospace;line-height:1" id="cnt-hrs">00</div><div style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-top:6px;font-family:Inter,sans-serif">Horas</div></div>
+          <div style="text-align:center;background:rgba(0,87,255,.06);border:1px solid rgba(0,87,255,.18);border-radius:12px;padding:20px 24px"><div style="font-size:42px;font-weight:800;color:#fff;font-family:'Space Mono',monospace;line-height:1" id="cnt-min">00</div><div style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-top:6px;font-family:Inter,sans-serif">Minutos</div></div>
+        </div>
+        <div style="margin-top:20px;font-size:13px;color:rgba(255,255,255,.38);font-family:Inter,sans-serif">📍 Las Vegas, Nevada — Janeiro 2027 · LVCC</div>
+      </div>
+      <div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px">
+          <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(0,87,255,.12);border-radius:10px;padding:14px 16px"><div style="width:36px;height:36px;background:rgba(0,87,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ri-plane-line" style="color:#0057FF;font-size:16px"></i></div><div><div style="font-weight:700;font-size:13px;color:#fff">Passagem Business Class</div><div style="font-size:11px;color:rgba(255,255,255,.4);font-family:Inter,sans-serif">Voo direto GRU-LAX ou GRU-LAS</div></div></div>
+          <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(0,87,255,.12);border-radius:10px;padding:14px 16px"><div style="width:36px;height:36px;background:rgba(0,87,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ri-hotel-line" style="color:#0057FF;font-size:16px"></i></div><div><div style="font-weight:700;font-size:13px;color:#fff">Hotel 5★ na Strip</div><div style="font-size:11px;color:rgba(255,255,255,.4);font-family:Inter,sans-serif">Bellagio, Wynn ou Aria — curado pela VP</div></div></div>
+          <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(0,87,255,.12);border-radius:10px;padding:14px 16px"><div style="width:36px;height:36px;background:rgba(0,87,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ri-vip-crown-line" style="color:#0057FF;font-size:16px"></i></div><div><div style="font-weight:700;font-size:13px;color:#fff">Credenciamento VIP CES</div><div style="font-size:11px;color:rgba(255,255,255,.4);font-family:Inter,sans-serif">Acesso a todas as zonas + keynotes exclusivos</div></div></div>
+        </div>
+        <a href="../ces/ces-landing.html" onclick="sessionStorage.setItem('vp_referral','true')" style="display:flex;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,#003FC7,#0057FF);color:#fff;padding:18px 36px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;box-shadow:0 8px 32px rgba(0,87,255,.3);">
+          <i class="ri-rocket-line" style="font-size:18px"></i> Garantir Vaga na Delegação →
+        </a>
+        <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.28);margin-top:10px;font-family:Inter,sans-serif">Vagas limitadas · Apenas para delegação brasileira selecionada</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     FOTO STRIP LOOPING
+══════════════════════════════════════════════════ -->
+<div class="strip-outer" style="background:#0A0D16;padding:0;">
+  <div class="strip-inner">
+    <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&auto=format&fit=crop&q=80" alt="Dubai">
+    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop&q=80" alt="Tóquio">
+    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&auto=format&fit=crop&q=80" alt="Roma">
+    <img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&auto=format&fit=crop&q=80" alt="Maldivas">
+    <img src="https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=600&auto=format&fit=crop&q=80" alt="Nova York">
+    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80" alt="Paris">
+    <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=600&auto=format&fit=crop&q=80" alt="Santorini">
+    <img src="https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?w=600&auto=format&fit=crop&q=80" alt="Las Vegas">
+    <!-- duplicates for seamless loop -->
+    <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&auto=format&fit=crop&q=80" alt="Dubai">
+    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop&q=80" alt="Tóquio">
+    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&auto=format&fit=crop&q=80" alt="Roma">
+    <img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&auto=format&fit=crop&q=80" alt="Maldivas">
+    <img src="https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=600&auto=format&fit=crop&q=80" alt="Nova York">
+    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80" alt="Paris">
+    <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=600&auto=format&fit=crop&q=80" alt="Santorini">
+    <img src="https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?w=600&auto=format&fit=crop&q=80" alt="Las Vegas">
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TECNOLOGIA NEXIA OS
+══════════════════════════════════════════════════ -->
+<div id="tecnologia" style="background:linear-gradient(135deg,#0A0A0F 0%,#1A1025 100%);padding:80px 60px;color:#fff;">
+  <div style="max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:80px;">
+    <div style="flex:1;">
+      <div style="color:#DAA520;font-size:11px;font-weight:700;letter-spacing:3px;margin-bottom:12px;font-family:Inter,sans-serif;">TECNOLOGIA NEXIA OS</div>
+      <h2 style="font-size:42px;font-weight:700;margin-bottom:16px;line-height:1.2;">A única agência com <span style="color:#DAA520;">IA operacional</span> em tempo real</h2>
+      <p style="color:rgba(255,255,255,.58);font-size:15px;line-height:1.8;font-family:Inter,sans-serif;margin-bottom:32px;">Enquanto sua equipe descansa, nossos 15.000 agentes IA trabalham: monitorando voos, ajustando hotéis, alertando guias, traduzindo emergências em 47 idiomas e gerando relatórios automáticos para o RH.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(218,165,32,.14);border-radius:10px;padding:14px 16px;"><div style="width:36px;height:36px;background:rgba(218,165,32,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ri-robot-2-line" style="color:#DAA520;font-size:18px;"></i></div><div><div style="font-weight:700;font-size:13px;">15.000 Agentes IA</div><div style="color:rgba(255,255,255,.38);font-size:11px;font-family:Inter,sans-serif;">Trabalhando 24/7</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(218,165,32,.14);border-radius:10px;padding:14px 16px;"><div style="width:36px;height:36px;background:rgba(218,165,32,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ri-map-pin-2-line" style="color:#DAA520;font-size:18px;"></i></div><div><div style="font-weight:700;font-size:13px;">Rastreamento Live</div><div style="color:rgba(255,255,255,.38);font-size:11px;font-family:Inter,sans-serif;">GPS do grupo todo</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(218,165,32,.14);border-radius:10px;padding:14px 16px;"><div style="width:36px;height:36px;background:rgba(218,165,32,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ri-translate-2" style="color:#DAA520;font-size:18px;"></i></div><div><div style="font-weight:700;font-size:13px;">47 Idiomas</div><div style="color:rgba(255,255,255,.38);font-size:11px;font-family:Inter,sans-serif;">Tradução instantânea</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(218,165,32,.14);border-radius:10px;padding:14px 16px;"><div style="width:36px;height:36px;background:rgba(218,165,32,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ri-shield-check-line" style="color:#DAA520;font-size:18px;"></i></div><div><div style="font-weight:700;font-size:13px;">SOS Global</div><div style="color:rgba(255,255,255,.38);font-size:11px;font-family:Inter,sans-serif;">Emergência em 8s</div></div></div>
+      </div>
+    </div>
+    <div style="flex:0 0 460px;border-radius:16px;overflow:hidden;border:1px solid rgba(218,165,32,.2);">
+      <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=920&auto=format&fit=crop&q=80" alt="Viajante Pro Tecnologia" style="width:100%;height:360px;object-fit:cover;">
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     DESTINOS
+══════════════════════════════════════════════════ -->
+<div id="destinos" style="padding:80px 60px;background:#fafaf8;">
+  <div style="max-width:1300px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div style="color:#B8860B;font-size:11px;font-weight:700;letter-spacing:3px;margin-bottom:10px;font-family:Inter,sans-serif;">DESTINOS CURADOS</div>
+      <h2 style="font-size:44px;font-weight:700;margin-bottom:12px;">Onde levamos sua empresa</h2>
+      <p style="color:#666;font-size:16px;font-family:Inter,sans-serif;">67 destinos selecionados a dedo pela nossa equipe de especialistas</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+      <div style="border-radius:14px;overflow:hidden;position:relative;cursor:pointer;"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&auto=format&fit=crop&q=80" alt="Dubai" style="width:100%;height:260px;object-fit:cover;display:block;transition:.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 60%);"></div><div style="position:absolute;top:14px;right:14px;background:rgba(184,134,11,.9);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:4px;letter-spacing:1px;text-transform:uppercase;font-family:Inter,sans-serif;">Mais Vendido</div><div style="position:absolute;bottom:18px;left:18px;"><div style="font-size:22px;font-weight:700;color:#fff;">Dubai</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-family:Inter,sans-serif;">Emirados Árabes</div></div></div>
+      <div style="border-radius:14px;overflow:hidden;position:relative;cursor:pointer;"><img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop&q=80" alt="Tóquio" style="width:100%;height:260px;object-fit:cover;display:block;transition:.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 60%);"></div><div style="position:absolute;top:14px;right:14px;background:rgba(184,134,11,.9);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:4px;letter-spacing:1px;text-transform:uppercase;font-family:Inter,sans-serif;">Novo</div><div style="position:absolute;bottom:18px;left:18px;"><div style="font-size:22px;font-weight:700;color:#fff;">Tóquio</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-family:Inter,sans-serif;">Japão</div></div></div>
+      <div style="border-radius:14px;overflow:hidden;position:relative;cursor:pointer;"><img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80" alt="Paris" style="width:100%;height:260px;object-fit:cover;display:block;transition:.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 60%);"></div><div style="position:absolute;bottom:18px;left:18px;"><div style="font-size:22px;font-weight:700;color:#fff;">Paris</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-family:Inter,sans-serif;">França</div></div></div>
+      <div style="border-radius:14px;overflow:hidden;position:relative;cursor:pointer;"><img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&auto=format&fit=crop&q=80" alt="Maldivas" style="width:100%;height:260px;object-fit:cover;display:block;transition:.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 60%);"></div><div style="position:absolute;top:14px;right:14px;background:rgba(184,134,11,.9);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:4px;letter-spacing:1px;text-transform:uppercase;font-family:Inter,sans-serif;">Premium</div><div style="position:absolute;bottom:18px;left:18px;"><div style="font-size:22px;font-weight:700;color:#fff;">Maldivas</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-family:Inter,sans-serif;">Oceano Índico</div></div></div>
+      <div style="border-radius:14px;overflow:hidden;position:relative;cursor:pointer;"><img src="https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=600&auto=format&fit=crop&q=80" alt="Nova York" style="width:100%;height:260px;object-fit:cover;display:block;transition:.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 60%);"></div><div style="position:absolute;bottom:18px;left:18px;"><div style="font-size:22px;font-weight:700;color:#fff;">Nova York</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-family:Inter,sans-serif;">Estados Unidos</div></div></div>
+      <div style="border-radius:14px;overflow:hidden;position:relative;cursor:pointer;"><img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&auto=format&fit=crop&q=80" alt="Roma" style="width:100%;height:260px;object-fit:cover;display:block;transition:.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 60%);"></div><div style="position:absolute;bottom:18px;left:18px;"><div style="font-size:22px;font-weight:700;color:#fff;">Roma</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-family:Inter,sans-serif;">Itália</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PACOTES
+══════════════════════════════════════════════════ -->
+<div id="pacotes" style="padding:80px 60px;background:#f5f0e8;">
+  <div style="max-width:1300px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div style="color:#B8860B;font-size:11px;font-weight:700;letter-spacing:3px;margin-bottom:10px;font-family:Inter,sans-serif;">PACOTES PREMIUM</div>
+      <h2 style="font-size:44px;font-weight:700;margin-bottom:12px;">Escolha sua experiência</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+      <div style="background:#fff;border-radius:16px;padding:32px;border:1px solid rgba(0,0,0,.07);">
+        <div style="color:#10B981;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:8px;font-family:Inter,sans-serif;">7 DIAS</div>
+        <div style="font-size:22px;font-weight:700;color:#1a1a1a;margin-bottom:6px;">VP Essentials</div>
+        <div style="font-size:38px;font-weight:800;color:#10B981;margin-bottom:24px;font-family:Inter,sans-serif;">R$ 4.800<span style="font-size:14px;font-weight:400;color:#999;">/pessoa</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#10B981;font-size:15px;flex-shrink:0;"></i>Hotel 4★ curado</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#10B981;font-size:15px;flex-shrink:0;"></i>Transfer aéreo</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#10B981;font-size:15px;flex-shrink:0;"></i>Guia local 2 dias</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#10B981;font-size:15px;flex-shrink:0;"></i>Seguro viagem</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#10B981;font-size:15px;flex-shrink:0;"></i>App exclusivo Viajante Pro</div>
+        </div>
+        <a href="#contato" style="display:block;text-align:center;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10B981;padding:13px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;">Solicitar Proposta</a>
+      </div>
+      <div style="background:linear-gradient(135deg,#1A1025,#0F0A1A);border-radius:16px;padding:32px;border:2px solid rgba(218,165,32,.4);position:relative;box-shadow:rgba(184,134,11,.15) 0 20px 60px;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#B8860B,#DAA520);color:#fff;font-size:10px;font-weight:800;padding:4px 16px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase;font-family:Inter,sans-serif;white-space:nowrap;">⭐ MAIS ESCOLHIDO</div>
+        <div style="color:#DAA520;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:8px;font-family:Inter,sans-serif;">10 DIAS</div>
+        <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;">VP Premium</div>
+        <div style="font-size:38px;font-weight:800;color:#DAA520;margin-bottom:24px;font-family:Inter,sans-serif;">R$ 9.200<span style="font-size:14px;font-weight:400;color:rgba(255,255,255,.35);">/pessoa</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.75);font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#DAA520;font-size:15px;flex-shrink:0;"></i>Hotel 5★ boutique</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.75);font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#DAA520;font-size:15px;flex-shrink:0;"></i>Transfer executivo</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.75);font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#DAA520;font-size:15px;flex-shrink:0;"></i>Guia pessoal 4 dias</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.75);font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#DAA520;font-size:15px;flex-shrink:0;"></i>Experiências exclusivas</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.75);font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#DAA520;font-size:15px;flex-shrink:0;"></i>Concierge 24/7</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.75);font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#DAA520;font-size:15px;flex-shrink:0;"></i>App exclusivo Viajante Pro</div>
+        </div>
+        <a href="#contato" style="display:block;text-align:center;background:linear-gradient(135deg,#B8860B,#DAA520);color:#fff;padding:13px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;">Solicitar Proposta</a>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:32px;border:1px solid rgba(0,0,0,.07);">
+        <div style="color:#8B5CF6;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:8px;font-family:Inter,sans-serif;">14 DIAS</div>
+        <div style="font-size:22px;font-weight:700;color:#1a1a1a;margin-bottom:6px;">VP Elite</div>
+        <div style="font-size:38px;font-weight:800;color:#8B5CF6;margin-bottom:24px;font-family:Inter,sans-serif;">R$ 22.000<span style="font-size:14px;font-weight:400;color:#999;">/pessoa</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#8B5CF6;font-size:15px;flex-shrink:0;"></i>Suíte em palácio</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#8B5CF6;font-size:15px;flex-shrink:0;"></i>Jatinho privativo</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#8B5CF6;font-size:15px;flex-shrink:0;"></i>Guia dedicado full time</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#8B5CF6;font-size:15px;flex-shrink:0;"></i>Chef particular</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#8B5CF6;font-size:15px;flex-shrink:0;"></i>Entradas VIP tudo incluso</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#555;font-family:Inter,sans-serif;"><i class="ri-checkbox-circle-fill" style="color:#8B5CF6;font-size:15px;flex-shrink:0;"></i>App exclusivo Viajante Pro</div>
+        </div>
+        <a href="#contato" style="display:block;text-align:center;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:#8B5CF6;padding:13px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;">Solicitar Proposta</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     DEPOIMENTOS
+══════════════════════════════════════════════════ -->
+<div id="corporativo" style="padding:80px 60px;background:#fff;">
+  <div style="max-width:1300px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div style="color:#B8860B;font-size:11px;font-weight:700;letter-spacing:3px;margin-bottom:10px;font-family:Inter,sans-serif;">CLIENTES QUE CONFIAM</div>
+      <h2 style="font-size:40px;font-weight:700;margin-bottom:10px;">O que dizem nossos clientes</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+      <div style="background:#fafaf8;border-radius:14px;padding:28px;border:1px solid rgba(0,0,0,.06);">
+        <div style="display:flex;gap:4px;margin-bottom:16px;"><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i></div>
+        <p style="color:#555;font-size:14px;line-height:1.7;font-family:Inter,sans-serif;margin-bottom:20px;font-style:italic;">"A Viajante Pro transformou nossa viagem de incentivo em uma experiência inesquecível. O app em tempo real foi incrível!"</p>
+        <div style="display:flex;align-items:center;gap:12px;"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80" alt="Mariana Figueiredo" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div><div style="font-weight:700;font-size:14px;">Mariana Figueiredo</div><div style="font-size:11px;color:#999;font-family:Inter,sans-serif;">CEO · TechStart BR</div></div></div>
+      </div>
+      <div style="background:#fafaf8;border-radius:14px;padding:28px;border:1px solid rgba(0,0,0,.06);">
+        <div style="display:flex;gap:4px;margin-bottom:16px;"><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i></div>
+        <p style="color:#555;font-size:14px;line-height:1.7;font-family:Inter,sans-serif;margin-bottom:20px;font-style:italic;">"Levamos 85 executivos para Dubai. Controle total de embarques, rooming list e logística perfeita. Nota 10!"</p>
+        <div style="display:flex;align-items:center;gap:12px;"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80" alt="Ricardo Ávila" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div><div style="font-weight:700;font-size:14px;">Ricardo Ávila</div><div style="font-size:11px;color:#999;font-family:Inter,sans-serif;">Diretor · MegaCorp</div></div></div>
+      </div>
+      <div style="background:#fafaf8;border-radius:14px;padding:28px;border:1px solid rgba(0,0,0,.06);">
+        <div style="display:flex;gap:4px;margin-bottom:16px;"><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i><i class="ri-star-fill" style="color:#DAA520;font-size:14px;"></i></div>
+        <p style="color:#555;font-size:14px;line-height:1.7;font-family:Inter,sans-serif;margin-bottom:20px;font-style:italic;">"O guia via app conseguia atualizar todos os 120 participantes ao mesmo tempo. Nunca vi tecnologia assim em agência de viagem."</p>
+        <div style="display:flex;align-items:center;gap:12px;"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80" alt="Sofia Monteiro" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div><div style="font-weight:700;font-size:14px;">Sofia Monteiro</div><div style="font-size:11px;color:#999;font-family:Inter,sans-serif;">Gerente de RH · Grupo Atlas</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     FORMULÁRIO DE CONTATO
+══════════════════════════════════════════════════ -->
+<div id="contato" style="padding:80px 60px;background:linear-gradient(135deg,#0A0A0F,#1A1025);text-align:center;">
+  <div style="max-width:700px;margin:0 auto;">
+    <h2 style="font-size:46px;font-weight:700;color:#fff;margin-bottom:16px;line-height:1.2;">Pronto para a viagem <span style="color:#DAA520;">perfeita?</span></h2>
+    <p style="color:rgba(255,255,255,.55);font-size:16px;line-height:1.7;font-family:Inter,sans-serif;margin-bottom:40px;">Mais de 380 grupos corporativos confiam na Viajante Pro. Fale com nosso time agora.</p>
+    <div id="vpForm" style="background:rgba(255,255,255,.04);border:1px solid rgba(218,165,32,.2);border-radius:16px;padding:40px;text-align:left;margin-bottom:24px;">
+      <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;">Solicitar Proposta</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;font-family:Inter,sans-serif;">Confidencial · Sem compromisso · Retorno em até 24h úteis</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">Nome completo</label><input id="vp_nome" type="text" placeholder="Seu nome" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;"></div>
+        <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">E-mail</label><input id="vp_email" type="email" placeholder="email@empresa.com" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;"></div>
+        <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">WhatsApp</label><input id="vp_whatsapp" type="tel" placeholder="(11) 99999-9999" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;"></div>
+        <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">Tipo de cliente</label><select id="vp_tipo" style="background:#0E1E38;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;"><option value="">Selecione...</option><option>Viajante individual / família</option><option>Empresa / grupo corporativo</option><option>Agência parceira (B2B)</option><option>Lua-de-mel / ocasião especial</option></select></div>
+        <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">Destino de interesse</label><input id="vp_destino" type="text" placeholder="Ex: Dubai, Tóquio, Maldivas..." style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;"></div>
+        <div style="display:flex;flex-direction:column;gap:7px;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">Número de viajantes</label><input id="vp_pax" type="text" placeholder="Ex: 2 pessoas, grupo de 50..." style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;"></div>
+        <div style="display:flex;flex-direction:column;gap:7px;grid-column:1/-1;"><label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.8px;font-family:Inter,sans-serif;">Mensagem / detalhes da viagem</label><textarea id="vp_mensagem" placeholder="Datas, orçamento, experiências desejadas..." style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px 16px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;resize:vertical;min-height:90px;"></textarea></div>
+      </div>
+      <button id="vpSubmit" onclick="submitViajantePro()" style="width:100%;margin-top:22px;background:linear-gradient(135deg,#B8860B,#DAA520);color:#fff;padding:16px;border-radius:9px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.5px;">Solicitar Proposta Viajante Pro →</button>
+    </div>
+    <div id="vpSuccess" style="display:none;background:rgba(218,165,32,.06);border:1px solid rgba(218,165,32,.25);border-radius:16px;padding:44px;text-align:center;">
+      <i class="ri-plane-fill" style="color:#DAA520;font-size:40px;margin-bottom:14px;display:block;"></i>
+      <h3 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#fff;">Proposta recebida! ✈️</h3>
+      <p style="color:rgba(255,255,255,.55);font-size:14px;line-height:1.6;font-family:Inter,sans-serif;">Nossa equipe e os agentes IA já estão montando o roteiro ideal. Em até 24 horas úteis você receberá uma proposta personalizada.</p>
+    </div>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+      <a href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Tenho%20interesse%20nos%20pacotes%20da%20Viajante%20Pro." target="_blank" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;padding:16px 40px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;font-family:Inter,sans-serif;display:inline-flex;align-items:center;gap:10px;"><i class="ri-whatsapp-line"></i> Falar no WhatsApp</a>
+    </div>
+    <div style="color:rgba(255,255,255,.25);font-size:12px;font-family:Inter,sans-serif;margin-top:12px;">App disponível para iOS e Android · Guias e Passageiros</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     FOOTER — HTML COMPLETO ✅ CORRIGIDO
+══════════════════════════════════════════════════ -->
+<footer id="nexia-footer">
+  <div class="ft-grid">
+    <!-- Brand col -->
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="width:44px;height:44px;background:linear-gradient(135deg,#B8860B,#DAA520);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;font-family:Inter,sans-serif;">VP</div>
+        <div>
+          <div id="ft-tenant-name" style="font-size:17px;font-weight:700;color:#fff;font-family:Inter,sans-serif;">Viajante Pro</div>
+          <div id="ft-tenant-sub" style="font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;font-family:Inter,sans-serif;">Agência de Viagens</div>
+        </div>
+      </div>
+      <p id="ft-desc" style="font-family:Inter,sans-serif;font-size:13px;color:rgba(255,255,255,.4);line-height:1.7;max-width:280px;">Sua agência de viagens premium. Pacotes personalizados, passagens e roteiros exclusivos para pessoas e empresas.</p>
+      <div class="ft-social" style="margin-top:20px;">
+        <a id="ft-instagram" href="https://instagram.com/viajantepro" target="_blank"><i class="ri-instagram-line"></i></a>
+        <a id="ft-youtube" href="https://youtube.com/@viajantepro" target="_blank"><i class="ri-youtube-line"></i></a>
+        <a id="ft-tiktok" href="https://tiktok.com/@viajantepro" target="_blank"><i class="ri-tiktok-line"></i></a>
+        <a id="ft-linkedin" href="https://linkedin.com/company/viajantepro" target="_blank"><i class="ri-linkedin-line"></i></a>
+      </div>
+      <!-- NEXIA badge -->
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(218,165,32,.07);border:1px solid rgba(218,165,32,.18);border-radius:8px;padding:8px 14px;margin-top:20px;">
+        <span style="font-size:16px;font-weight:900;color:#DAA520;font-family:Inter,sans-serif;">✦</span>
+        <div>
+          <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:800;color:#DAA520;letter-spacing:1px;">NEXIA OS</div>
+          <div style="font-family:Inter,sans-serif;font-size:10px;color:rgba(255,255,255,.3);">Powered by NEXIA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links col -->
+    <div class="ft-col">
+      <h4>Produtos</h4>
+      <a href="#destinos">Destinos</a>
+      <a href="#pacotes">VP Essentials</a>
+      <a href="#pacotes">VP Premium</a>
+      <a href="#pacotes">VP Elite</a>
+      <a href="#ces2027">Missão CES 2027</a>
+      <a href="#corporativo">Incentivos Corporativos</a>
+    </div>
+
+    <!-- Company col -->
+    <div class="ft-col">
+      <h4>Empresa</h4>
+      <a href="/viajante-pro/vp-landing.html#sobre">Sobre a VP</a>
+      <a href="/viajante-pro/vp-landing.html#equipe">Nossa Equipe</a>
+      <a href="/viajante-pro/vp-landing.html#parceiros">Parceiros</a>
+      <a id="ft-link-email" href="/cdn-cgi/l/email-protection#ccafa3a2b8adb8a38cbaa5ada6ada2b8a9bcbea3e2afa3a1e2aebe">Contato</a>
+      <a href="#contato">Solicitar Proposta</a>
+    </div>
+
+    <!-- Legal col -->
+    <div class="ft-col">
+      <h4>Legal & Acesso</h4>
+      <a id="ft-link-privacy" href="/privacidade">Privacidade</a>
+      <a id="ft-link-terms" href="/termos">Termos de Uso</a>
+      <a id="ft-link-cookies" href="/cookies">Cookies</a>
+      <a id="ft-link-lgpd" href="/lgpd">LGPD</a>
+      <a id="ft-link-sitemap" href="/sitemap.xml">Sitemap</a>
+      <div style="margin-top:16px;display:flex;gap:8px;">
+        <a id="ft-waze-btn" href="https://waze.com/ul?q=Viajante+Pro" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);text-decoration:none;font-family:Inter,sans-serif;transition:.2s;" onmouseover="this.style.color='#DAA520'" onmouseout="this.style.color='rgba(255,255,255,.5)'"><i class="ri-navigation-line"></i> Waze</a>
+        <a id="ft-maps-btn" href="https://maps.google.com/?q=Viajante+Pro" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);text-decoration:none;font-family:Inter,sans-serif;transition:.2s;" onmouseover="this.style.color='#DAA520'" onmouseout="this.style.color='rgba(255,255,255,.5)'"><i class="ri-map-pin-line"></i> Maps</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer bottom bar -->
+  <div class="ft-bottom">
+    <p id="ft-company-name" style="color:rgba(255,255,255,.22);font-family:Inter,sans-serif;font-size:12px;">© <span id="ft-year">2026</span> Viajante Pro Ltda. Todos os direitos reservados.</p>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:18px;font-weight:900;color:#DAA520;font-family:Inter,sans-serif;">✦</span>
+      <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.25);">Powered by NEXIA OS</span>
+    </div>
+    <p style="color:rgba(255,255,255,.18);font-family:Inter,sans-serif;font-size:11px;">Agência de Turismo · CADASTUR registrado</p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════
+     FAB WIDGET (WhatsApp + Chat)
+══════════════════════════════════════════════════ -->
+<div id="nexia-widget-btn">
+  <div id="nexia-widget-menu">
+    <a id="nexia-wa-btn" href="https://api.whatsapp.com/send?phone=5511999999999&text=Ol%C3%A1!%20Quero%20saber%20mais%20sobre%20os%20pacotes%20da%20Viajante%20Pro!" target="_blank" class="fab-item">
+      <i class="ri-whatsapp-line"></i>
+      <span>Falar no WhatsApp</span>
+    </a>
+    <div class="fab-item" onclick="nexiaOpenChat()">
+      <i class="ri-robot-2-line"></i>
+      <span>CORTEX Co-Pilot IA</span>
+    </div>
+    <a href="#contato" class="fab-item">
+      <i class="ri-mail-send-line"></i>
+      <span>Solicitar Proposta</span>
+    </a>
+  </div>
+  <button id="nexia-fab" onclick="nexiaToggleWidget()" aria-expanded="false" aria-label="Abrir menu de contato">
+    <span id="fab-badge">1</span>
+    <i class="ri-customer-service-2-line" id="fab-ico-chat" style="color:#fff;font-size:22px;display:block;"></i>
+    <i class="ri-close-line" id="fab-ico-x" style="color:#fff;font-size:22px;display:none;"></i>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// NAV scroll effect
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('vpNav');
+  if (window.scrollY > 60) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+});
+
+// COUNTDOWN CES 2027
+function updateCountdown() {
+  const target = new Date('2027-01-06T09:00:00');
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) return;
+  const days = Math.floor(diff / 86400000);
+  const hrs  = Math.floor((diff % 86400000) / 3600000);
+  const min  = Math.floor((diff % 3600000) / 60000);
+  const pad = (n,l=2) => String(n).padStart(l,'0');
+  document.getElementById('cnt-days').textContent = pad(days, 3);
+  document.getElementById('cnt-hrs').textContent  = pad(hrs);
+  document.getElementById('cnt-min').textContent  = pad(min);
+}
+updateCountdown();
+setInterval(updateCountdown, 60000);
+
+// SOCIAL PROOF TOASTS
+const vpProofs = [
+  {av:'JP',txt:'<strong style="color:#fff">João P.</strong> reservou pacote Dubai Premium'},
+  {av:'AM',txt:'<strong style="color:#fff">Ana M.</strong> confirmou grupo de 40 para Tóquio'},
+  {av:'RB',txt:'<strong style="color:#fff">Ricardo B.</strong> garantiu vaga no CES 2027'},
+  {av:'LS',txt:'<strong style="color:#fff">Lucia S.</strong> solicitou proposta lua-de-mel Maldivas'},
+  {av:'CF',txt:'<strong style="color:#fff">Carlos F.</strong> fechou incentivo 120 pax NYC'},
+];
+let vpi = 0;
+const spEl = document.getElementById('vp-sp');
+function showVpProof() {
+  spEl.style.opacity = '0'; spEl.style.transform = 'translateY(16px)';
+  setTimeout(() => {
+    const p = vpProofs[vpi % vpProofs.length];
+    document.getElementById('vp-sp-av').textContent = p.av;
+    document.getElementById('vp-sp-txt').innerHTML = p.txt;
+    spEl.style.opacity = '1'; spEl.style.transform = 'translateY(0)';
+    vpi++;
+    setTimeout(() => { spEl.style.opacity = '0'; spEl.style.transform = 'translateY(16px)'; }, 4500);
+  }, 400);
+}
+setTimeout(() => { showVpProof(); setInterval(showVpProof, 7000); }, 4000);
+
+// FAB WIDGET
+let widgetOpen = false;
+window.nexiaToggleWidget = function() {
+  widgetOpen = !widgetOpen;
+  const menu = document.getElementById('nexia-widget-menu');
+  const fab  = document.getElementById('nexia-fab');
+  const icoC = document.getElementById('fab-ico-chat');
+  const icoX = document.getElementById('fab-ico-x');
+  const badge= document.getElementById('fab-badge');
+  if (widgetOpen) {
+    menu.classList.add('open');
+    fab.setAttribute('aria-expanded','true');
+    icoC.style.display='none'; icoX.style.display='block';
+    if(badge) badge.style.display='none';
+  } else {
+    menu.classList.remove('open');
+    fab.setAttribute('aria-expanded','false');
+    icoC.style.display='block'; icoX.style.display='none';
+  }
+};
+document.addEventListener('click', function(e) {
+  const widgetEl = document.getElementById('nexia-widget-btn');
+  if (widgetOpen && widgetEl && !widgetEl.contains(e.target)) nexiaToggleWidget();
+});
+window.nexiaOpenChat = function() {
+  document.dispatchEvent(new CustomEvent('nexia:open-chat'));
+  nexiaToggleWidget();
+};
+
+// FOOTER year
+document.getElementById('ft-year').textContent = new Date().getFullYear();
+
+// SPONSOR FLASH POPUPS
+const sponsors = [
+  { logo:'🌐', name:'NEXIA OS', sub:'Plataforma Oficial', color:'#DAA520', bg:'rgba(218,165,32,.15)' },
+  { logo:'✈', name:'CES Brasil 2027', sub:'Parceiro Platinum', color:'#0057FF', bg:'rgba(0,87,255,.15)' },
+  { logo:'🏨', name:'Marriott Bonvoy', sub:'Hotel Partner Premium', color:'#00D68F', bg:'rgba(0,214,143,.12)' },
+  { logo:'🛡', name:'Inter Seguros', sub:'Seguro de Viagem', color:'#9B5CF6', bg:'rgba(155,92,246,.12)' },
+];
+let si = 0;
+const spopup = document.getElementById('sponsor-popup');
+function showSponsor() {
+  const s = sponsors[si % sponsors.length];
+  spopup.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'spon-card';
+  card.style.animation = 'sponsor-in 7s forwards';
+  card.innerHTML = `
+    <div style="width:42px;height:42px;border-radius:10px;background:${s.bg};border:1px solid ${s.color}33;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${s.logo}</div>
+    <div>
+      <div style="font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${s.color};margin-bottom:2px;">PATROCINADOR</div>
+      <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#fff;">${s.name}</div>
+      <div style="font-family:Inter,sans-serif;font-size:11px;color:rgba(255,255,255,.4);">${s.sub}</div>
+    </div>`;
+  spopup.appendChild(card);
+  si++;
+  setTimeout(showSponsor, 9000);
+}
+setTimeout(showSponsor, 3000);
+</script>
+
+<!-- Firebase Compat (unificado) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  try{firebase.initializeApp({apiKey:"AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",authDomain:"nexia-c8710.firebaseapp.com",projectId:"nexia-c8710",storageBucket:"nexia-c8710.firebasestorage.app",messagingSenderId:"623044447905",appId:"1:623044447905:web:13f70e1584fb0fcf8d2ae0"});}catch(e){}
+  const db = firebase.firestore();
+  window.submitViajantePro = async function() {
+    const v = id => document.getElementById(id).value.trim();
+    const nome = v('vp_nome'), email = v('vp_email');
+    if (!nome || !email) { nexiaToast('Preencha ao menos nome e e-mail.', 'warn'); return; }
+    const btn = document.getElementById('vpSubmit');
+    btn.disabled = true; btn.textContent = 'Enviando proposta...';
+    try {
+      await db.collection('tenants').doc('viajante-pro').collection('cadastros').add({
+        nome, email,
+        whatsapp: v('vp_whatsapp'),
+        tipo: document.getElementById('vp_tipo').value,
+        destino: v('vp_destino'),
+        pax: v('vp_pax'),
+        mensagem: v('vp_mensagem'),
+        origem: 'vp-landing', status: 'Lead',
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      document.getElementById('vpForm').style.display = 'none';
+      document.getElementById('vpSuccess').style.display = 'block';
+    } catch(e) {
+      console.error(e);
+      nexiaToast('Erro ao enviar. Tente novamente.', 'err');
+      btn.disabled = false; btn.textContent = 'Enviar Proposta';
+    }
+  };
+})();
+</script>
+  <script src="../core/nexia-engine.js"></script>
+  <script src="../core/sales-agent-widget.js" data-tenant="viajante-pro" data-name="ARIA" data-color="#00e5ff"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+</script>
+
+</body>
+</html>

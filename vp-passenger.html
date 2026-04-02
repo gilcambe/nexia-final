@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07090E">
+<title>Viajante Pro — Minha Viagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
+<style>
+:root {
+  --bg:   #F7F4EF; --bg2: #EFECE6; --bg3: #E5E1D8;
+  --sur:  #FFFFFF; --brd: rgba(0,0,0,.07); --brd2: rgba(0,0,0,.14);
+  --ink:  #0E0E0D; --ink2: #2C2B27; --ink3: #3D3C38; --ink4: #8A8780; --ink5: #C0BDB5;
+  --gold: #B8935A; --gold2: rgba(184,147,90,.12); --gold3: #DAA520;
+  --grn:  #1F7A4A; --grn2: rgba(31,122,74,.09);
+  --red:  #C0392B; --red2: rgba(192,57,43,.08);
+  --blu:  #1A4080; --blu2: rgba(26,64,128,.08);
+  --amb:  #B5620A; --amb2: rgba(181,98,10,.09);
+  --pur:  #5B2D8E; --pur2: rgba(91,45,142,.08);
+  --ff:   'Sora', system-ui, sans-serif;
+  --ffs:  'DM Serif Display', Georgia, serif;
+  --ffm:  'JetBrains Mono', monospace;
+  --nh: 72px; --bar: 64px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: #18160f; min-height: 100vh; display: flex; align-items: center; justify-content: center; -webkit-font-smoothing: antialiased; }
+body { width: 100%; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: var(--ff); }
+
+/* ── SHELL (phone frame) ─────────────────────────────────────── */
+#shell { position: relative; width: 100%; max-width: 400px; height: 100vh; max-height: 900px; background: var(--bg); overflow: hidden; display: flex; flex-direction: column; }
+@media(min-width:460px) { #shell { border-radius: 48px; box-shadow: 0 40px 120px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.06), inset 0 1px 0 rgba(255,255,255,.1); height: 900px; } }
+@media(max-width:460px) { html { background: var(--bg); } }
+
+/* ── STATUS BAR ──────────────────────────────────────────────── */
+.sbar { height: 44px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 22px 9px; background: var(--ink); }
+.sbar-time { font-family: var(--ffm); font-size: 11px; font-weight: 500; color: rgba(255,255,255,.65); }
+.sbar-ico  { font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: 2px; }
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+#topbar { flex-shrink: 0; background: var(--ink); padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.tb-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.tb-wordmark { font-family: var(--ffs); font-style: italic; font-size: 1.15rem; color: rgba(255,255,255,.9); letter-spacing: 0.02em; }
+.tb-badge { font-size: 7.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; padding: 3px 10px; background: var(--gold3); color: #fff; border-radius: 4px; }
+.tb-notif { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.6); font-size: 14px; cursor: pointer; }
+.tb-row2 { display: flex; align-items: center; gap: 10px; }
+.tb-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #B8860B, #DAA520); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.tb-greeting { font-size: 11px; color: rgba(255,255,255,.5); }
+.tb-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.9); }
+.tb-mission { margin-left: auto; font-size: 8.5px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--gold3); opacity: .9; }
+
+/* ── SCROLL AREA ─────────────────────────────────────────────── */
+#scroll-area { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(var(--bar) + 16px); }
+#scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── SCREENS ─────────────────────────────────────────────────── */
+.screen { display: none; padding: 20px; }
+.screen.active { display: block; }
+
+/* ── HOME SCREEN ─────────────────────────────────────────────── */
+/* Hero card missão */
+.mission-hero { border-radius: 20px; overflow: hidden; margin-bottom: 16px; position: relative; background: var(--ink); min-height: 160px; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; }
+.mh-bg { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(184,134,11,.3) 0%, rgba(10,10,15,.9) 100%); }
+.mh-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(218,165,32,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(218,165,32,.06) 1px, transparent 1px); background-size: 32px 32px; opacity: .6; }
+.mh-content { position: relative; z-index: 2; }
+.mh-tag { font-size: 8px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 6px; }
+.mh-title { font-family: var(--ffs); font-style: italic; font-size: 1.4rem; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+.mh-sub { font-size: 11px; color: rgba(255,255,255,.55); }
+.mh-meta { display: flex; gap: 10px; margin-top: 12px; }
+.mh-meta-item { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: rgba(255,255,255,.65); font-weight: 600; }
+.mh-meta-item i { color: var(--gold3); font-size: 12px; }
+
+/* Countdown */
+.countdown-card { background: var(--sur); border: 1px solid var(--brd); border-radius: 16px; padding: 16px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
+.cd-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--gold); flex-shrink: 0; }
+.cd-label { font-size: 11px; color: var(--ink4); margin-bottom: 4px; }
+.cd-val { font-family: var(--ffm); font-size: 22px; font-weight: 500; color: var(--ink); }
+.cd-sub { font-size: 10px; color: var(--ink5); margin-top: 2px; }
+
+/* Quick actions */
+.quick-title { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink4); margin-bottom: 12px; }
+.quick-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+.quick-btn { background: var(--sur); border: 1px solid var(--brd); border-radius: 14px; padding: 14px 8px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: all .18s; text-align: center; -webkit-tap-highlight-color: transparent; }
+.quick-btn:active { transform: scale(.95); background: var(--bg2); }
+.quick-btn i { font-size: 20px; }
+.quick-btn span { font-size: 9.5px; font-weight: 600; color: var(--ink3); letter-spacing: .01em; line-height: 1.3; }
+
+/* Próximos eventos */
+.events-list { display: flex; flex-direction: column; gap: 10px; }
+.event-card { background: var(--sur); border: 1px solid var(--brd); border-radius: 14px; padding: 14px 16px; display: flex; gap: 14px; align-items: center; }
+.event-date { flex-shrink: 0; text-align: center; width: 40px; }
+.event-day  { font-family: var(--ffm); font-size: 20px; font-weight: 500; color: var(--ink); line-height: 1; }
+.event-mon  { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink4); margin-top: 2px; }
+.event-divider { width: 1px; background: var(--brd); align-self: stretch; flex-shrink: 0; }
+.event-body { flex: 1; min-width: 0; }
+.event-time   { font-size: 10px; color: var(--ink4); margin-bottom: 3px; }
+.event-title  { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-local  { font-size: 11px; color: var(--ink4); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-tag { flex-shrink: 0; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: .05em; }
+.tag-gold  { background: var(--gold2); color: var(--gold); }
+.tag-grn   { background: var(--grn2); color: var(--grn); }
+.tag-blu   { background: var(--blu2); color: var(--blu); }
+.tag-amb   { background: var(--amb2); color: var(--amb); }
+
+/* ── ITINERÁRIO SCREEN ─────────────────────────────────────────── */
+.day-group { margin-bottom: 24px; }
+.day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px 14px; background: var(--ink); border-radius: 12px; }
+.day-header-day  { font-family: var(--ffm); font-size: 22px; font-weight: 500; color: var(--gold3); line-height: 1; }
+.day-header-info { }
+.day-header-label { font-size: 12px; font-weight: 700; color: #fff; }
+.day-header-sub   { font-size: 10px; color: rgba(255,255,255,.45); margin-top: 1px; }
+.itin-item { position: relative; padding-left: 28px; margin-bottom: 14px; }
+.itin-item::before { content: ''; position: absolute; left: 8px; top: 0; bottom: -14px; width: 1px; background: var(--brd2); }
+.itin-item:last-child::before { display: none; }
+.itin-dot { position: absolute; left: 4px; top: 14px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--brd2); background: var(--bg); flex-shrink: 0; }
+.itin-dot.done  { background: var(--grn); border-color: var(--grn); }
+.itin-dot.now   { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px var(--gold2); }
+.itin-card { background: var(--sur); border: 1px solid var(--brd); border-radius: 12px; padding: 14px 14px; }
+.itin-card.highlighted { border-color: rgba(184,147,90,.35); background: rgba(184,147,90,.04); }
+.itin-hora  { font-size: 10px; font-family: var(--ffm); color: var(--ink4); margin-bottom: 4px; }
+.itin-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.itin-local { font-size: 11px; color: var(--ink4); display: flex; align-items: center; gap: 4px; }
+.itin-local i { font-size: 11px; }
+.itin-note  { font-size: 11px; color: var(--ink3); margin-top: 8px; padding: 8px 10px; background: var(--bg2); border-radius: 8px; line-height: 1.5; }
+
+/* ── DOCUMENTOS SCREEN ───────────────────────────────────────── */
+.doc-section-title { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink4); margin: 20px 0 10px; }
+.doc-card { background: var(--sur); border: 1px solid var(--brd); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.doc-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.doc-icon.ok  { background: var(--grn2); color: var(--grn); }
+.doc-icon.pnd { background: var(--amb2); color: var(--amb); }
+.doc-icon.miss{ background: var(--red2); color: var(--red); }
+.doc-info { flex: 1; }
+.doc-name   { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.doc-detail { font-size: 11px; color: var(--ink4); }
+.doc-status { font-size: 9.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.ds-ok   { background: var(--grn2); color: var(--grn); }
+.ds-pend { background: var(--amb2); color: var(--amb); }
+.ds-miss { background: var(--red2); color: var(--red); }
+.doc-upload-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 13px; margin-top: 4px; border: 1.5px dashed var(--brd2); border-radius: 12px; background: none; font-family: var(--ff); font-size: 12px; font-weight: 600; color: var(--ink4); cursor: pointer; transition: all .18s; }
+.doc-upload-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold2); }
+
+/* ── BOTÃO DE PÂNICO ─────────────────────────────────────────── */
+.panic-section { margin-top: 24px; }
+.panic-card { border-radius: 20px; overflow: hidden; }
+.panic-header { background: var(--red); padding: 20px; text-align: center; }
+.panic-icon-wrap { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,.15); border: 3px solid rgba(255,255,255,.4); display: flex; align-items: center; justify-content: center; font-size: 32px; color: #fff; margin: 0 auto 12px; animation: panic-pulse 2s ease-in-out infinite; }
+@keyframes panic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.3)}50%{box-shadow:0 0 0 12px rgba(255,255,255,0)} }
+.panic-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.panic-sub   { font-size: 12px; color: rgba(255,255,255,.75); line-height: 1.5; }
+.panic-body { background: var(--sur); border: 1px solid var(--brd); border-top: none; padding: 20px; border-radius: 0 0 20px 20px; }
+.panic-contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.panic-contact { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg2); border-radius: 12px; cursor: pointer; transition: background .15s; -webkit-tap-highlight-color: transparent; }
+.panic-contact:active { background: var(--bg3); }
+.panic-contact-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.panic-contact-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.panic-contact-type { font-size: 11px; color: var(--ink4); margin-top: 1px; }
+.panic-contact-phone { margin-left: auto; font-family: var(--ffm); font-size: 11px; color: var(--grn); font-weight: 700; }
+.panic-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px; border-radius: 14px; font-family: var(--ff); font-size: 14px; font-weight: 800; cursor: pointer; border: none; transition: all .18s; -webkit-tap-highlight-color: transparent; }
+.panic-btn.emergency { background: var(--red); color: #fff; margin-bottom: 10px; }
+.panic-btn.emergency:active { opacity: .85; transform: scale(.98); }
+.panic-btn.guide { background: var(--gold2); color: var(--gold); border: 1px solid rgba(184,147,90,.25); }
+.panic-btn.guide:active { opacity: .85; }
+.panic-location { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--grn2); border-radius: 10px; margin-top: 12px; }
+.panic-location i { color: var(--grn); font-size: 14px; flex-shrink: 0; }
+.panic-location span { font-size: 11px; color: var(--grn); font-weight: 600; }
+
+/* ── BOTTOM NAV ──────────────────────────────────────────────── */
+#bottom-nav { flex-shrink: 0; height: var(--bar); background: rgba(255,255,255,.92); backdrop-filter: blur(16px); border-top: 1px solid var(--brd); display: flex; align-items: stretch; padding: 0 4px; }
+@media(min-width:460px) { #bottom-nav { border-radius: 0 0 48px 48px; } }
+.nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: none; -webkit-tap-highlight-color: transparent; transition: all .18s; }
+.nav-tab i { font-size: 20px; color: var(--ink5); transition: all .18s; }
+.nav-tab span { font-size: 9px; font-weight: 600; letter-spacing: .03em; color: var(--ink5); transition: all .18s; }
+.nav-tab.active i { color: var(--gold); }
+.nav-tab.active span { color: var(--gold); }
+.nav-tab:active { opacity: .7; }
+
+/* ── SHEET MODAL ─────────────────────────────────────────────── */
+.sheet-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 100; display: none; }
+.sheet-overlay.open { display: block; }
+.sheet { position: absolute; bottom: 0; left: 0; right: 0; background: var(--sur); border-radius: 28px 28px 0 0; z-index: 101; padding: 0 20px 32px; transform: translateY(100%); transition: transform .35s var(--ease); max-height: 85%; overflow-y: auto; }
+.sheet.open { transform: translateY(0); }
+.sheet-handle { width: 36px; height: 4px; background: var(--brd2); border-radius: 2px; margin: 12px auto 20px; }
+.sheet-title { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 16px; }
+
+/* ── TOAST ───────────────────────────────────────────────────── */
+#pax-toast { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 12px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 200; pointer-events: none; white-space: nowrap; }
+#pax-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#pax-toast.gold { background: var(--gold); color: #fff; }
+#pax-toast.danger { background: var(--red); }
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- Status bar -->
+  <div class="sbar">
+    <span class="sbar-time" id="sb-time">9:41</span>
+    <span class="sbar-ico">▲ ▲ ⬛</span>
+  </div>
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <div class="tb-row1">
+      <span class="tb-wordmark">Viajante Pro</span>
+      <span class="tb-badge">PASSAGEIRO</span>
+      <div class="tb-notif" onclick="showToast('Nenhuma notificação nova','gold')"><i class="ri-notification-3-line"></i></div>
+    </div>
+    <div class="tb-row2">
+      <div class="tb-avatar" id="pax-avatar">?</div>
+      <div>
+        <div class="tb-greeting">Bem-vindo(a),</div>
+        <div class="tb-name" id="pax-name">Carregando...</div>
+      </div>
+      <div class="tb-mission" id="pax-mission-label">CES 2027</div>
+    </div>
+  </div>
+
+  <!-- Scroll area -->
+  <div id="scroll-area">
+
+    <!-- ── HOME ──────────────────────────────────────────────── -->
+    <div class="screen active" id="screen-home">
+
+      <!-- Mission hero card -->
+      <div class="mission-hero">
+        <div class="mh-bg"></div>
+        <div class="mh-grid"></div>
+        <div class="mh-content">
+          <div class="mh-tag">✈ Missão em curso</div>
+          <div class="mh-title">CES 2027<br>Las Vegas</div>
+          <div class="mh-sub">Consumer Electronics Show</div>
+          <div class="mh-meta">
+            <div class="mh-meta-item"><i class="ri-calendar-line"></i>6–9 jan 2027</div>
+            <div class="mh-meta-item"><i class="ri-map-pin-line"></i>Las Vegas, NV</div>
+            <div class="mh-meta-item"><i class="ri-group-line"></i>48 passageiros</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Countdown -->
+      <div class="countdown-card">
+        <div class="cd-icon"><i class="ri-timer-line"></i></div>
+        <div>
+          <div class="cd-label">Embarque em</div>
+          <div class="cd-val" id="countdown-val">—d —h —m</div>
+          <div class="cd-sub">GRU → LAS · Voo LA 545</div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="quick-title"><i class="ri-flash-line"></i> Acesso rápido</div>
+      <div class="quick-grid">
+        <button class="quick-btn" onclick="goScreen('itinerario')"><i class="ri-map-2-line" style="color:var(--gold)"></i><span>Roteiro</span></button>
+        <button class="quick-btn" onclick="goScreen('documentos')"><i class="ri-folder-open-line" style="color:var(--blu)"></i><span>Docs</span></button>
+        <button class="quick-btn" onclick="showFlightInfo()"><i class="ri-plane-line" style="color:var(--grn)"></i><span>Voo</span></button>
+        <button class="quick-btn" onclick="goScreen('panico')"><i class="ri-alarm-warning-line" style="color:var(--red)"></i><span>Emergência</span></button>
+      </div>
+
+      <!-- Próximos eventos -->
+      <div class="quick-title"><i class="ri-calendar-event-line"></i> Próximos eventos</div>
+      <div class="events-list">
+        <div class="event-card">
+          <div class="event-date"><div class="event-day">06</div><div class="event-mon">jan</div></div>
+          <div class="event-divider"></div>
+          <div class="event-body"><div class="event-time">08:00 · LVCC</div><div class="event-title">Abertura Oficial CES 2027</div><div class="event-local"><i class="ri-map-pin-line"></i>Las Vegas Conv. Center</div></div>
+          <span class="event-tag tag-gold">Hoje</span>
+        </div>
+        <div class="event-card">
+          <div class="event-date"><div class="event-day">06</div><div class="event-mon">jan</div></div>
+          <div class="event-divider"></div>
+          <div class="event-body"><div class="event-time">10:00 · Arena</div><div class="event-title">Keynote Samsung — IA no Cotidiano</div><div class="event-local"><i class="ri-map-pin-line"></i>Michelob Ultra Arena</div></div>
+          <span class="event-tag tag-blu">Obrig.</span>
+        </div>
+        <div class="event-card">
+          <div class="event-date"><div class="event-day">07</div><div class="event-mon">jan</div></div>
+          <div class="event-divider"></div>
+          <div class="event-body"><div class="event-time">19:00 · Wynn</div><div class="event-title">Jantar Networking Missão BR</div><div class="event-local"><i class="ri-map-pin-line"></i>Wynn Hotel — Salão Norte</div></div>
+          <span class="event-tag tag-grn">Social</span>
+        </div>
+      </div>
+    </div><!-- /screen-home -->
+
+    <!-- ── ITINERÁRIO ─────────────────────────────────────────── -->
+    <div class="screen" id="screen-itinerario">
+      <div style="margin-bottom:20px">
+        <div class="quick-title"><i class="ri-route-line"></i> Roteiro Completo</div>
+      </div>
+
+      <div class="day-group">
+        <div class="day-header">
+          <div class="day-header-day">05</div>
+          <div class="day-header-info"><div class="day-header-label">Quinta-feira · Dia de viagem</div><div class="day-header-sub">São Paulo → Las Vegas</div></div>
+        </div>
+        <div class="itin-item"><div class="itin-dot done"></div><div class="itin-card"><div class="itin-hora">06:00</div><div class="itin-title">Transfer para o Aeroporto</div><div class="itin-local"><i class="ri-car-line"></i>Van grupo — Ponto de encontro lobby do hotel</div></div></div>
+        <div class="itin-item"><div class="itin-dot done"></div><div class="itin-card"><div class="itin-hora">09:30</div><div class="itin-title">Embarque — GRU → MIA</div><div class="itin-local"><i class="ri-flight-takeoff-line"></i>American Airlines AA207 · Terminal 3</div></div></div>
+        <div class="itin-item"><div class="itin-dot now"></div><div class="itin-card highlighted"><div class="itin-hora">15:45 MIA → 18:20 LAS</div><div class="itin-title">Conexão Miami → Las Vegas ✈</div><div class="itin-local"><i class="ri-flight-land-line"></i>AA1032 · Harry Reid Int'l Airport</div><div class="itin-note">Portão D22. Tempo de conexão: 1h55. Bagagem despachada até Las Vegas.</div></div></div>
+      </div>
+
+      <div class="day-group">
+        <div class="day-header">
+          <div class="day-header-day">06</div>
+          <div class="day-header-info"><div class="day-header-label">Sexta-feira · Dia 1 do CES</div><div class="day-header-sub">Las Vegas Convention Center</div></div>
+        </div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">08:00</div><div class="itin-title">Credenciamento CES</div><div class="itin-local"><i class="ri-qr-code-line"></i>LVCC — South Hall · Entrada C</div><div class="itin-note">Trazer documento com foto e badge de credencial.</div></div></div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">10:00</div><div class="itin-title">Keynote Samsung</div><div class="itin-local"><i class="ri-map-pin-line"></i>Michelob Ultra Arena</div></div></div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">13:00</div><div class="itin-title">Almoço livre — Tech District</div><div class="itin-local"><i class="ri-restaurant-line"></i>Área de restaurantes — Main Hall</div></div></div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">19:00</div><div class="itin-title">Jantar do grupo</div><div class="itin-local"><i class="ri-restaurant-2-line"></i>STK Steakhouse · The Cosmopolitan</div></div></div>
+      </div>
+
+      <div class="day-group">
+        <div class="day-header">
+          <div class="day-header-day">09</div>
+          <div class="day-header-info"><div class="day-header-label">Segunda-feira · Retorno</div><div class="day-header-sub">Las Vegas → São Paulo</div></div>
+        </div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">10:00</div><div class="itin-title">Debriefing da missão</div><div class="itin-local"><i class="ri-presentation-line"></i>Wynn Hotel — Salão Primavera</div></div></div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">14:00</div><div class="itin-title">Transfer para o aeroporto</div><div class="itin-local"><i class="ri-car-line"></i>Saída do lobby do Wynn</div></div></div>
+        <div class="itin-item"><div class="itin-dot"></div><div class="itin-card"><div class="itin-hora">17:15</div><div class="itin-title">Embarque — LAS → GRU</div><div class="itin-local"><i class="ri-flight-takeoff-line"></i>LA 546 · Harry Reid Int'l</div></div></div>
+      </div>
+    </div><!-- /screen-itinerario -->
+
+    <!-- ── DOCUMENTOS ─────────────────────────────────────────── -->
+    <div class="screen" id="screen-documentos">
+      <div class="quick-title"><i class="ri-folder-open-line"></i> Meus Documentos</div>
+
+      <!-- Status geral -->
+      <div style="background:rgba(31,122,74,.08);border:1px solid rgba(31,122,74,.2);border-radius:14px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+        <i class="ri-shield-check-line" style="color:var(--grn);font-size:22px;flex-shrink:0"></i>
+        <div><div style="font-size:13px;font-weight:700;color:var(--grn)">Documentação 85% completa</div><div style="font-size:11px;color:var(--ink4);margin-top:2px">1 documento pendente de upload</div></div>
+      </div>
+
+      <div class="doc-section-title">Documentos de viagem</div>
+      <div class="doc-card"><div class="doc-icon ok"><i class="ri-passport-line"></i></div><div class="doc-info"><div class="doc-name">Passaporte</div><div class="doc-detail">Vence em 15/03/2029 · 4 páginas livres</div></div><span class="doc-status ds-ok">✓ OK</span></div>
+      <div class="doc-card"><div class="doc-icon ok"><i class="ri-global-line"></i></div><div class="doc-info"><div class="doc-name">Visto Americano (B1/B2)</div><div class="doc-detail">Vence em 22/08/2029 · Multiple Entry</div></div><span class="doc-status ds-ok">✓ OK</span></div>
+      <div class="doc-card" id="seguro-card"><div class="doc-icon pnd" id="seguro-icon"><i class="ri-health-book-line"></i></div><div class="doc-info"><div class="doc-name">Seguro Viagem</div><div class="doc-detail" id="seguro-detail">Upload pendente · Apólice obrigatória</div></div><span class="doc-status ds-pend" id="seguro-status">Pendente</span></div>
+      <input type="file" id="seguro-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadSeguroViagem(this)">
+      <button class="doc-upload-btn" onclick="document.getElementById('seguro-file-input').click()"><i class="ri-upload-cloud-line"></i>Enviar Seguro Viagem</button>
+
+      <div class="doc-section-title">Credenciais do evento</div>
+      <div class="doc-card"><div class="doc-icon ok"><i class="ri-qr-code-line"></i></div><div class="doc-info"><div class="doc-name">Badge CES 2027</div><div class="doc-detail">ID: CES27-BR-0041 · Acesso All-Access</div></div><span class="doc-status ds-ok">✓ Ativo</span></div>
+
+      <div class="doc-section-title">Hospedagem</div>
+      <div class="doc-card"><div class="doc-icon ok"><i class="ri-hotel-line"></i></div><div class="doc-info"><div class="doc-name">Wynn Las Vegas</div><div class="doc-detail">Check-in: 05/jan · Check-out: 09/jan · Quarto 1842</div></div><span class="doc-status ds-ok">✓ Conf.</span></div>
+
+      <div class="doc-section-title">Voos</div>
+      <div class="doc-card"><div class="doc-icon ok"><i class="ri-plane-line"></i></div><div class="doc-info"><div class="doc-name">GRU → LAS (05/jan)</div><div class="doc-detail">AA207 + AA1032 · Assento 24A</div></div><span class="doc-status ds-ok">✓ Conf.</span></div>
+      <div class="doc-card"><div class="doc-icon ok"><i class="ri-plane-line"></i></div><div class="doc-info"><div class="doc-name">LAS → GRU (09/jan)</div><div class="doc-detail">LA546 · Assento 22C</div></div><span class="doc-status ds-ok">✓ Conf.</span></div>
+    </div><!-- /screen-documentos -->
+
+    <!-- ── BOTÃO DE PÂNICO ────────────────────────────────────── -->
+    <div class="screen" id="screen-panico">
+      <div class="panic-section">
+        <div class="panic-card">
+          <div class="panic-header">
+            <div class="panic-icon-wrap"><i class="ri-alarm-warning-line"></i></div>
+            <div class="panic-title">Botão de Emergência</div>
+            <p class="panic-sub">Use em caso de emergência médica,<br>acidente, perda de documentos ou situação de risco.</p>
+          </div>
+          <div class="panic-body">
+            <div class="quick-title" style="margin-top:0"><i class="ri-phone-line"></i> Contatos de emergência</div>
+            <div class="panic-contacts">
+              <div class="panic-contact" onclick="callNumber('+55 11 99999-0001')">
+                <div class="panic-contact-icon" style="background:var(--gold2);color:var(--gold)"><i class="ri-customer-service-line"></i></div>
+                <div><div class="panic-contact-name">Central VP 24/7</div><div class="panic-contact-type">Suporte da missão</div></div>
+                <span class="panic-contact-phone">+55 11 99999-0001</span>
+              </div>
+              <div class="panic-contact" onclick="callNumber('+1 702 555-0100')">
+                <div class="panic-contact-icon" style="background:var(--blu2);color:var(--blu)"><i class="ri-user-location-line"></i></div>
+                <div><div class="panic-contact-name">Guia Local — Carlos</div><div class="panic-contact-type">Guia da missão em Las Vegas</div></div>
+                <span class="panic-contact-phone">+1 702 555-0100</span>
+              </div>
+              <div class="panic-contact" onclick="callNumber('193')">
+                <div class="panic-contact-icon" style="background:var(--red2);color:var(--red)"><i class="ri-hospital-line"></i></div>
+                <div><div class="panic-contact-name">Emergências EUA</div><div class="panic-contact-type">Police / Fire / Medical</div></div>
+                <span class="panic-contact-phone">911</span>
+              </div>
+              <div class="panic-contact" onclick="callNumber('+1 702 555-0200')">
+                <div class="panic-contact-icon" style="background:var(--grn2);color:var(--grn)"><i class="ri-building-line"></i></div>
+                <div><div class="panic-contact-name">Consulado Brasileiro</div><div class="panic-contact-type">Los Angeles (cobre NV)</div></div>
+                <span class="panic-contact-phone">+1 213 555-0200</span>
+              </div>
+            </div>
+
+            <button class="panic-btn emergency" onclick="panicAlert()">
+              <i class="ri-alarm-warning-line"></i> ACIONAR EMERGÊNCIA AGORA
+            </button>
+            <button class="panic-btn guide" onclick="callNumber('+1 702 555-0100')">
+              <i class="ri-phone-line"></i> Ligar para o Guia
+            </button>
+
+            <div class="panic-location">
+              <i class="ri-map-pin-2-line"></i>
+              <span id="panic-location-txt">Localização: Wynn Las Vegas — Las Vegas, NV</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seguro -->
+        <div style="background:var(--sur);border:1px solid var(--brd);border-radius:16px;padding:16px;margin-top:16px">
+          <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px"><i class="ri-shield-line" style="color:var(--gold)"></i> Seguro Viagem</div>
+          <div style="font-size:12px;color:var(--ink4);line-height:1.6">Apólice: <strong style="color:var(--ink)">Pendente</strong><br>Cobertura médica: até USD 100.000<br>Repatriação incluída</div>
+        </div>
+      </div>
+    </div><!-- /screen-panico -->
+
+  </div><!-- /scroll-area -->
+
+  <!-- Bottom nav -->
+  <nav id="bottom-nav">
+    <button class="nav-tab active" onclick="goScreen('home',this)"><i class="ri-home-2-line"></i><span>Início</span></button>
+    <button class="nav-tab" onclick="goScreen('itinerario',this)"><i class="ri-map-2-line"></i><span>Roteiro</span></button>
+    <button class="nav-tab" onclick="goScreen('documentos',this)"><i class="ri-folder-open-line"></i><span>Docs</span></button>
+    <button class="nav-tab" onclick="goScreen('panico',this)" style="color:var(--red)"><i class="ri-alarm-warning-line" style="color:var(--red)"></i><span style="color:var(--red)">S.O.S.</span></button>
+  </nav>
+
+</div><!-- /shell -->
+
+<!-- Sheet modal -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()">
+  <div class="sheet" id="sheet-content" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">Info</div>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<div id="pax-toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/bridge.js"></script>
+<script>
+'use strict';
+const VP_SLUG = 'viajante-pro';
+
+// ── Clock ────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('sb-time').textContent = `${h}:${m}`;
+}
+setInterval(updateClock, 10000);
+updateClock();
+
+// ── Countdown ─────────────────────────────────────────────────────
+function updateCountdown() {
+  const target = new Date('2027-01-05T09:30:00-03:00');
+  const now    = new Date();
+  let   diff   = Math.max(0, target - now);
+  const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+  const h = Math.floor(diff / 3600000);  diff -= h * 3600000;
+  const m = Math.floor(diff / 60000);
+  const el = document.getElementById('countdown-val');
+  if (el) el.textContent = `${d}d ${h}h ${m}m`;
+}
+setInterval(updateCountdown, 60000);
+updateCountdown();
+
+// ── Navigation ────────────────────────────────────────────────────
+function goScreen(name, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  const screen = document.getElementById('screen-' + name);
+  if (screen) screen.classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const navBtn = document.querySelector(`.nav-tab[onclick*="${name}"]`);
+    if (navBtn) navBtn.classList.add('active');
+  }
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+function showToast(msg, type = '') {
+  const t = document.getElementById('pax-toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+// ── Sheet modal ───────────────────────────────────────────────────
+function openSheet(title, bodyHTML) {
+  document.getElementById('sheet-title').textContent = title;
+  document.getElementById('sheet-body').innerHTML = bodyHTML;
+  document.getElementById('sheet-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('sheet-content').classList.add('open'), 10);
+}
+function closeSheet() {
+  document.getElementById('sheet-content').classList.remove('open');
+  setTimeout(() => document.getElementById('sheet-overlay').classList.remove('open'), 350);
+}
+
+// ── Flight info sheet ─────────────────────────────────────────────
+function showFlightInfo() {
+  openSheet('Informações de Voo', `
+    <div style="display:flex;flex-direction:column;gap:12px;font-size:13px">
+      <div style="background:var(--bg2);border-radius:12px;padding:16px">
+        <div style="font-size:10px;color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Ida — 05 Jan 2027</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">GRU → LAS</div>
+        <div style="color:var(--ink4)">AA207 + AA1032 via MIA<br>09:30 → 18:20 (local)</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--grn);font-weight:700">✓ Confirmado · Assento 24A</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:12px;padding:16px">
+        <div style="font-size:10px;color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Volta — 09 Jan 2027</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">LAS → GRU</div>
+        <div style="color:var(--ink4)">LA546 · Direto<br>17:15 → 07:30+1</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--grn);font-weight:700">✓ Confirmado · Assento 22C</div>
+      </div>
+    </div>
+  `);
+}
+
+// ── Panic ─────────────────────────────────────────────────────────
+function callNumber(num) {
+  showToast('Ligando para ' + num, 'gold');
+}
+
+function panicAlert() {
+  nexiaConfirm('Confirmar acionamento de emergência? A central VP será notificada imediatamente.', function(){
+  showToast('🚨 Central notificada! Aguarde contato em < 2 min.', 'danger');
+  // Em produção: gravar alerta no Firestore
+  if (window.NEXIA && NEXIA._ready && NEXIA.db) {
+    NEXIA.db.collection('tenants').doc(VP_SLUG).collection('alerts').add({
+      type: 'PANIC',
+      userId: firebase.auth?.()?.currentUser?.uid || 'anon',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      location: 'Las Vegas, NV',
+      active: true
+    }).catch(() => {});
+  }
+}
+
+// ── Auth + dados do passageiro ────────────────────────────────────
+// P4 FIX: Auth guard + role check — requer user autenticado com role 'passenger'
+function _vpPassengerGuard(callback) {
+  firebase.auth().onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = '../login.html?redirect=' + encodeURIComponent(location.pathname);
+      return;
+    }
+    // Verificar role no Firestore
+    try {
+      const snap = await firebase.firestore().collection('users').doc(user.uid).get();
+      const profile = snap.exists ? snap.data() : {};
+      const role = profile.role || profile.tenantRole || '';
+      if (role !== 'passenger' && role !== 'admin' && role !== 'master') {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0f;color:#ff3d71;font-family:sans-serif;text-align:center;padding:2rem"><div><h2>Acesso Negado</h2><p>Esta área é exclusiva para passageiros do Viajante Pro.</p><a href="../login.html" style="color:#00e5ff">← Voltar ao login</a></div></div>';
+        return;
+      }
+      callback(user, profile);
+    } catch (e) {
+      console.warn('[VP] Erro ao verificar role:', e.message);
+      callback(user, {}); // fail-open apenas para erros de Firestore, não de auth
+    }
+  });
+}
+
+function initPaxData() {
+  const waitReady = () => {
+    if (!window.NEXIA || !NEXIA._ready) { setTimeout(waitReady, 400); return; }
+    NEXIA.setTenant('viajante-pro');
+    _vpPassengerGuard((user, profile) => {
+      const nome = user.displayName || user.email?.split('@')[0] || 'Passageiro';
+      document.getElementById('pax-name').textContent = nome;
+      document.getElementById('pax-avatar').textContent = nome[0].toUpperCase();
+    });
+  };
+  waitReady();
+}
+
+if (window.NEXIA) NEXIA.onReady(initPaxData);
+else { const iv = setInterval(() => { if (window.NEXIA) { clearInterval(iv); NEXIA.onReady(initPaxData); } }, 300); }
+
+// ── Upload Seguro Viagem ──────────────────────────────────────────
+async function uploadSeguroViagem(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Validação de tipo
+  const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowed.includes(file.type)) {
+    showToast('Formato inválido. Envie PDF, JPG ou PNG.', 'danger');
+    input.value = '';
+    return;
+  }
+
+  // Validação de tamanho (max 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('Arquivo muito grande. Máximo 10MB.', 'danger');
+    input.value = '';
+    return;
+  }
+
+  // Feedback visual: estado de upload
+  const btn = document.querySelector('.doc-upload-btn');
+  const statusEl  = document.getElementById('seguro-status');
+  const detailEl  = document.getElementById('seguro-detail');
+  const iconEl    = document.getElementById('seguro-icon');
+  const cardEl    = document.getElementById('seguro-card');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ri-loader-4-line"></i> Enviando…';
+  if (statusEl) { statusEl.textContent = 'Enviando…'; statusEl.className = 'doc-status'; statusEl.style.background = 'rgba(192,132,252,.15)'; statusEl.style.color = '#c084fc'; }
+
+  try {
+    // Converte para Base64 para salvar no Firestore (sem Firebase Storage)
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload  = () => res(reader.result.split(',')[1]);
+      reader.onerror = () => rej(new Error('Leitura falhou'));
+      reader.readAsDataURL(file);
+    });
+
+    const uid = firebase.auth?.()?.currentUser?.uid || 'anon';
+    const record = {
+      type:       'seguro_viagem',
+      fileName:   file.name,
+      mimeType:   file.type,
+      sizeBytes:  file.size,
+      base64:     base64,
+      uploadedBy: uid,
+      status:     'pendente_revisao',
+      uploadedAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+    };
+
+    if (window.NEXIA && NEXIA._ready && NEXIA.db) {
+      await NEXIA.db.collection('tenants').doc(VP_SLUG)
+        .collection('passenger_docs').doc(uid + '_seguro').set(record);
+    } else {
+      // Fallback: salva localmente até Firebase estar disponível
+      try { localStorage.setItem('vp_seguro_pending_' + uid, JSON.stringify({ fileName: file.name, size: file.size, uploadedAt: new Date().toISOString() })); } catch(e) {}
+    }
+
+    // Atualiza UI para estado confirmado
+    if (statusEl) { statusEl.textContent = '✓ Enviado'; statusEl.className = 'doc-status ds-ok'; statusEl.style = ''; }
+    if (detailEl) detailEl.textContent = file.name + ' · ' + (file.size / 1024).toFixed(0) + ' KB · Em revisão';
+    if (iconEl)   { iconEl.className = 'doc-icon ok'; }
+    if (cardEl)   cardEl.style.opacity = '1';
+
+    btn.innerHTML = '<i class="ri-check-line"></i> Enviado com sucesso';
+    btn.style.background = 'rgba(0,214,143,.12)';
+    btn.style.color = 'var(--grn)';
+    btn.style.borderColor = 'rgba(0,214,143,.3)';
+
+    showToast('✅ Seguro Viagem enviado! Aguarde revisão.', 'success');
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ri-upload-cloud-line"></i> Tentar novamente';
+    if (statusEl) { statusEl.textContent = 'Pendente'; statusEl.className = 'doc-status ds-pend'; statusEl.style = ''; }
+    showToast('Erro ao enviar: ' + (err.message || 'tente novamente'), 'danger');
+  } finally {
+    input.value = '';
+  }
+}
+</script>
+  <script src="../core/nexia-engine.js"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

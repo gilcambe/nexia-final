@@ -1,0 +1,703 @@
+<!DOCTYPE html> 
+<html lang="pt-BR" id="html-root"> 
+<head> 
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title id="page-title">Bezsan — Inteligência em Leilões Judiciais e Extrajudiciais</title> 
+<link rel="preconnect" href="https://fonts.googleapis.com"> 
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"> 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"> 
+<style> 
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0} 
+:root{ 
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#111827; 
+  --gold:#DAA520;--gold2:#B8860B;--gold3:#F0C030;--gold-glow:rgba(218,165,32,.25); 
+  --border:rgba(255,255,255,.06);--border2:rgba(218,165,32,.15); 
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35); 
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace; 
+} 
+html{scroll-behavior:smooth} 
+body{font-family:var(--ff);background:var(--bg);color:var(--text);overflow-x:hidden} 
+@keyframes logo-pulse{0%,100%{box-shadow:0 0 20px var(--gold-glow)}50%{box-shadow:0 0 40px rgba(218,165,32,.5)}} 
+@keyframes fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}} 
+@keyframes float-badge{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}} 
+@keyframes glow-bar{0%,100%{opacity:.4}50%{opacity:1}} 
+@keyframes chat-in{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:none}} 
+@keyframes dot-pulse{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}} 
+@keyframes fab-bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}} 
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}} 
+ 
+.lang-switcher{display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:24px;padding:4px 6px} 
+.lang-btn{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);border:none;background:transparent;cursor:pointer;font-family:var(--ff);transition:all .2s} 
+.lang-btn.active{background:var(--gold);color:#07090E} 
+.lang-btn:hover:not(.active){color:var(--gold)} 
+ 
+/* NAV */ 
+#navbar{position:fixed;top:0;left:0;right:0;z-index:500;padding:0 clamp(20px,5vw,80px);transition:background .4s} 
+#navbar.scrolled{background:rgba(7,9,14,.92);backdrop-filter:blur(20px);box-shadow:0 1px 0 var(--border2)} 
+.nav-inner{max-width:1280px;margin:0 auto;height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px} 
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none} 
+.nav-logo-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold3));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#07090E;animation:logo-pulse 3s ease-in-out infinite;font-family:var(--ffm)} 
+.nav-logo-name{font-size:20px;font-weight:700;color:var(--text)} 
+.nav-logo-sub{font-size:9px;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;font-weight:600} 
+.nav-links{display:flex;gap:20px;align-items:center} 
+.nav-links a{color:var(--text2);font-size:13.5px;text-decoration:none;font-weight:500;transition:color .2s} 
+.nav-links a:hover{color:var(--gold)} 
+.nav-cta{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#07090E;text-decoration:none;transition:all .25s} 
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--gold-glow)} 
+@media(max-width:860px){.nav-links>a{display:none}} 
+ 
+/* TICKER */ 
+.ticker-wrap{background:rgba(218,165,32,.08);border-bottom:1px solid var(--border2);overflow:hidden;height:36px;display:flex;align-items:center;margin-top:76px} 
+.ticker-track{display:flex;gap:0;animation:ticker 30s linear infinite;white-space:nowrap} 
+.ticker-item{padding:0 40px;font-size:11px;font-weight:600;color:var(--gold);letter-spacing:.5px;display:flex;align-items:center;gap:8px} 
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--gold3)} 
+ 
+/* HERO */ 
+.hero{position:relative;min-height:90vh;display:flex;align-items:center;padding:60px clamp(20px,5vw,80px) 80px;overflow:hidden} 
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.4;z-index:0} 
+.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(ellipse,rgba(218,165,32,.12) 0%,transparent 70%);z-index:1;pointer-events:none} 
+.hero-inner{position:relative;z-index:2;max-width:1280px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 440px;gap:80px;align-items:center} 
+@media(max-width:1060px){.hero-inner{grid-template-columns:1fr;gap:56px}} 
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(218,165,32,.1);border:1px solid var(--border2);border-radius:6px;padding:8px 16px;margin-bottom:28px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;animation:float-badge 3s ease-in-out infinite} 
+.hero-badge i{font-size:14px} 
+.hero-h1{font-size:clamp(40px,5.5vw,76px);font-weight:800;line-height:1.08;color:var(--text);margin-bottom:12px} 
+.hero-h1 span{color:var(--gold)} 
+.hero-sub{font-size:clamp(16px,1.8vw,20px);font-weight:300;color:var(--text2);margin-bottom:16px;line-height:1.6} 
+.hero-desc{font-size:15px;color:var(--text2);line-height:1.85;max-width:560px;margin-bottom:36px} 
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:44px} 
+.btn-gold{display:inline-flex;align-items:center;gap:9px;padding:14px 30px;border-radius:8px;font-size:15px;font-weight:700;font-family:var(--ff);cursor:pointer;border:none;text-decoration:none;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#07090E;box-shadow:0 6px 28px var(--gold-glow);transition:all .3s} 
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 10px 40px var(--gold-glow)} 
+.btn-ghost{display:inline-flex;align-items:center;gap:9px;padding:14px 30px;border-radius:8px;font-size:15px;font-weight:600;font-family:var(--ff);cursor:pointer;text-decoration:none;background:transparent;color:var(--gold);border:1px solid var(--border2);transition:all .25s} 
+.btn-ghost:hover{background:rgba(218,165,32,.08);transform:translateY(-2px)} 
+.hero-trust{display:flex;align-items:center;gap:20px;flex-wrap:wrap} 
+.trust-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)} 
+.trust-item i{color:var(--gold);font-size:14px} 
+.trust-div{width:1px;height:20px;background:var(--border)} 
+ 
+/* FORM CARD */ 
+.form-card{background:linear-gradient(160deg,#0D1220,#070B14);border:1px solid var(--border2);border-radius:16px;padding:36px 30px;box-shadow:0 32px 80px rgba(0,0,0,.6);position:relative;overflow:hidden} 
+.form-card::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)} 
+.form-card-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(218,165,32,.1);border:1px solid var(--border2);border-radius:6px;padding:5px 12px;margin-bottom:16px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase} 
+.form-card-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px} 
+.form-card-sub{font-size:12.5px;color:var(--text3);margin-bottom:24px;line-height:1.5} 
+.fc-field{margin-bottom:14px} 
+.fc-label{display:block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px} 
+.fc-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:11px 14px;font-size:14px;font-family:var(--ff);color:var(--text);outline:none;transition:border-color .2s} 
+.fc-input:focus{border-color:var(--border2)}.fc-input option{background:var(--bg)} 
+.fc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px} 
+.fc-submit{width:100%;margin-top:8px;padding:14px;border-radius:8px;border:none;font-size:14px;font-weight:700;font-family:var(--ff);cursor:pointer;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#07090E;box-shadow:0 6px 24px var(--gold-glow);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px} 
+.fc-submit:hover{transform:translateY(-2px)} 
+.fc-note{font-size:11px;color:var(--text3);margin-top:10px;line-height:1.5;display:flex;align-items:flex-start;gap:6px} 
+.fc-success{display:none;text-align:center;padding:40px 10px} 
+.fc-success-icon{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;color:#07090E} 
+.fc-success-title{font-size:24px;font-weight:700;color:var(--gold);margin-bottom:12px} 
+.fc-success-text{font-size:14px;color:var(--text2);line-height:1.7} 
+ 
+/* STATS */ 
+.stats-strip{border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:32px clamp(20px,5vw,80px);background:rgba(218,165,32,.03)} 
+.stats-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;gap:24px;flex-wrap:wrap} 
+.stat-item{text-align:center} 
+.stat-num{font-size:clamp(28px,4vw,52px);font-weight:800;color:var(--gold);font-family:var(--ffm);line-height:1} 
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px} 
+.stat-div{width:1px;height:56px;background:var(--border2)} 
+@media(max-width:600px){.stat-div{display:none}} 
+ 
+/* SECTIONS */ 
+.section{padding:clamp(60px,8vw,110px) clamp(20px,5vw,80px)} 
+.section-inner{max-width:1280px;margin:0 auto} 
+.section-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(218,165,32,.08);border:1px solid var(--border2);border-radius:6px;padding:5px 14px;margin-bottom:18px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase} 
+.section-title{font-size:clamp(28px,4vw,52px);font-weight:800;line-height:1.15;color:var(--text);margin-bottom:16px} 
+.section-title span{color:var(--gold)} 
+.section-sub{font-size:16px;color:var(--text2);line-height:1.85;max-width:600px} 
+ 
+/* HOW IT WORKS */ 
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:56px;background:var(--border)} 
+@media(max-width:860px){.how-grid{grid-template-columns:1fr 1fr}} 
+@media(max-width:480px){.how-grid{grid-template-columns:1fr}} 
+.how-step{background:var(--bg2);padding:32px 24px;position:relative;transition:background .3s} 
+.how-step:hover{background:var(--bg3)} 
+.how-num{font-family:var(--ffm);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:16px;opacity:.7} 
+.how-icon{width:48px;height:48px;border-radius:10px;background:rgba(218,165,32,.1);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);margin-bottom:16px} 
+.how-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px} 
+.how-text{font-size:13px;color:var(--text3);line-height:1.7} 
+ 
+/* FEATURES */ 
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px} 
+@media(max-width:860px){.features-grid{grid-template-columns:1fr 1fr}} 
+@media(max-width:480px){.features-grid{grid-template-columns:1fr}} 
+.feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px 24px;transition:border-color .3s,transform .3s} 
+.feat-card:hover{border-color:var(--border2);transform:translateY(-4px)} 
+.feat-icon{width:44px;height:44px;border-radius:10px;background:rgba(218,165,32,.1);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);margin-bottom:16px} 
+.feat-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px} 
+.feat-text{font-size:13px;color:var(--text3);line-height:1.7} 
+ 
+/* TESTIMONIALS */ 
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px} 
+@media(max-width:860px){.testi-grid{grid-template-columns:1fr}} 
+.testi-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px 24px;transition:border-color .2s} 
+.testi-card:hover{border-color:var(--border2)} 
+.testi-stars{font-size:13px;color:var(--gold);letter-spacing:3px;margin-bottom:14px} 
+.testi-quote{font-size:14.5px;color:var(--text2);line-height:1.75;margin-bottom:20px;font-style:italic} 
+.testi-author{display:flex;align-items:center;gap:12px} 
+.testi-av{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#07090E;flex-shrink:0} 
+.testi-name{font-size:13px;font-weight:700;color:var(--text)} 
+.testi-role{font-size:11px;color:var(--text3);margin-top:2px} 
+ 
+/* CTA FINAL */ 
+.final-cta{padding:clamp(80px,10vw,130px) clamp(20px,5vw,80px);text-align:center;position:relative;overflow:hidden} 
+.final-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(218,165,32,.1) 0%,transparent 70%)} 
+.final-cta-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(218,165,32,.08);border:1px solid var(--border2);border-radius:6px;padding:5px 14px;margin-bottom:24px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase} 
+.final-cta-title{font-size:clamp(32px,5vw,64px);font-weight:800;line-height:1.1;color:var(--text);margin-bottom:16px;position:relative;z-index:1} 
+.final-cta-title span{color:var(--gold)} 
+.final-cta-sub{font-size:16px;color:var(--text2);max-width:540px;margin:0 auto 44px;line-height:1.8;position:relative;z-index:1} 
+.final-cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1} 
+ 
+/* FOOTER */ 
+footer{border-top:1px solid var(--border2);padding:48px clamp(20px,5vw,80px);background:rgba(255,255,255,.01)} 
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap} 
+.footer-brand{display:flex;align-items:center;gap:10px} 
+.footer-brand-icon{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#07090E;font-family:var(--ffm)} 
+.footer-brand-name{font-size:15px;font-weight:700;color:var(--text2)} 
+.footer-copy{font-size:12px;color:var(--text3)} 
+.footer-links{display:flex;gap:20px} 
+.footer-links a{font-size:12px;color:var(--text3);text-decoration:none;transition:color .2s} 
+.footer-links a:hover{color:var(--gold)} 
+ 
+/* CHATBOT */ 
+#bz-chat-fab{position:fixed;bottom:32px;right:32px;z-index:9000} 
+#bz-fab-btn{width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,var(--gold2),var(--gold));border:none;box-shadow:0 8px 32px var(--gold-glow);display:flex;align-items:center;justify-content:center;cursor:pointer;animation:fab-bounce 4s ease-in-out infinite} 
+#bz-fab-btn i{color:#07090E;font-size:24px} 
+#bz-fab-badge{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:#FF3D71;border-radius:50%;border:2px solid var(--bg);font-size:11px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center} 
+#bz-chat-window{display:none;position:fixed;bottom:106px;right:32px;z-index:9001;width:380px;background:linear-gradient(160deg,#0C1018,#07090E);border:1px solid var(--border2);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.7);overflow:hidden} 
+#bz-chat-window.open{display:flex;flex-direction:column;animation:chat-in .3s ease both} 
+.bz-chat-head{background:rgba(218,165,32,.06);border-bottom:1px solid var(--border2);padding:18px 20px;display:flex;align-items:center;gap:12px} 
+.bz-chat-avatar{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-size:18px;color:#07090E;flex-shrink:0} 
+.bz-chat-head-name{font-size:14px;font-weight:700;color:var(--text)} 
+.bz-chat-head-status{font-size:11px;color:var(--gold);display:flex;align-items:center;gap:5px} 
+.bz-status-dot{width:6px;height:6px;background:#00D68F;border-radius:50%} 
+.bz-chat-close{margin-left:auto;cursor:pointer;color:var(--text3);font-size:20px} 
+.bz-chat-msgs{flex:1;padding:18px;display:flex;flex-direction:column;gap:12px;max-height:300px;overflow-y:auto} 
+.bz-msg{max-width:85%;display:flex;flex-direction:column;gap:4px} 
+.bz-msg.bot{align-self:flex-start}.bz-msg.user{align-self:flex-end} 
+.bz-msg-bubble{padding:11px 15px;border-radius:10px;font-size:13.5px;line-height:1.6} 
+.bz-msg.bot .bz-msg-bubble{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text2);border-bottom-left-radius:3px} 
+.bz-msg.user .bz-msg-bubble{background:rgba(218,165,32,.15);border:1px solid var(--border2);color:var(--text);border-bottom-right-radius:3px} 
+.bz-msg-time{font-size:10px;color:var(--text3);padding:0 4px}.bz-msg.user .bz-msg-time{text-align:right} 
+.bz-typing{display:flex;align-items:center;gap:5px;padding:11px 15px;background:rgba(255,255,255,.04);border-radius:10px;width:68px} 
+.bz-typing span{width:6px;height:6px;background:rgba(218,165,32,.7);border-radius:50%;animation:dot-pulse 1.2s infinite ease-in-out} 
+.bz-typing span:nth-child(2){animation-delay:.15s}.bz-typing span:nth-child(3){animation-delay:.3s} 
+.bz-chat-foot{border-top:1px solid var(--border);padding:14px 18px;display:flex;gap:10px;align-items:flex-end} 
+#bz-chat-input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13.5px;color:var(--text);font-family:var(--ff);resize:none;outline:none;max-height:100px;min-height:42px} 
+#bz-send-btn{width:40px;height:40px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--gold2),var(--gold));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center} 
+#bz-send-btn i{color:#07090E;font-size:17px} 
+#bz-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--gold);color:#07090E;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:700;font-family:var(--ff);box-shadow:0 8px 32px var(--gold-glow);z-index:9999;transition:transform .35s,opacity .35s;opacity:0;pointer-events:none;white-space:nowrap} 
+#bz-toast.show{transform:translateX(-50%) translateY(0);opacity:1} 
+#bz-toast.error{background:#FF3D71;color:#fff} 
+.fade-up{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)} 
+.fade-up.visible{opacity:1;transform:translateY(0)} 
+</style> 
+</head> 
+<body> 
+ 
+<script> 
+const I18N={ 
+pt:{ 
+  lang:'pt-BR',pageTitle:'Bezsan — Inteligência em Leilões Judiciais e Extrajudiciais', 
+  navHow:'Como Funciona',navFeatures:'Funcionalidades',navTesti:'Cases',navCta:'Cadastrar Interesse', 
+  tickerItems:['🏛️ Leilões Judiciais','⚡ Alertas em Tempo Real','🤖 Due Diligence com IA','🔒 Contratos PKI','📊 Análise de Risco CORTEX','💰 NEXIA Pay Split','🎯 CORTEX Sniper de Lances'], 
+  heroBadge:'Powered by CORTEX AI · NEXIA OS', 
+  heroH1:'Arremate imóveis e ativos com <span>inteligência real.</span>', 
+  heroSub:'A plataforma de leilões judiciais com IA embarcada.', 
+  heroDesc:'Bezsan reúne rastreamento automático de editais, due diligence com IA, lance programático e contratos com certificação PKI — tudo em um único painel.', 
+  heroCta1:'Cadastrar Interesse',heroCta2:'Ver Demonstração', 
+  trust1:'Dados Firestore em tempo real',trust2:'Contratos ICP-Brasil',trust3:'API Receita Federal', 
+  stat1:'R$ 2,4Bi',stat1lbl:'Volume rastreado',stat2:'4.800+',stat2lbl:'Editais indexados',stat3:'98%',stat3lbl:'Precisão CORTEX',stat4:'< 300ms',stat4lbl:'Tempo de alerta', 
+  formBadge:'Acesso Antecipado',formTitle:'Cadastrar Interesse',formSub:'Seja avisado assim que sua região for liberada.', 
+  fNome:'Nome completo *',fNomePh:'Seu nome',fEmail:'E-mail *',fEmailPh:'voce@empresa.com',fWpp:'WhatsApp *',fWppPh:'+55 11 9 0000-0000', 
+  fPerfil:'Seu perfil *',fPerfilOpts:['Selecionar...','Investidor pessoa física','Empresa / Incorporadora','Advogado / Escritório','Leiloeiro','Outro'], 
+  fRegiao:'Região de interesse *',fRegiaoOpts:['Selecionar...','São Paulo','Rio de Janeiro','Minas Gerais','Sul do Brasil','Nordeste','Centro-Oeste','Todo o Brasil'], 
+  fObs:'Interesse específico',fObsPh:'Imóveis residenciais, comerciais, veículos...', 
+  fSubmit:'Confirmar Cadastro', 
+  fNote:'Sem compromisso. Você será notificado por e-mail e WhatsApp.', 
+  successTitle:'Cadastro confirmado! 🏆',successText:'Você está na lista de acesso antecipado. Entraremos em contato assim que a sua região for habilitada.', 
+  howEy:'Processo',howH:'Como o <span>Bezsan</span> funciona', 
+  howSteps:['Cadastre-se','Defina Critérios','CORTEX Monitora','Lance e Arremate'], 
+  howIcons:['ri-user-add-line','ri-filter-line','ri-robot-line','ri-auction-line'], 
+  howTexts:['Crie sua conta e configure seu perfil de investidor em minutos.','Defina regiões, faixas de valor, tipo de ativo e percentual mínimo de desconto.','Nossa IA escaneia diariamente novos editais e ativa alertas instantâneos com análise de risco.','Programe lances automáticos com o CORTEX Sniper e acompanhe em tempo real.'], 
+  featEy:'Funcionalidades',featH:'Tecnologia que <span>inclina o jogo</span> a seu favor.', 
+  featSub:'Cada feature foi construída para eliminar riscos e maximizar retorno em leilões.', 
+  feats:[ 
+    {icon:'ri-robot-line',title:'Due Diligence com IA',text:'Upload do edital em PDF → análise automática de ônus, dívidas, pendências e risco em < 30 segundos via Anthropic API.'}, 
+    {icon:'ri-target-line',title:'CORTEX Sniper',text:'Motor de lance automático com regras configuráveis: lance máximo, incremento mínimo, execução nos últimos segundos.'}, 
+    {icon:'ri-shield-keyhole-line',title:'Contratos PKI',text:'Geração e assinatura de contratos com hash SHA-256 e certificação ICP-Brasil embutida no painel.'}, 
+    {icon:'ri-search-eye-line',title:'OSINT & Receita Federal',text:'Consulta automática CPF/CNPJ do proprietário, processos Jusbrasil, score Serasa e histórico de transferências.'}, 
+    {icon:'ri-notification-badge-line',title:'Alertas Instantâneos',text:'Webhooks e push em < 300ms quando um novo edital corresponde aos seus critérios — app e WhatsApp.'}, 
+    {icon:'ri-pie-chart-2-line',title:'Dashboard de ROI',text:'Painel financeiro com valor em risco, retorno potencial, histórico de arrematações e projeção de portfólio.'}, 
+  ], 
+  testiEy:'Cases',testiH:'Resultados que <span>falam por si.</span>', 
+  tq:[ 
+    '"O CORTEX Sniper arrematou um apartamento em SP com 68% de desconto. A due diligence em 25 segundos revelou que o imóvel estava limpo. Nunca mais licito de outra forma."', 
+    '"Sou advogado e uso o Bezsan para prospectar clientes. O rastreador de editais me poupa 4 horas por dia de pesquisa manual."', 
+    '"Nossa incorporadora participou de 3 leilões no mês passado. O ROI médio foi 31%. O painel financeiro é claro e o suporte da equipe é excelente."', 
+  ], 
+  tn:['Ricardo Nunes','Dra. Fernanda Castro','Construtora Apex'], 
+  tr:['Investidor · São Paulo','Advogada Imobiliária · Curitiba','Incorporadora · Rio de Janeiro'], 
+  ctaEy:'Vagas limitadas por região',ctaH:'Garanta seu acesso <span>antes da abertura pública.</span>', 
+  ctaSub:'Estamos liberando regiões em fases. Cadastre-se agora e seja o primeiro a operar na sua área.', 
+  ctaBtn1:'Cadastrar Interesse',ctaBtn2:'Falar no WhatsApp', 
+  footHow:'Como Funciona',footFeatures:'Funcionalidades',footCases:'Cases', 
+  chatName:'CORTEX · Bezsan AI',chatOnline:'Online agora', 
+  chatWelcome:'Olá! 🏛️ Sou o CORTEX, assistente de inteligência da Bezsan.<br><br>Posso te ajudar a entender como funciona a plataforma, explicar a due diligence automática, o CORTEX Sniper e muito mais.<br><br>Qual tipo de ativo você costuma buscar em leilões?', 
+  chatPh:'Pergunte sobre leilões, due diligence...', 
+  toastSent:'Cadastro enviado! Você está na lista. 🏆',toastErr:'Preencha nome, e-mail e WhatsApp.',toastSendErr:'Erro ao enviar. Tente novamente.', 
+  replies:['Ótimo! Em leilões de imóveis, o diferencial do Bezsan é a due diligence automática — você sabe o risco antes de dar um lance. Quer saber como funciona o CORTEX Sniper?','O CORTEX Sniper programa lances automáticos com regras que você define: valor máximo, incremento mínimo e timing nos segundos finais. Já usou lances automáticos antes?','Nossa análise de risco combina dados da Receita Federal, Jusbrasil e histórico de transferências. O resultado sai em < 30 segundos. Gostaria de ver um exemplo?','Faça o cadastro de interesse e nossa equipe entrará em contato com o processo de acesso para a sua região. 🏆','Atendemos investidores PF, incorporadoras, escritórios de advocacia e leiloeiros. Qual o seu perfil?'] 
+}, 
+en:{ 
+  lang:'en',pageTitle:'Bezsan — AI-Powered Intelligence for Judicial & Extrajudicial Auctions', 
+  navHow:'How It Works',navFeatures:'Features',navTesti:'Cases',navCta:'Register Interest', 
+  tickerItems:['🏛️ Judicial Auctions','⚡ Real-time Alerts','🤖 AI Due Diligence','🔒 PKI Contracts','📊 CORTEX Risk Analysis','💰 NEXIA Pay Split','🎯 CORTEX Auto-Bid'], 
+  heroBadge:'Powered by CORTEX AI · NEXIA OS', 
+  heroH1:'Acquire properties and assets with <span>real intelligence.</span>', 
+  heroSub:'The judicial auction platform with embedded AI.', 
+  heroDesc:'Bezsan combines automated bid tracking, AI-powered due diligence, programmatic bidding and PKI-certified contracts — all in one dashboard.', 
+  heroCta1:'Register Interest',heroCta2:'Watch Demo', 
+  trust1:'Firestore real-time data',trust2:'ICP-Brasil Contracts',trust3:'Federal Revenue API', 
+  stat1:'R$ 2.4Bi',stat1lbl:'Volume tracked',stat2:'4,800+',stat2lbl:'Bids indexed',stat3:'98%',stat3lbl:'CORTEX accuracy',stat4:'< 300ms',stat4lbl:'Alert time', 
+  formBadge:'Early Access',formTitle:'Register Interest',formSub:'Be notified as soon as your region goes live.', 
+  fNome:'Full name *',fNomePh:'Your name',fEmail:'Email *',fEmailPh:'you@company.com',fWpp:'WhatsApp *',fWppPh:'+55 11 9 0000-0000', 
+  fPerfil:'Your profile *',fPerfilOpts:['Select...','Individual investor','Company / Developer','Lawyer / Law firm','Auctioneer','Other'], 
+  fRegiao:'Region of interest *',fRegiaoOpts:['Select...','São Paulo','Rio de Janeiro','Minas Gerais','South Brazil','Northeast','Midwest','All of Brazil'], 
+  fObs:'Specific interest',fObsPh:'Residential, commercial, vehicles...', 
+  fSubmit:'Confirm Registration', 
+  fNote:'No commitment. You will be notified by email and WhatsApp.', 
+  successTitle:'Registration confirmed! 🏆',successText:"You're on the early access list. We'll contact you when your region is enabled.", 
+  howEy:'Process',howH:'How <span>Bezsan</span> works', 
+  howSteps:['Sign Up','Set Criteria','CORTEX Monitors','Bid & Win'], 
+  howIcons:['ri-user-add-line','ri-filter-line','ri-robot-line','ri-auction-line'], 
+  howTexts:['Create your account and set up your investor profile in minutes.','Define regions, price ranges, asset types and minimum discount thresholds.','Our AI scans new bids daily and triggers instant alerts with risk analysis.','Program automatic bids with CORTEX Sniper and follow along in real time.'], 
+  featEy:'Features',featH:'Technology that <span>tilts the game</span> in your favor.', 
+  featSub:'Every feature was built to eliminate risk and maximize return in auctions.', 
+  feats:[ 
+    {icon:'ri-robot-line',title:'AI Due Diligence',text:'Upload the bid PDF → automatic analysis of liens, debts, pending issues and risk in < 30 seconds via Anthropic API.'}, 
+    {icon:'ri-target-line',title:'CORTEX Sniper',text:'Auto-bid engine with configurable rules: max bid, minimum increment, execution in the final seconds.'}, 
+    {icon:'ri-shield-keyhole-line',title:'PKI Contracts',text:'Contract generation and signing with SHA-256 hash and ICP-Brasil certification built into the dashboard.'}, 
+    {icon:'ri-search-eye-line',title:'OSINT & Revenue Data',text:'Automatic CPF/CNPJ lookup, Jusbrasil court records, Serasa score and transfer history.'}, 
+    {icon:'ri-notification-badge-line',title:'Instant Alerts',text:'Webhooks and push in < 300ms when a new bid matches your criteria — app and WhatsApp.'}, 
+    {icon:'ri-pie-chart-2-line',title:'ROI Dashboard',text:'Financial panel with at-risk value, potential return, acquisition history and portfolio projection.'}, 
+  ], 
+  testiEy:'Cases',testiH:'Results that <span>speak for themselves.</span>', 
+  tq:[ 
+    '"The CORTEX Sniper acquired an apartment in São Paulo at a 68% discount. The 25-second due diligence confirmed no liens. I will never bid any other way."', 
+    '"I\'m a lawyer and use Bezsan to prospect clients. The bid tracker saves me 4 hours of manual research every single day."', 
+    '"Our developer company participated in 3 auctions last month. Average ROI was 31%. The financial dashboard is clear and the team support is excellent."', 
+  ], 
+  tn:['Ricardo Nunes','Dr. Fernanda Castro','Apex Developers'], 
+  tr:['Investor · São Paulo','Real Estate Lawyer · Curitiba','Developer · Rio de Janeiro'], 
+  ctaEy:'Limited spots per region',ctaH:'Secure your access <span>before public launch.</span>', 
+  ctaSub:"We're releasing regions in phases. Register now and be the first to operate in your area.", 
+  ctaBtn1:'Register Interest',ctaBtn2:'WhatsApp Chat', 
+  footHow:'How It Works',footFeatures:'Features',footCases:'Cases', 
+  chatName:'CORTEX · Bezsan AI',chatOnline:'Online now', 
+  chatWelcome:"Hello! 🏛️ I'm CORTEX, Bezsan's intelligence assistant.<br><br>I can help you understand how the platform works, explain the automatic due diligence, CORTEX Sniper and much more.<br><br>What type of asset do you usually look for at auctions?", 
+  chatPh:'Ask about auctions, due diligence...', 
+  toastSent:'Registration sent! You are on the list. 🏆',toastErr:'Please fill in name, email and WhatsApp.',toastSendErr:'Send error. Please try again.', 
+  replies:["Great! For real estate auctions, Bezsan's advantage is automatic due diligence — you know the risk before bidding. Want to know how CORTEX Sniper works?","CORTEX Sniper programs automatic bids with rules you define: max value, minimum increment and last-second timing. Have you used auto-bidding before?","Our risk analysis combines Federal Revenue data, Jusbrasil court records and transfer history. Results come in < 30 seconds. Would you like to see an example?","Register your interest and our team will contact you about access for your region. 🏆","We serve individual investors, developers, law firms and auctioneers. What is your profile?"] 
+}, 
+es:{ 
+  lang:'es',pageTitle:'Bezsan — Inteligencia para Subastas Judiciales y Extrajudiciales', 
+  navHow:'Cómo Funciona',navFeatures:'Funcionalidades',navTesti:'Casos',navCta:'Registrar Interés', 
+  tickerItems:['🏛️ Subastas Judiciales','⚡ Alertas en Tiempo Real','🤖 Due Diligence con IA','🔒 Contratos PKI','📊 Análisis CORTEX','💰 NEXIA Pay Split','🎯 CORTEX Auto-Puja'], 
+  heroBadge:'Powered by CORTEX AI · NEXIA OS', 
+  heroH1:'Adquiere inmuebles y activos con <span>inteligencia real.</span>', 
+  heroSub:'La plataforma de subastas judiciales con IA embarcada.', 
+  heroDesc:'Bezsan reúne rastreo automático de edictos, due diligence con IA, puja programática y contratos con certificación PKI — todo en un solo panel.', 
+  heroCta1:'Registrar Interés',heroCta2:'Ver Demostración', 
+  trust1:'Datos Firestore en tiempo real',trust2:'Contratos ICP-Brasil',trust3:'API Receita Federal', 
+  stat1:'R$ 2,4Bi',stat1lbl:'Volumen rastreado',stat2:'4.800+',stat2lbl:'Edictos indexados',stat3:'98%',stat3lbl:'Precisión CORTEX',stat4:'< 300ms',stat4lbl:'Tiempo de alerta', 
+  formBadge:'Acceso Anticipado',formTitle:'Registrar Interés',formSub:'Sé notificado en cuanto tu región esté disponible.', 
+  fNome:'Nombre completo *',fNomePh:'Tu nombre',fEmail:'Correo electrónico *',fEmailPh:'tu@empresa.com',fWpp:'WhatsApp *',fWppPh:'+55 11 9 0000-0000', 
+  fPerfil:'Tu perfil *',fPerfilOpts:['Seleccionar...','Inversor persona física','Empresa / Desarrolladora','Abogado / Bufete','Subastador','Otro'], 
+  fRegiao:'Región de interés *',fRegiaoOpts:['Seleccionar...','São Paulo','Rio de Janeiro','Minas Gerais','Sur de Brasil','Nordeste','Centro-Oeste','Todo Brasil'], 
+  fObs:'Interés específico',fObsPh:'Inmuebles residenciales, comerciales, vehículos...', 
+  fSubmit:'Confirmar Registro', 
+  fNote:'Sin compromiso. Serás notificado por correo y WhatsApp.', 
+  successTitle:'¡Registro confirmado! 🏆',successText:'Estás en la lista de acceso anticipado. Nos pondremos en contacto cuando tu región esté habilitada.', 
+  howEy:'Proceso',howH:'Cómo funciona <span>Bezsan</span>', 
+  howSteps:['Regístrate','Define Criterios','CORTEX Monitorea','Puja y Gana'], 
+  howIcons:['ri-user-add-line','ri-filter-line','ri-robot-line','ri-auction-line'], 
+  howTexts:['Crea tu cuenta y configura tu perfil de inversor en minutos.','Define regiones, rangos de precio, tipos de activo y descuento mínimo.','Nuestra IA escanea nuevos edictos diariamente y activa alertas instantáneas con análisis de riesgo.','Programa pujas automáticas con CORTEX Sniper y sigue todo en tiempo real.'], 
+  featEy:'Funcionalidades',featH:'Tecnología que <span>inclina el juego</span> a tu favor.', 
+  featSub:'Cada función fue construida para eliminar riesgos y maximizar el retorno en subastas.', 
+  feats:[ 
+    {icon:'ri-robot-line',title:'Due Diligence con IA',text:'Sube el edicto en PDF → análisis automático de gravámenes, deudas, pendencias y riesgo en < 30 segundos vía Anthropic API.'}, 
+    {icon:'ri-target-line',title:'CORTEX Sniper',text:'Motor de puja automática con reglas configurables: puja máxima, incremento mínimo, ejecución en los últimos segundos.'}, 
+    {icon:'ri-shield-keyhole-line',title:'Contratos PKI',text:'Generación y firma de contratos con hash SHA-256 y certificación ICP-Brasil integradas en el panel.'}, 
+    {icon:'ri-search-eye-line',title:'OSINT y Receita Federal',text:'Consulta automática CPF/CNPJ, procesos Jusbrasil, score Serasa e historial de transferencias.'}, 
+    {icon:'ri-notification-badge-line',title:'Alertas Instantáneas',text:'Webhooks y push en < 300ms cuando un nuevo edicto coincide con tus criterios — app y WhatsApp.'}, 
+    {icon:'ri-pie-chart-2-line',title:'Dashboard ROI',text:'Panel financiero con valor en riesgo, retorno potencial, historial de adjudicaciones y proyección de portafolio.'}, 
+  ], 
+  testiEy:'Casos',testiH:'Resultados que <span>hablan por sí solos.</span>', 
+  tq:[ 
+    '"El CORTEX Sniper adjudicó un apartamento en SP con 68% de descuento. La due diligence en 25 segundos confirmó que el inmueble estaba limpio. Nunca más licito de otra manera."', 
+    '"Soy abogada y uso Bezsan para prospectar clientes. El rastreador de edictos me ahorra 4 horas de investigación manual cada día."', 
+    '"Nuestra desarrolladora participó en 3 subastas el mes pasado. El ROI promedio fue del 31%. El panel financiero es claro y el soporte del equipo es excelente."', 
+  ], 
+  tn:['Ricardo Nunes','Dra. Fernanda Castro','Constructora Apex'], 
+  tr:['Inversor · São Paulo','Abogada Inmobiliaria · Curitiba','Desarrolladora · Rio de Janeiro'], 
+  ctaEy:'Cupos limitados por región',ctaH:'Asegura tu acceso <span>antes de la apertura pública.</span>', 
+  ctaSub:'Estamos liberando regiones por fases. Regístrate ahora y sé el primero en operar en tu área.', 
+  ctaBtn1:'Registrar Interés',ctaBtn2:'Chat WhatsApp', 
+  footHow:'Cómo Funciona',footFeatures:'Funcionalidades',footCases:'Casos', 
+  chatName:'CORTEX · Bezsan IA',chatOnline:'En línea ahora', 
+  chatWelcome:'¡Hola! 🏛️ Soy CORTEX, el asistente de inteligencia de Bezsan.<br><br>Puedo ayudarte a entender cómo funciona la plataforma, explicarte la due diligence automática, el CORTEX Sniper y mucho más.<br><br>¿Qué tipo de activo sueles buscar en subastas?', 
+  chatPh:'Pregunta sobre subastas, due diligence...', 
+  toastSent:'¡Registro enviado! Estás en la lista. 🏆',toastErr:'Por favor completa nombre, correo y WhatsApp.',toastSendErr:'Error al enviar. Inténtalo de nuevo.', 
+  replies:['¡Genial! En subastas de inmuebles, la ventaja de Bezsan es la due diligence automática — conoces el riesgo antes de pujar. ¿Quieres saber cómo funciona el CORTEX Sniper?','El CORTEX Sniper programa pujas automáticas con reglas que defines tú: valor máximo, incremento mínimo y timing en los últimos segundos. ¿Has usado pujas automáticas antes?','Nuestro análisis de riesgo combina datos de la Receita Federal, Jusbrasil y historial de transferencias. El resultado sale en < 30 segundos. ¿Quieres ver un ejemplo?','Registra tu interés y nuestro equipo se pondrá en contacto contigo para el acceso en tu región. 🏆','Atendemos inversores PF, desarrolladoras, bufetes de abogados y subastadores. ¿Cuál es tu perfil?'] 
+}}; 
+ 
+let currentLang=localStorage.getItem('bezsan_lang')||'pt'; 
+function T(k){return I18N[currentLang][k]||k;} 
+ 
+function setLang(lang){ 
+  currentLang=lang;localStorage.setItem('bezsan_lang',lang); 
+  const d=I18N[lang]; 
+  document.getElementById('html-root').lang=d.lang; 
+  document.getElementById('page-title').textContent=d.pageTitle; 
+  document.getElementById('n-how').textContent=d.navHow; 
+  document.getElementById('n-features').textContent=d.navFeatures; 
+  document.getElementById('n-testi').textContent=d.navTesti; 
+  document.getElementById('n-cta').textContent=d.navCta; 
+  // ticker 
+  const track=document.getElementById('ticker-track'); 
+  const items=[...d.tickerItems,...d.tickerItems].map(t=>`<span class="ticker-item"><span class="ticker-dot"></span>${t}</span>`).join(''); 
+  track.innerHTML=items; 
+  document.getElementById('hero-badge').innerHTML=`<i class="ri-sparkling-2-line"></i>${d.heroBadge}`; 
+  document.getElementById('hero-h1').innerHTML=d.heroH1; 
+  document.getElementById('hero-sub').textContent=d.heroSub; 
+  document.getElementById('hero-desc').textContent=d.heroDesc; 
+  document.getElementById('hero-cta1').textContent=d.heroCta1; 
+  document.getElementById('hero-cta2').textContent=d.heroCta2; 
+  document.getElementById('trust1').textContent=d.trust1; 
+  document.getElementById('trust2').textContent=d.trust2; 
+  document.getElementById('trust3').textContent=d.trust3; 
+  document.getElementById('stat1').textContent=d.stat1;document.getElementById('stat1lbl').textContent=d.stat1lbl; 
+  document.getElementById('stat2').textContent=d.stat2;document.getElementById('stat2lbl').textContent=d.stat2lbl; 
+  document.getElementById('stat3').textContent=d.stat3;document.getElementById('stat3lbl').textContent=d.stat3lbl; 
+  document.getElementById('stat4').textContent=d.stat4;document.getElementById('stat4lbl').textContent=d.stat4lbl; 
+  document.getElementById('form-badge').textContent=d.formBadge; 
+  document.getElementById('form-title').textContent=d.formTitle; 
+  document.getElementById('form-sub').textContent=d.formSub; 
+  document.getElementById('l-nome').textContent=d.fNome;document.getElementById('fc-nome').placeholder=d.fNomePh; 
+  document.getElementById('l-email').textContent=d.fEmail;document.getElementById('fc-email').placeholder=d.fEmailPh; 
+  document.getElementById('l-wpp').textContent=d.fWpp;document.getElementById('fc-whatsapp').placeholder=d.fWppPh; 
+  document.getElementById('l-perfil').textContent=d.fPerfil; 
+  const sp=document.getElementById('fc-perfil');[...sp.options].forEach((o,i)=>{o.textContent=d.fPerfilOpts[i]||o.textContent;}); 
+  document.getElementById('l-regiao').textContent=d.fRegiao; 
+  const sr=document.getElementById('fc-regiao');[...sr.options].forEach((o,i)=>{o.textContent=d.fRegiaoOpts[i]||o.textContent;}); 
+  document.getElementById('l-obs').textContent=d.fObs;document.getElementById('fc-obs').placeholder=d.fObsPh; 
+  document.getElementById('f-submit').innerHTML=`<i class="ri-send-plane-line"></i> ${d.fSubmit}`; 
+  document.getElementById('f-note').textContent=d.fNote; 
+  document.getElementById('success-title').textContent=d.successTitle; 
+  document.getElementById('success-text').textContent=d.successText; 
+  document.getElementById('how-ey').textContent=d.howEy; 
+  document.getElementById('how-h').innerHTML=d.howH; 
+  document.querySelectorAll('.how-step').forEach((el,i)=>{ 
+    el.querySelector('.how-num').textContent=`0${i+1}`; 
+    el.querySelector('.how-icon').innerHTML=`<i class="${d.howIcons[i]}"></i>`; 
+    el.querySelector('.how-title').textContent=d.howSteps[i]; 
+    el.querySelector('.how-text').textContent=d.howTexts[i]; 
+  }); 
+  document.getElementById('feat-ey').textContent=d.featEy; 
+  document.getElementById('feat-h').innerHTML=d.featH; 
+  document.getElementById('feat-sub').textContent=d.featSub; 
+  document.querySelectorAll('.feat-card').forEach((el,i)=>{ 
+    const f=d.feats[i];if(!f)return; 
+    el.querySelector('.feat-icon').innerHTML=`<i class="${f.icon}"></i>`; 
+    el.querySelector('.feat-title').textContent=f.title; 
+    el.querySelector('.feat-text').textContent=f.text; 
+  }); 
+  document.getElementById('testi-ey').textContent=d.testiEy; 
+  document.getElementById('testi-h').innerHTML=d.testiH; 
+  document.querySelectorAll('.testi-card').forEach((el,i)=>{ 
+    el.querySelector('.testi-quote').textContent=d.tq[i]; 
+    el.querySelector('.testi-name').textContent=d.tn[i]; 
+    el.querySelector('.testi-role').textContent=d.tr[i]; 
+  }); 
+  document.getElementById('cta-ey').textContent=d.ctaEy; 
+  document.getElementById('cta-h').innerHTML=d.ctaH; 
+  document.getElementById('cta-sub').textContent=d.ctaSub; 
+  document.getElementById('cta-btn1').innerHTML=`<i class="ri-send-plane-line"></i>${d.ctaBtn1}`; 
+  document.getElementById('cta-btn2').innerHTML=`<i class="ri-whatsapp-line"></i>${d.ctaBtn2}`; 
+  document.getElementById('foot-how').textContent=d.footHow; 
+  document.getElementById('foot-features').textContent=d.footFeatures; 
+  document.getElementById('foot-cases').textContent=d.footCases; 
+  document.getElementById('chat-name').textContent=d.chatName; 
+  document.getElementById('chat-online').textContent=d.chatOnline; 
+  document.getElementById('chat-welcome-msg').innerHTML=d.chatWelcome; 
+  document.getElementById('bz-chat-input').placeholder=d.chatPh; 
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang)); 
+} 
+</script> 
+ 
+<nav id="navbar"> 
+  <div class="nav-inner"> 
+    <a href="/" class="nav-logo"> 
+      <div class="nav-logo-icon">Bz</div> 
+      <div><div class="nav-logo-name">Bezsan</div><div class="nav-logo-sub">Auction Intelligence</div></div> 
+    </a> 
+    <div class="nav-links"> 
+      <a href="#como-funciona" id="n-how">Como Funciona</a> 
+      <a href="#funcionalidades" id="n-features">Funcionalidades</a> 
+      <a href="#cases" id="n-testi">Cases</a> 
+      <a href="#cadastrar" class="nav-cta" id="n-cta">Cadastrar Interesse</a> 
+      <div class="lang-switcher"> 
+        <button class="lang-btn active" data-lang="pt" onclick="setLang('pt')">PT</button> 
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button> 
+        <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button> 
+      </div> 
+    </div> 
+  </div> 
+</nav> 
+ 
+<div class="ticker-wrap"> 
+  <div class="ticker-track" id="ticker-track"> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🏛️ Leilões Judiciais</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>⚡ Alertas em Tempo Real</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🤖 Due Diligence com IA</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🔒 Contratos PKI</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>📊 Análise de Risco CORTEX</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>💰 NEXIA Pay Split</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🎯 CORTEX Sniper de Lances</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🏛️ Leilões Judiciais</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>⚡ Alertas em Tempo Real</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🤖 Due Diligence com IA</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🔒 Contratos PKI</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>📊 Análise de Risco CORTEX</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>💰 NEXIA Pay Split</span> 
+    <span class="ticker-item"><span class="ticker-dot"></span>🎯 CORTEX Sniper de Lances</span> 
+  </div> 
+</div> 
+ 
+<section class="hero" id="home"> 
+  <div class="hero-grid-bg"></div> 
+  <div class="hero-glow"></div> 
+  <div class="hero-inner"> 
+    <div> 
+      <div class="hero-badge" id="hero-badge"><i class="ri-sparkling-2-line"></i>Powered by CORTEX AI · NEXIA OS</div> 
+      <h1 class="hero-h1" id="hero-h1">Arremate imóveis e ativos com <span>inteligência real.</span></h1> 
+      <p class="hero-sub" id="hero-sub">A plataforma de leilões judiciais com IA embarcada.</p> 
+      <p class="hero-desc" id="hero-desc">Bezsan reúne rastreamento automático de editais, due diligence com IA, lance programático e contratos com certificação PKI — tudo em um único painel.</p> 
+      <div class="hero-ctas"> 
+        <a href="#cadastrar" class="btn-gold" id="hero-cta1">Cadastrar Interesse</a> 
+        <a href="#como-funciona" class="btn-ghost" id="hero-cta2"><i class="ri-play-circle-line"></i>Ver Demonstração</a> 
+      </div> 
+      <div class="hero-trust"> 
+        <div class="trust-item"><i class="ri-database-2-line"></i><span id="trust1">Dados Firestore em tempo real</span></div> 
+        <div class="trust-div"></div> 
+        <div class="trust-item"><i class="ri-shield-check-line"></i><span id="trust2">Contratos ICP-Brasil</span></div> 
+        <div class="trust-div"></div> 
+        <div class="trust-item"><i class="ri-government-line"></i><span id="trust3">API Receita Federal</span></div> 
+      </div> 
+    </div> 
+    <div id="cadastrar"> 
+      <div class="form-card"> 
+        <div id="fc-form-area"> 
+          <div class="form-card-badge"><i class="ri-vip-crown-line"></i><span id="form-badge">Acesso Antecipado</span></div> 
+          <div class="form-card-title" id="form-title">Cadastrar Interesse</div> 
+          <p class="form-card-sub" id="form-sub">Seja avisado assim que sua região for liberada.</p> 
+          <div class="fc-field"><label class="fc-label" id="l-nome">Nome completo *</label><input class="fc-input" type="text" id="fc-nome" placeholder="Seu nome"></div> 
+          <div class="fc-field"><label class="fc-label" id="l-email">E-mail *</label><input class="fc-input" type="email" id="fc-email" placeholder="voce@empresa.com"></div> 
+          <div class="fc-field"><label class="fc-label" id="l-wpp">WhatsApp *</label><input class="fc-input" type="tel" id="fc-whatsapp" placeholder="+55 11 9 0000-0000"></div> 
+          <div class="fc-row"> 
+            <div class="fc-field"><label class="fc-label" id="l-perfil">Seu perfil *</label><select class="fc-input" id="fc-perfil"><option value="">Selecionar...</option><option value="pf">Investidor PF</option><option value="pj">Empresa/Incorporadora</option><option value="adv">Advogado/Escritório</option><option value="leil">Leiloeiro</option><option value="outro">Outro</option></select></div> 
+            <div class="fc-field"><label class="fc-label" id="l-regiao">Região *</label><select class="fc-input" id="fc-regiao"><option value="">Selecionar...</option><option value="sp">São Paulo</option><option value="rj">Rio de Janeiro</option><option value="mg">Minas Gerais</option><option value="sul">Sul do Brasil</option><option value="ne">Nordeste</option><option value="co">Centro-Oeste</option><option value="br">Todo o Brasil</option></select></div> 
+          </div> 
+          <div class="fc-field"><label class="fc-label" id="l-obs">Interesse específico</label><input class="fc-input" type="text" id="fc-obs" placeholder="Imóveis residenciais, comerciais, veículos..."></div> 
+          <button class="fc-submit" id="f-submit" onclick="bzsSubmit()"><i class="ri-send-plane-line"></i> Confirmar Cadastro</button> 
+          <p class="fc-note"><i class="ri-information-line"></i><span id="f-note">Sem compromisso. Você será notificado por e-mail e WhatsApp.</span></p> 
+        </div> 
+        <div class="fc-success" id="fc-success"> 
+          <div class="fc-success-icon"><i class="ri-trophy-line"></i></div> 
+          <div class="fc-success-title" id="success-title">Cadastro confirmado! 🏆</div> 
+          <p class="fc-success-text" id="success-text">Você está na lista de acesso antecipado. Entraremos em contato assim que a sua região for habilitada.</p> 
+        </div> 
+      </div> 
+    </div> 
+  </div> 
+</section> 
+ 
+<div class="stats-strip"> 
+  <div class="stats-inner"> 
+    <div class="stat-item"><div class="stat-num" id="stat1">R$ 2,4Bi</div><div class="stat-lbl" id="stat1lbl">Volume rastreado</div></div> 
+    <div class="stat-div"></div> 
+    <div class="stat-item"><div class="stat-num" id="stat2">4.800+</div><div class="stat-lbl" id="stat2lbl">Editais indexados</div></div> 
+    <div class="stat-div"></div> 
+    <div class="stat-item"><div class="stat-num" id="stat3">98%</div><div class="stat-lbl" id="stat3lbl">Precisão CORTEX</div></div> 
+    <div class="stat-div"></div> 
+    <div class="stat-item"><div class="stat-num" id="stat4">&lt; 300ms</div><div class="stat-lbl" id="stat4lbl">Tempo de alerta</div></div> 
+  </div> 
+</div> 
+ 
+<section class="section" id="como-funciona"> 
+  <div class="section-inner"> 
+    <div class="section-eyebrow fade-up"><i class="ri-route-line"></i><span id="how-ey">Processo</span></div> 
+    <h2 class="section-title fade-up" id="how-h">Como o <span>Bezsan</span> funciona</h2> 
+    <div class="how-grid"> 
+      <div class="how-step fade-up"><div class="how-num">01</div><div class="how-icon"><i class="ri-user-add-line"></i></div><div class="how-title">Cadastre-se</div><p class="how-text">Crie sua conta e configure seu perfil de investidor em minutos.</p></div> 
+      <div class="how-step fade-up" style="transition-delay:.1s"><div class="how-num">02</div><div class="how-icon"><i class="ri-filter-line"></i></div><div class="how-title">Defina Critérios</div><p class="how-text">Defina regiões, faixas de valor, tipo de ativo e percentual mínimo de desconto.</p></div> 
+      <div class="how-step fade-up" style="transition-delay:.2s"><div class="how-num">03</div><div class="how-icon"><i class="ri-robot-line"></i></div><div class="how-title">CORTEX Monitora</div><p class="how-text">Nossa IA escaneia novos editais e ativa alertas instantâneos com análise de risco.</p></div> 
+      <div class="how-step fade-up" style="transition-delay:.3s"><div class="how-num">04</div><div class="how-icon"><i class="ri-auction-line"></i></div><div class="how-title">Lance e Arremate</div><p class="how-text">Programe lances automáticos com o CORTEX Sniper e acompanhe em tempo real.</p></div> 
+    </div> 
+  </div> 
+</section> 
+ 
+<section class="section" id="funcionalidades" style="background:rgba(255,255,255,.015);border-top:1px solid var(--border);border-bottom:1px solid var(--border)"> 
+  <div class="section-inner"> 
+    <div class="section-eyebrow fade-up"><i class="ri-cpu-line"></i><span id="feat-ey">Funcionalidades</span></div> 
+    <h2 class="section-title fade-up" id="feat-h">Tecnologia que <span>inclina o jogo</span> a seu favor.</h2> 
+    <p class="section-sub fade-up" id="feat-sub">Cada feature foi construída para eliminar riscos e maximizar retorno em leilões.</p> 
+    <div class="features-grid"> 
+      <div class="feat-card fade-up"><div class="feat-icon"><i class="ri-robot-line"></i></div><div class="feat-title">Due Diligence com IA</div><p class="feat-text">Upload do edital em PDF → análise automática de ônus, dívidas, pendências e risco em &lt; 30 segundos via Anthropic API.</p></div> 
+      <div class="feat-card fade-up" style="transition-delay:.08s"><div class="feat-icon"><i class="ri-target-line"></i></div><div class="feat-title">CORTEX Sniper</div><p class="feat-text">Motor de lance automático com regras configuráveis: lance máximo, incremento mínimo, execução nos últimos segundos.</p></div> 
+      <div class="feat-card fade-up" style="transition-delay:.16s"><div class="feat-icon"><i class="ri-shield-keyhole-line"></i></div><div class="feat-title">Contratos PKI</div><p class="feat-text">Geração e assinatura de contratos com hash SHA-256 e certificação ICP-Brasil embutida no painel.</p></div> 
+      <div class="feat-card fade-up" style="transition-delay:.24s"><div class="feat-icon"><i class="ri-search-eye-line"></i></div><div class="feat-title">OSINT & Receita Federal</div><p class="feat-text">Consulta automática CPF/CNPJ do proprietário, processos Jusbrasil, score Serasa e histórico de transferências.</p></div> 
+      <div class="feat-card fade-up" style="transition-delay:.32s"><div class="feat-icon"><i class="ri-notification-badge-line"></i></div><div class="feat-title">Alertas Instantâneos</div><p class="feat-text">Webhooks e push em &lt; 300ms quando um novo edital corresponde aos seus critérios — app e WhatsApp.</p></div> 
+      <div class="feat-card fade-up" style="transition-delay:.40s"><div class="feat-icon"><i class="ri-pie-chart-2-line"></i></div><div class="feat-title">Dashboard de ROI</div><p class="feat-text">Painel financeiro com valor em risco, retorno potencial, histórico de arrematações e projeção de portfólio.</p></div> 
+    </div> 
+  </div> 
+</section> 
+ 
+<section class="section" id="cases"> 
+  <div class="section-inner"> 
+    <div class="section-eyebrow fade-up"><i class="ri-double-quotes-l"></i><span id="testi-ey">Cases</span></div> 
+    <h2 class="section-title fade-up" id="testi-h">Resultados que <span>falam por si.</span></h2> 
+    <div class="testi-grid"> 
+      <div class="testi-card fade-up"><div class="testi-stars">★★★★★</div><p class="testi-quote">"O CORTEX Sniper arrematou um apartamento em SP com 68% de desconto. A due diligence em 25 segundos revelou que o imóvel estava limpo. Nunca mais licito de outra forma."</p><div class="testi-author"><div class="testi-av">R</div><div><div class="testi-name">Ricardo Nunes</div><div class="testi-role">Investidor · São Paulo</div></div></div></div> 
+      <div class="testi-card fade-up" style="transition-delay:.1s"><div class="testi-stars">★★★★★</div><p class="testi-quote">"Sou advogada e uso o Bezsan para prospectar clientes. O rastreador de editais me poupa 4 horas por dia de pesquisa manual."</p><div class="testi-author"><div class="testi-av">F</div><div><div class="testi-name">Dra. Fernanda Castro</div><div class="testi-role">Advogada Imobiliária · Curitiba</div></div></div></div> 
+      <div class="testi-card fade-up" style="transition-delay:.2s"><div class="testi-stars">★★★★★</div><p class="testi-quote">"Nossa incorporadora participou de 3 leilões no mês passado. O ROI médio foi 31%. O painel financeiro é claro e o suporte da equipe é excelente."</p><div class="testi-author"><div class="testi-av">A</div><div><div class="testi-name">Construtora Apex</div><div class="testi-role">Incorporadora · Rio de Janeiro</div></div></div></div> 
+    </div> 
+  </div> 
+</section> 
+ 
+<section class="final-cta"> 
+  <div class="final-cta-eyebrow"><i class="ri-vip-crown-line"></i><span id="cta-ey">Vagas limitadas por região</span></div> 
+  <h2 class="final-cta-title" id="cta-h">Garanta seu acesso <span>antes da abertura pública.</span></h2> 
+  <p class="final-cta-sub" id="cta-sub">Estamos liberando regiões em fases. Cadastre-se agora e seja o primeiro a operar na sua área.</p> 
+  <div class="final-cta-btns"> 
+    <a href="#cadastrar" class="btn-gold" id="cta-btn1"><i class="ri-send-plane-line"></i>Cadastrar Interesse</a> 
+    <a href="https://wa.me/5511999990000" target="_blank" rel="noopener" class="btn-ghost" id="cta-btn2"><i class="ri-whatsapp-line"></i>Falar no WhatsApp</a> 
+  </div> 
+</section> 
+ 
+<footer> 
+  <div class="footer-inner"> 
+    <div class="footer-brand"><div class="footer-brand-icon">Bz</div><div class="footer-brand-name">Bezsan · NEXIA OS</div></div> 
+    <div class="footer-copy">© <span id="bz-year"></span> Bezsan. Todos os direitos reservados.</div> 
+    <div class="footer-links"> 
+      <a href="#como-funciona" id="foot-how">Como Funciona</a> 
+      <a href="#funcionalidades" id="foot-features">Funcionalidades</a> 
+      <a href="#cases" id="foot-cases">Cases</a> 
+    </div> 
+  </div> 
+</footer> 
+ 
+<div id="bz-toast"></div> 
+ 
+<div id="bz-chat-fab"> 
+  <div id="bz-fab-btn" onclick="bzToggleChat()" style="position:relative"> 
+    <span id="bz-fab-badge">1</span> 
+    <i class="ri-robot-2-line" id="bz-fab-ico-chat"></i> 
+    <i class="ri-close-line" id="bz-fab-ico-x" style="display:none"></i> 
+  </div> 
+  <div id="bz-chat-window"> 
+    <div class="bz-chat-head"> 
+      <div class="bz-chat-avatar"><i class="ri-robot-2-line"></i></div> 
+      <div> 
+        <div class="bz-chat-head-name" id="chat-name">CORTEX · Bezsan AI</div> 
+        <div class="bz-chat-head-status"><div class="bz-status-dot"></div><span id="chat-online">Online agora</span></div> 
+      </div> 
+      <i class="ri-close-line bz-chat-close" onclick="bzToggleChat()"></i> 
+    </div> 
+    <div class="bz-chat-msgs" id="bz-msgs"> 
+      <div class="bz-msg bot"> 
+        <div class="bz-msg-bubble" id="chat-welcome-msg">Olá! 🏛️ Sou o CORTEX, assistente de inteligência da Bezsan.<br><br>Posso te ajudar a entender como funciona a plataforma, explicar a due diligence automática, o CORTEX Sniper e muito mais.<br><br>Qual tipo de ativo você costuma buscar em leilões?</div> 
+        <div class="bz-msg-time">agora</div> 
+      </div> 
+    </div> 
+    <div class="bz-chat-foot"> 
+      <textarea id="bz-chat-input" rows="1" onkeydown="bzHandleKey(event)" placeholder="Pergunte sobre leilões, due diligence..."></textarea> 
+      <button id="bz-send-btn" onclick="bzSend()"><i class="ri-send-plane-fill"></i></button> 
+    </div> 
+  </div> 
+</div> 
+ 
+<!-- Firebase Compat (unificado) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  try{firebase.initializeApp({apiKey:"AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",authDomain:"nexia-c8710.firebaseapp.com",projectId:"nexia-c8710",storageBucket:"nexia-c8710.firebasestorage.app",messagingSenderId:"623044447905",appId:"1:623044447905:web:13f70e1584fb0fcf8d2ae0"});}catch(e){}
+  const db=firebase.firestore();
+  function bzToast(msg,err=false){const t=document.getElementById('bz-toast');t.textContent=msg;t.className=err?'error show':'show';setTimeout(()=>t.className='',4500);} 
+  window.bzsSubmit = async function(){ 
+    const v=id=>document.getElementById(id).value.trim(); 
+    const nome=v('fc-nome'),email=v('fc-email'),whatsapp=v('fc-whatsapp'); 
+    if(!nome||!email||!whatsapp){bzToast(T('toastErr'),true);return;} 
+    const btn=document.getElementById('f-submit');btn.disabled=true; 
+    try{ 
+      await db.collection('tenants').doc('bezsan').collection('leads').add({nome,email,whatsapp,lang:currentLang,perfil:document.getElementById('fc-perfil').value,regiao:document.getElementById('fc-regiao').value,obs:v('fc-obs'),origem:'bezsan-landing',status:'Novo',criadoEm:firebase.firestore.FieldValue.serverTimestamp()}); 
+      document.getElementById('fc-form-area').style.display='none'; 
+      document.getElementById('fc-success').style.display='block'; 
+      bzToast(T('toastSent')); 
+    }catch(e){console.error(e);bzToast(T('toastSendErr'),true);btn.disabled=false;} 
+  }; 
+})();
+</script> 
+ 
+<script> 
+  document.getElementById('bz-year').textContent=new Date().getFullYear(); 
+  window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60);}); 
+  document.querySelectorAll('.fade-up').forEach(el=>new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});},{threshold:.12}).observe(el)); 
+  let bzChatOpen=false,bzIsTyping=false,bzReplyIdx=0; 
+  window.bzToggleChat=function(){ 
+    bzChatOpen=!bzChatOpen; 
+    const w=document.getElementById('bz-chat-window'); 
+    const b=document.getElementById('bz-fab-badge'); 
+    document.getElementById('bz-fab-ico-chat').style.display=bzChatOpen?'none':'block'; 
+    document.getElementById('bz-fab-ico-x').style.display=bzChatOpen?'block':'none'; 
+    if(bzChatOpen){w.classList.add('open');if(b)b.style.display='none';document.getElementById('bz-chat-input').focus();} 
+    else w.classList.remove('open'); 
+  }; 
+  window.bzHandleKey=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();bzSend();}}; 
+  window.bzSend=function(){ 
+    if(bzIsTyping)return; 
+    const input=document.getElementById('bz-chat-input'); 
+    const txt=input.value.trim();if(!txt)return; 
+    input.value='';bzAppendMsg(txt,'user');bzIsTyping=true; 
+    const typingEl=bzAppendTyping(); 
+    setTimeout(function(){ 
+      typingEl.remove(); 
+      const replies=I18N[currentLang].replies; 
+      bzAppendMsg(replies[bzReplyIdx%replies.length],'bot'); 
+      bzReplyIdx++;bzIsTyping=false; 
+    },1200+Math.random()*700); 
+  }; 
+  function bzAppendMsg(text,role){ 
+    const msgs=document.getElementById('bz-msgs'); 
+    const now=new Date();const time=now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes(); 
+    const div=document.createElement('div');div.className='bz-msg '+role; 
+    div.innerHTML='<div class="bz-msg-bubble">'+text+'</div><div class="bz-msg-time">'+time+'</div>'; 
+    msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;return div; 
+  } 
+  function bzAppendTyping(){ 
+    const msgs=document.getElementById('bz-msgs'); 
+    const div=document.createElement('div');div.className='bz-msg bot'; 
+    div.innerHTML='<div class="bz-typing"><span></span><span></span><span></span></div>'; 
+    msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;return div; 
+  } 
+  document.addEventListener('DOMContentLoaded',()=>setLang(currentLang)); 
+</script> 
+  <script src="../core/nexia-engine.js"></script>
+  <!-- AI Sales Agent Widget -->
+  <script src="../core/sales-agent-widget.js" data-tenant="bezsan" data-name="ARIA" data-color="#00e5ff"></script>
+</body> 

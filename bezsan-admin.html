@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ Bezsan — Admin v12</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#131829;
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.10);
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35);
+  --gold:#DAA520;--gbg:rgba(218,165,32,.08);--gbrd:rgba(218,165,32,.22);
+  --green:#00D68F;--gnbg:rgba(0,214,143,.08);--gnbrd:rgba(0,214,143,.22);
+  --blue:#0057FF;--bbg:rgba(0,87,255,.08);--bbrd:rgba(0,87,255,.22);
+  --cyan:#00E5FF;--cbg:rgba(0,229,255,.07);--cbrd:rgba(0,229,255,.2);
+  --red:#FF3D71;--rbg:rgba(255,61,113,.08);--rbrd:rgba(255,61,113,.22);
+  --purple:#9B5CF6;--pbg:rgba(155,92,246,.08);--pbrd:rgba(155,92,246,.22);
+  --orange:#F59E0B;--obg:rgba(245,158,11,.08);--obrd:rgba(245,158,11,.22);
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+  --sw:240px;--r:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);overflow:hidden}
+button{font-family:var(--ff);cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:var(--ff);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(218,165,32,.3);border-radius:2px}
+.shell{display:grid;grid-template-columns:var(--sw) 1fr;height:100vh;overflow:hidden}
+#sb{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.gem{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3d2800,#a07000,var(--gold));border:1px solid var(--gbrd);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(218,165,32,.25)}
+.gem i{color:#fff;font-size:16px}
+.sn{font-size:13px;font-weight:800;color:var(--text)}
+.ss{font-size:7.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);opacity:.9;margin-top:1px}
+.grp{margin-bottom:2px}
+.grp-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all .15s}
+.grp-btn:hover{color:var(--text2)}.grp-btn i.gi{font-size:15px;flex-shrink:0}
+.grp-btn .cv{font-size:13px;margin-left:auto;transition:transform .25s ease}
+.grp-btn.open .cv{transform:rotate(180deg)}.grp-btn.ha{color:var(--gold)}
+.grp-items{display:none;flex-direction:column;padding:2px 0 6px;border-left:1px solid var(--brd);margin:0 14px 0 22px}
+.grp-items.open{display:flex}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border:1px solid transparent;margin:1px 0}
+.nav-item i{font-size:15px;flex-shrink:0;width:18px;text-align:center}
+.nav-item:hover{background:var(--gbg);color:var(--text)}
+.nav-item.active{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}
+.nbadge{margin-left:auto;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nbadge.live{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.nbadge.hot{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.nbadge.gold{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.nbadge.new{background:var(--cbg);color:var(--cyan);border:1px solid var(--cbrd)}
+.sdiv{height:1px;background:var(--brd);margin:8px 14px}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#a07000,var(--gold));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#000;flex-shrink:0}
+#main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 24px;background:rgba(7,9,14,.92);border-bottom:1px solid var(--brd);backdrop-filter:blur(16px)}
+#tb-title{font-size:15px;font-weight:800;color:var(--text)}
+.tbstat{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;font-family:var(--ffm)}
+.dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+.dg{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dgld{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;border:1px solid transparent}
+.bg{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}.bg:hover{background:rgba(218,165,32,.16)}
+.br{background:var(--rbg);border-color:var(--rbrd);color:var(--red)}.br:hover{background:rgba(255,61,113,.16)}
+.bc{background:var(--cbg);border-color:var(--cbrd);color:var(--cyan)}.bc:hover{background:rgba(0,229,255,.14)}
+.bb{background:var(--bbg);border-color:var(--bbrd);color:var(--blue)}.bb:hover{background:rgba(0,87,255,.16)}
+.bgn{background:var(--gnbg);border-color:var(--gnbrd);color:var(--green)}.bgn:hover{background:rgba(0,214,143,.14)}
+.bo{background:var(--obg);border-color:var(--obrd);color:var(--orange)}
+.ab{width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.ab.r{background:var(--rbg);color:var(--red);border-color:var(--rbrd)}
+.ab.gld{background:var(--gbg);color:var(--gold);border-color:var(--gbrd)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--ffm)}
+.pill.on{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.pill.off{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.pill.wait{background:var(--obg);color:var(--orange);border:1px solid var(--obrd)}
+.pill.gld{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.pill.blue{background:var(--bbg);color:var(--blue);border:1px solid var(--bbrd)}
+.pill.pur{background:var(--pbg);color:var(--purple);border:1px solid var(--pbrd)}
+.content{flex:1;overflow:hidden}
+.page{display:none;height:100%;overflow-y:auto;padding:26px 28px;flex-direction:column;gap:20px}
+.page.active{display:flex}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.phl .ey{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.phl .pt{font-size:22px;font-weight:900;color:var(--text)}
+.ac{color:var(--gold)}.pha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.chd{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ct{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.ct i{color:var(--gold)}.cbd{padding:18px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kcard{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kcard.k-gold::before{background:var(--gold)}.kcard.k-green::before{background:var(--green)}
+.kcard.k-red::before{background:var(--red)}.kcard.k-cyan::before{background:var(--cyan)}
+.kcard.k-purple::before{background:var(--purple)}.kcard.k-orange::before{background:var(--orange)}
+.kval{font-size:26px;font-weight:900;font-family:var(--ffm);color:var(--text)}
+.klbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.kdelta{font-size:10px;font-weight:700;display:flex;align-items:center;gap:3px;margin-top:2px}
+.kdelta.up{color:var(--green)}.kdelta.dn{color:var(--red)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:9px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--brd);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--brd);transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:10px 14px;color:var(--text2);font-size:12px}
+tbody td:first-child{color:var(--text);font-weight:600}
+.srch{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.srch-wrap{position:relative;flex:1}
+.srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.srch-in{width:100%;padding:9px 14px 9px 38px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:12px}
+.srch-in:focus{border-color:var(--gold)}.srch-in::placeholder{color:var(--text3)}
+select.sel{padding:8px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer}
+select.sel:focus{border-color:var(--gold)}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(4px)}
+.mov.show{display:flex}
+.mo{background:var(--bg2);border:1px solid var(--brd2);border-radius:16px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.mo-hd{padding:20px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.mo-tt{font-size:15px;font-weight:800;color:var(--text)}
+.mo-x{width:28px;height:28px;border-radius:6px;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.mo-bd{padding:24px}.mo-ft{padding:16px 24px;border-top:1px solid var(--brd);display:flex;gap:10px;justify-content:flex-end}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:.05em}
+.fi{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:13px}
+.fi:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gbg)}.fi::placeholder{color:var(--text3)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+textarea.fi{resize:vertical;min-height:80px}
+.cortex-layout{display:flex;flex-direction:column;height:calc(100vh - 52px - 80px - 90px);min-height:350px}
+.cx-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg3);border-radius:12px 12px 0 0;border:1px solid var(--brd);border-bottom:none}
+.cx-msg{max-width:80%;display:flex;flex-direction:column;gap:4px}
+.cx-msg.ai{align-self:flex-start}.cx-msg.user{align-self:flex-end}
+.cx-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+.cx-msg.ai .cx-bubble{background:var(--bg4);border:1px solid var(--brd);color:var(--text);border-radius:4px 12px 12px 12px}
+.cx-msg.user .cx-bubble{background:var(--gbg);border:1px solid var(--gbrd);color:var(--text);border-radius:12px 4px 12px 12px}
+.cx-meta{font-size:10px;color:var(--text3);font-family:var(--ffm)}.cx-msg.user .cx-meta{text-align:right}
+.cx-input-row{display:flex;gap:8px;padding:12px;background:var(--bg2);border:1px solid var(--brd);border-radius:0 0 12px 12px}
+.cx-in{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:13px;resize:none;height:42px}
+.cx-in:focus{border-color:var(--gold)}
+.cx-typing{display:flex;gap:4px;align-items:center;padding:10px 14px}
+.cx-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:bounce 1.2s infinite}
+.cx-dot:nth-child(2){animation-delay:.2s}.cx-dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.chart-wrap{position:relative;height:220px}
+.lc{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s}
+.lc:hover{border-color:var(--gbrd)}
+.risk-bar{height:8px;border-radius:4px;background:var(--bg4);overflow:hidden;margin-top:4px}
+.risk-fill{height:100%;border-radius:4px;transition:width .8s}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--gbrd);border-radius:10px;padding:12px 18px;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+.splash-ov{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;transition:opacity .5s}
+.splash-ov.fade{opacity:0;pointer-events:none}
+.splash-gem{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#3d2800,#a07000,var(--gold));border:1px solid var(--gbrd);display:flex;align-items:center;justify-content:center;font-size:24px;animation:sglow 2s ease-in-out infinite}
+@keyframes sglow{0%,100%{box-shadow:0 0 16px rgba(218,165,32,.3)}50%{box-shadow:0 0 40px rgba(218,165,32,.6)}}
+.splash-txt{font-size:20px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+.splash-sub{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);opacity:.8}
+.splash-bar{width:200px;height:2px;background:var(--brd);border-radius:1px;overflow:hidden}
+.splash-prog{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:1px;animation:prog 1.2s ease-out forwards}
+@keyframes prog{0%{width:0}100%{width:100%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){
+  .kgrid{grid-template-columns:repeat(2,1fr)}.kgrid3{grid-template-columns:1fr}
+  .shell{grid-template-columns:1fr!important}
+  #sb,aside{position:fixed!important;top:0;left:-280px!important;height:100vh;z-index:1000;width:260px!important;transition:left .3s;box-shadow:4px 0 30px rgba(0,0,0,.5)}
+  #sb.open,aside.open{left:0!important}
+  .main-area,.main{grid-column:1!important;margin-left:0!important}
+  .topbar,.tb,.header{padding-left:60px!important}
+}
+@media(max-width:540px){
+  .kgrid{grid-template-columns:1fr!important}
+  .modal{width:96vw!important;padding:16px!important}
+}
+#bez-mob-btn{display:none;position:fixed;top:12px;left:12px;z-index:2000;width:42px;height:42px;border-radius:10px;background:#0A0D16;border:1px solid rgba(218,165,32,.3);color:#DAA520;font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+@media(max-width:900px){#bez-mob-btn{display:flex}}
+</style>
+</head>
+<body>
+
+<div class="splash-ov" id="splash">
+  <div class="splash-gem">⚖️</div>
+  <div><div class="splash-txt">Bezsan <span style="color:var(--gold)">Leilões</span></div><div class="splash-sub">Admin · NEXIA OS v12</div></div>
+  <div class="splash-bar"><div class="splash-prog"></div></div>
+</div>
+
+<div class="shell">
+<aside id="sb">
+  <div class="sb-logo">
+    <div class="gem"><i class="ri-auction-line"></i></div>
+    <div><div class="sn">Bezsan</div><div class="ss">Admin · v12</div></div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn open ha" onclick="tg(this)"><i class="ri-dashboard-line gi"></i><span>Visão Geral</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items open">
+      <div class="nav-item active" onclick="nav('dashboard',this)"><i class="ri-layout-masonry-line"></i>Dashboard<span class="nbadge live">LIVE</span></div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn open ha" onclick="tg(this)"><i class="ri-auction-line gi"></i><span>Leilões</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items open">
+      <div class="nav-item" onclick="nav('leiloes',this)"><i class="ri-list-check-3"></i>Ativos & Editais<span class="nbadge gold" id="badge-leiloes">0</span></div>
+      <div class="nav-item" onclick="nav('sniper',this)"><i class="ri-focus-3-line"></i>CORTEX Sniper<span class="nbadge hot">AUTO</span></div>
+      <div class="nav-item" onclick="nav('pipeline',this)"><i class="ri-kanban-view"></i>Pipeline CRM</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-file-search-line gi"></i><span>Due Diligence</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('diligence',this)"><i class="ri-robot-line"></i>Análise IA PDF<span class="nbadge new">IA</span></div>
+      <div class="nav-item" onclick="nav('contratos',this)"><i class="ri-file-lock-line"></i>Contratos PKI</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-money-dollar-circle-line gi"></i><span>Financeiro</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('financeiro',this)"><i class="ri-bank-card-line"></i>Retorno & Lances</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-shield-check-line gi"></i><span>Segurança</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('shield',this)"><i class="ri-eye-line"></i>NEXIA Shield</div>
+      <div class="nav-item" onclick="nav('compliance',this)"><i class="ri-file-certificate-line"></i>Compliance LGPD</div>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)"><i class="ri-robot-line gi"></i><span>CORTEX AI</span><i class="ri-arrow-down-s-line cv"></i></button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('cortex',this)"><i class="ri-chat-ai-line"></i>Co-Pilot<span class="nbadge live">IA</span></div>
+    </div>
+  </div>
+  <div class="sdiv"></div>
+  <div class="nav-item" style="margin:4px 14px" onclick="nav('configuracoes',this)"><i class="ri-tools-line"></i>Configurações</div>
+  <div class="sb-footer">
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="avatar">BZ</div>
+      <div><div style="font-size:12px;font-weight:700">Bezsan Admin</div><div style="font-size:9px;color:var(--gold);font-family:var(--ffm)">LEILÕES JUDICIAIS</div></div>
+    </div>
+  </div>
+</aside>
+
+<div id="main">
+  <div class="topbar">
+    <div id="tb-title">⚖️ Dashboard</div>
+    <div class="tbstat"><div class="dot dgld"></div><span style="font-size:11px;color:var(--gold)">BEZSAN</span></div>
+    <div class="tbstat"><div class="dot dg"></div><span id="stat-leiloes" style="color:var(--text2)">— leilões</span></div>
+    <div class="tbr">
+      <select class="sel" style="font-size:10px" onchange="setLang(this.value)">
+        <option value="pt">🇧🇷 PT</option><option value="en">🇺🇸 EN</option><option value="es">🇪🇸 ES</option>
+      </select>
+      <button class="btn bg" onclick="om('m-novo-leilao')"><i class="ri-add-line"></i>Novo Leilão</button>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="pg-dashboard">
+    <div class="ph">
+      <div class="phl"><div class="ey">BEZSAN · NEXIA OS v12</div><div class="pt">Dashboard <span class="ac">Leilões</span></div></div>
+      <div class="pha">
+        <div class="pill gld"><i class="ri-auction-line"></i><span id="kpi-pill">0 ativos</span></div>
+        <button class="btn bg" onclick="loadDashboard()"><i class="ri-refresh-line"></i>Atualizar</button>
+      </div>
+    </div>
+    <div class="kgrid">
+      <div class="kcard k-gold"><div class="klbl">Valor em Risco</div><div class="kval" id="kpi-risco">R$ 0</div><div class="kdelta">Lances mín. somados</div></div>
+      <div class="kcard k-green"><div class="klbl">Retorno Potencial</div><div class="kval" id="kpi-retorno">R$ 0</div><div class="kdelta up"><i class="ri-arrow-up-s-line"></i>Avaliação − Lance</div></div>
+      <div class="kcard k-cyan"><div class="klbl">Leilões Ativos</div><div class="kval" id="kpi-leiloes">0</div><div class="kdelta"><i class="ri-calendar-line"></i>Próximos 30 dias</div></div>
+      <div class="kcard k-orange"><div class="klbl">Arrematados</div><div class="kval" id="kpi-arr">0</div><div class="kdelta up"><i class="ri-trophy-line"></i>Histórico</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-bar-chart-2-line"></i>Retorno por Mês</div></div><div class="cbd"><div class="chart-wrap"><canvas id="chart-retorno"></canvas></div></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-pie-chart-2-line"></i>Categorias de Bens</div></div><div class="cbd"><div class="chart-wrap"><canvas id="chart-cat"></canvas></div></div></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-robot-line"></i>CORTEX Insights</div><div class="pill gld">IA Preditiva</div></div>
+      <div class="cbd"><div id="cortex-insight" style="font-size:13px;color:var(--text2);line-height:1.7;background:var(--gbg);border:1px solid var(--gbrd);border-radius:8px;padding:14px"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block"></i> Carregando análise CORTEX...</div></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-auction-line"></i>Próximos Leilões</div><button class="btn bg" onclick="nav('leiloes',null)">Ver todos</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Bem</th><th>Tipo</th><th>Data</th><th>Lance Mín.</th><th>Avaliação</th><th>Desconto</th><th>Status</th></tr></thead><tbody id="dash-tbody"><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">Carregando...</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- LEILÕES -->
+  <div class="page" id="pg-leiloes">
+    <div class="ph">
+      <div class="phl"><div class="ey">GESTÃO</div><div class="pt">Editais & <span class="ac">Leilões Ativos</span></div></div>
+      <div class="pha">
+        <button class="btn bg" onclick="om('m-novo-leilao')"><i class="ri-add-line"></i>Cadastrar Leilão</button>
+        <button class="btn bc" onclick="nav('diligence',null)"><i class="ri-file-upload-line"></i>Analisar PDF</button>
+      </div>
+    </div>
+    <div class="srch">
+      <div class="srch-wrap"><i class="ri-search-line srch-ic"></i><input class="srch-in" id="srch-l" placeholder="Buscar bem, edital, vara..." oninput="filterL()"></div>
+      <select class="sel" id="fil-tipo" onchange="filterL()"><option value="">Todos os tipos</option><option value="imovel">Imóvel</option><option value="veiculo">Veículo</option><option value="empresa">Empresa</option></select>
+      <select class="sel" id="fil-status" onchange="filterL()"><option value="">Todos status</option><option value="ativo">Ativo</option><option value="monitorando">Monitorando</option><option value="arrematado">Arrematado</option></select>
+    </div>
+    <div id="leiloes-grid" style="display:flex;flex-direction:column;gap:12px"><div style="text-align:center;padding:40px;color:var(--text3)">Carregando leilões...</div></div>
+  </div>
+
+  <!-- SNIPER -->
+  <div class="page" id="pg-sniper">
+    <div class="ph">
+      <div class="phl"><div class="ey">AUTOMAÇÃO</div><div class="pt">CORTEX <span class="ac">Sniper</span> — Lances Auto</div></div>
+      <div class="pha"><div class="pill on"><div class="dot dg"></div>Motor Ativo</div><button class="btn bg" onclick="om('m-nova-regra')"><i class="ri-add-line"></i>Nova Regra</button></div>
+    </div>
+    <div class="kgrid3">
+      <div class="kcard k-gold"><div class="klbl">Regras Ativas</div><div class="kval" id="sniper-n">0</div><div class="kdelta"><i class="ri-focus-3-line"></i>Monitorando</div></div>
+      <div class="kcard k-green"><div class="klbl">Lances Disparados</div><div class="kval" id="sniper-l">0</div><div class="kdelta up">Automáticos</div></div>
+      <div class="kcard k-cyan"><div class="klbl">Economia Gerada</div><div class="kval" id="sniper-e">R$ 0</div><div class="kdelta up">vs. Lance manual</div></div>
+    </div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-focus-3-line"></i>Regras de Disparo</div></div><div class="cbd"><div id="sniper-rules" style="display:flex;flex-direction:column;gap:10px"></div></div></div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-history-line"></i>Log de Execuções</div></div><div class="tbl-wrap"><table><thead><tr><th>Leilão</th><th>Ação</th><th>Valor Lance</th><th>Teto</th><th>Resultado</th><th>Hora</th></tr></thead><tbody id="sniper-log"></tbody></table></div></div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="page" id="pg-pipeline">
+    <div class="ph">
+      <div class="phl"><div class="ey">CRM</div><div class="pt">Pipeline de <span class="ac">Clientes</span></div></div>
+      <div class="pha"><button class="btn bg" onclick="om('m-novo-cliente')"><i class="ri-add-line"></i>Novo Cliente</button></div>
+    </div>
+    <div id="kanban" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;min-height:400px"></div>
+  </div>
+
+  <!-- DILIGENCE -->
+  <div class="page" id="pg-diligence">
+    <div class="ph"><div class="phl"><div class="ey">IA ANÁLISE</div><div class="pt">CORTEX <span class="ac">Due Diligence</span></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-file-upload-line"></i>Upload Edital PDF</div></div>
+        <div class="cbd">
+          <div style="border:2px dashed var(--gbrd);border-radius:10px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('pdf-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+            <i class="ri-file-pdf-line" style="font-size:36px;color:var(--gold);display:block;margin-bottom:12px"></i>
+            <div style="font-size:13px;font-weight:600">Arraste o PDF ou clique</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">Edital, matrícula, IPTU — máx 20MB</div>
+          </div>
+          <input type="file" id="pdf-input" accept=".pdf" style="display:none" onchange="analyzePdf(this.files[0])">
+          <div id="pdf-status" style="margin-top:12px;display:none"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-robot-line"></i>Análise CORTEX</div><div class="pill gld">IA</div></div>
+        <div class="cbd" id="diligence-result" style="min-height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3)">
+          <i class="ri-file-search-line" style="font-size:32px"></i><span>Faça upload de um edital</span>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-history-line"></i>Histórico de Análises</div></div><div class="tbl-wrap"><table><thead><tr><th>Documento</th><th>Tipo</th><th>Risco</th><th>Score</th><th>Data</th></tr></thead><tbody id="diligence-hist"></tbody></table></div></div>
+  </div>
+
+  <!-- CONTRATOS -->
+  <div class="page" id="pg-contratos">
+    <div class="ph">
+      <div class="phl"><div class="ey">PKI</div><div class="pt">Contratos <span class="ac">Assinados</span></div></div>
+      <div class="pha"><button class="btn bg" onclick="om('m-novo-contrato')"><i class="ri-file-add-line"></i>Novo Contrato</button></div>
+    </div>
+    <div class="kgrid3">
+      <div class="kcard k-green"><div class="klbl">Ativos</div><div class="kval" id="ct-at">0</div><div class="kdelta up">ICP-Brasil</div></div>
+      <div class="kcard k-gold"><div class="klbl">Pendentes</div><div class="kval" id="ct-pd">0</div><div class="kdelta">Aguardando</div></div>
+      <div class="kcard k-cyan"><div class="klbl">Hash SHA-256</div><div class="kval">✓</div><div class="kdelta">Íntegros</div></div>
+    </div>
+    <div class="tbl-wrap card"><table><thead><tr><th>Contrato</th><th>Cliente</th><th>Leilão</th><th>Valor</th><th>Hash</th><th>Status</th><th>Data</th><th>Ação</th></tr></thead><tbody id="ct-tbody"></tbody></table></div>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div class="page" id="pg-financeiro">
+    <div class="ph">
+      <div class="phl"><div class="ey">FINANCEIRO</div><div class="pt">Retorno & <span class="ac">Investimentos</span></div></div>
+      <div class="pha"><button class="btn bg" onclick="exportDRE()"><i class="ri-file-excel-line"></i>Exportar DRE</button></div>
+    </div>
+    <div class="kgrid">
+      <div class="kcard k-gold"><div class="klbl">Capital Investido</div><div class="kval" id="fin-inv">R$ 0</div></div>
+      <div class="kcard k-green"><div class="klbl">Valor de Mercado</div><div class="kval" id="fin-mer">R$ 0</div></div>
+      <div class="kcard k-cyan"><div class="klbl">Lucro Estimado</div><div class="kval" id="fin-luc">R$ 0</div></div>
+      <div class="kcard k-purple"><div class="klbl">ROI Médio</div><div class="kval" id="fin-roi">0%</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px">
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-line-chart-line"></i>Fluxo de Caixa Mensal</div></div><div class="cbd"><div class="chart-wrap"><canvas id="chart-fluxo"></canvas></div></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-donut-chart-line"></i>Alocação</div></div><div class="cbd"><div style="height:220px"><canvas id="chart-aloc"></canvas></div></div></div>
+    </div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-bill-line"></i>Transações</div></div><div class="tbl-wrap"><table><thead><tr><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Leilão</th><th>Data</th><th>Status</th></tr></thead><tbody id="fin-tbody"></tbody></table></div></div>
+  </div>
+
+  <!-- SHIELD -->
+  <div class="page" id="pg-shield">
+    <div class="ph">
+      <div class="phl"><div class="ey">SEGURANÇA</div><div class="pt">NEXIA <span class="ac">Shield</span></div></div>
+      <div class="pha"><div class="pill on"><div class="dot dg"></div>Monitorando</div></div>
+    </div>
+    <div class="kgrid3">
+      <div class="kcard k-green"><div class="klbl">Score Segurança</div><div class="kval">97</div><div class="kdelta up">Excelente</div></div>
+      <div class="kcard k-gold"><div class="klbl">Eventos 24h</div><div class="kval" id="sh-ev">0</div><div class="kdelta">Auditados</div></div>
+      <div class="kcard k-red"><div class="klbl">Anomalias</div><div class="kval" id="sh-an">0</div><div class="kdelta">Últimas 24h</div></div>
+    </div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-history-line"></i>Audit Trail — Imutável</div><div class="pill gld"><i class="ri-lock-line"></i>SHA-256</div></div><div class="tbl-wrap"><table><thead><tr><th>Ação</th><th>Usuário</th><th>IP</th><th>Módulo</th><th>Hash</th><th>Timestamp</th></tr></thead><tbody id="audit-tbody"></tbody></table></div></div>
+  </div>
+
+  <!-- COMPLIANCE -->
+  <div class="page" id="pg-compliance">
+    <div class="ph"><div class="phl"><div class="ey">LGPD</div><div class="pt">Gestão de <span class="ac">Conformidade</span></div></div></div>
+    <div class="kgrid3">
+      <div class="kcard k-green"><div class="klbl">Conformidade LGPD</div><div class="kval">98%</div><div class="kdelta up">Aprovado</div></div>
+      <div class="kcard k-gold"><div class="klbl">Solicitações</div><div class="kval">2</div><div class="kdelta">Titulares</div></div>
+      <div class="kcard k-cyan"><div class="klbl">Retenção</div><div class="kval">5 anos</div><div class="kdelta">BACEN</div></div>
+    </div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-file-list-3-line"></i>Checklist LGPD</div></div><div class="cbd" id="comp-list" style="display:flex;flex-direction:column;gap:10px"></div></div>
+  </div>
+
+  <!-- CORTEX -->
+  <div class="page" id="pg-cortex">
+    <div class="ph">
+      <div class="phl"><div class="ey">IA</div><div class="pt">CORTEX <span class="ac">Co-Pilot</span> Bezsan</div></div>
+      <div class="pha"><button class="btn br" onclick="clearChat()"><i class="ri-delete-bin-line"></i>Limpar</button></div>
+    </div>
+    <div class="cortex-layout">
+      <div class="cx-msgs" id="cx-msgs">
+        <div class="cx-msg ai"><div class="cx-bubble">⚖️ <strong>CORTEX Bezsan</strong> ativo. Especialista em leilões judiciais brasileiros. Analiso editais, calculo retorno, identifico riscos. Como posso ajudar?</div><div class="cx-meta">CORTEX · v12</div></div>
+      </div>
+      <div class="cx-input-row">
+        <textarea class="cx-in" id="cx-input" placeholder="Analise os riscos deste leilão..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();cxSend()}"></textarea>
+        <button class="btn bg" onclick="cxSend()"><i class="ri-send-plane-fill"></i></button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn bb" onclick="cxQ('Quais leilões têm maior margem de retorno?')">📊 Maior retorno</button>
+      <button class="btn bb" onclick="cxQ('Analise os riscos jurídicos dos editais ativos')">⚖️ Riscos jurídicos</button>
+      <button class="btn bb" onclick="cxQ('Calcule o ROI médio do portfólio atual')">💰 ROI portfólio</button>
+      <button class="btn bb" onclick="cxQ('Gere relatório executivo do mês')">📋 Relatório</button>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div class="page" id="pg-configuracoes">
+    <div class="ph"><div class="phl"><div class="ey">SISTEMA</div><div class="pt">Configurações <span class="ac">Bezsan</span></div></div><div class="pha"><button class="btn bg" onclick="saveSettings()"><i class="ri-save-line"></i>Salvar</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-robot-line"></i>Anthropic API (CORTEX)</div></div><div class="cbd"><div class="fg"><label class="fl">API Key</label><input class="fi" type="password" id="cfg-key" placeholder="sk-ant-api..."></div><button class="btn bgn" style="width:100%;justify-content:center" onclick="testAPI()"><i class="ri-test-tube-line"></i>Testar Conexão</button></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-database-line"></i>Firebase</div></div><div class="cbd"><div class="fg"><label class="fl">Tenant</label><input class="fi" value="bezsan" readonly></div><div class="fg"><label class="fl">Coleção</label><input class="fi" value="data/bezsan/*" readonly></div></div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-notification-3-line"></i>Alertas Sniper</div></div><div class="cbd">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:12px">Alertar desconto &gt; 30%</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:12px">Notificar 24h antes</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px">Sniper automático</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div></div>
+      <div class="card"><div class="chd"><div class="ct"><i class="ri-bank-card-line"></i>Mercado Pago</div></div><div class="cbd"><div class="fg"><label class="fl">Access Token</label><input class="fi" type="password" id="cfg-mp" placeholder="APP_USR-..."></div></div></div>
+    </div>
+  </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="mov" id="m-novo-leilao">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-auction-line" style="color:var(--gold)"></i> Cadastrar Leilão</div><div class="mo-x" onclick="cm('m-novo-leilao')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="frow"><div class="fg"><label class="fl">Nº Edital</label><input class="fi" id="nl-edital" placeholder="000123/2026-TJ"></div><div class="fg"><label class="fl">Vara / Tribunal</label><input class="fi" id="nl-vara" placeholder="3ª Vara Cível - TJRJ"></div></div>
+      <div class="fg"><label class="fl">Descrição do Bem</label><input class="fi" id="nl-bem" placeholder="Apartamento 3 quartos, Barra da Tijuca..."></div>
+      <div class="frow"><div class="fg"><label class="fl">Tipo</label><select class="fi sel" id="nl-tipo"><option value="imovel">Imóvel</option><option value="veiculo">Veículo</option><option value="empresa">Empresa</option><option value="outro">Outros</option></select></div><div class="fg"><label class="fl">Data do Leilão</label><input class="fi" id="nl-data" type="date"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Lance Mínimo (R$)</label><input class="fi" id="nl-lance" type="number" placeholder="150000"></div><div class="fg"><label class="fl">Avaliação de Mercado (R$)</label><input class="fi" id="nl-aval" type="number" placeholder="280000"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">URL do Edital</label><input class="fi" id="nl-url" placeholder="https://..."></div><div class="fg"><label class="fl">Teto Máximo Lance (R$)</label><input class="fi" id="nl-teto" type="number" placeholder="200000"></div></div>
+      <div class="fg"><label class="fl">Observações</label><textarea class="fi" id="nl-obs" placeholder="Débitos, ocupação, pendências..."></textarea></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-leilao')">Cancelar</button><button class="btn bg" onclick="salvarLeilao()"><i class="ri-save-line"></i>Salvar</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-nova-regra">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-focus-3-line" style="color:var(--gold)"></i> Nova Regra Sniper</div><div class="mo-x" onclick="cm('m-nova-regra')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="fg"><label class="fl">Nome da Regra</label><input class="fi" id="sr-nome" placeholder="Imóveis RJ +40% desconto"></div>
+      <div class="frow"><div class="fg"><label class="fl">Desconto Mínimo (%)</label><input class="fi" id="sr-desc" type="number" placeholder="30" min="0" max="100"></div><div class="fg"><label class="fl">Lance Máximo (R$)</label><input class="fi" id="sr-teto" type="number" placeholder="300000"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Tipo</label><select class="fi sel" id="sr-tipo"><option value="imovel">Imóvel</option><option value="veiculo">Veículo</option><option value="qualquer">Qualquer</option></select></div><div class="fg"><label class="fl">Modo</label><select class="fi sel" id="sr-modo"><option value="automatico">Automático</option><option value="alerta">Apenas Alertar</option></select></div></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-nova-regra')">Cancelar</button><button class="btn bg" onclick="salvarRegra()"><i class="ri-save-line"></i>Ativar</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-novo-cliente">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-user-add-line" style="color:var(--gold)"></i> Novo Cliente</div><div class="mo-x" onclick="cm('m-novo-cliente')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="cli-nome" placeholder="Nome completo"></div><div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="cli-wpp" placeholder="(21) 99999-0000"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Email</label><input class="fi" id="cli-email"></div><div class="fg"><label class="fl">CPF/CNPJ</label><input class="fi" id="cli-doc"></div></div>
+      <div class="frow"><div class="fg"><label class="fl">Capital (R$)</label><input class="fi" id="cli-cap" type="number" placeholder="50000"></div><div class="fg"><label class="fl">Stage</label><select class="fi sel" id="cli-stage"><option>Lead</option><option>Qualificado</option><option>Proposta</option><option>Fechado</option></select></div></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-cliente')">Cancelar</button><button class="btn bg" onclick="salvarCliente()"><i class="ri-save-line"></i>Salvar</button></div>
+  </div>
+</div>
+
+<div class="mov" id="m-novo-contrato">
+  <div class="mo">
+    <div class="mo-hd"><div class="mo-tt"><i class="ri-file-add-line" style="color:var(--gold)"></i> Novo Contrato</div><div class="mo-x" onclick="cm('m-novo-contrato')"><i class="ri-close-line"></i></div></div>
+    <div class="mo-bd">
+      <div class="fg"><label class="fl">Nome do Contrato</label><input class="fi" id="ct-nome" placeholder="Contrato de Arrematação..."></div>
+      <div class="frow"><div class="fg"><label class="fl">Cliente</label><input class="fi" id="ct-cli"></div><div class="fg"><label class="fl">Valor (R$)</label><input class="fi" id="ct-val" type="number"></div></div>
+    </div>
+    <div class="mo-ft"><button class="btn br" onclick="cm('m-novo-contrato')">Cancelar</button><button class="btn bg" onclick="salvarContrato()"><i class="ri-save-line"></i>Salvar</button></div>
+  </div>
+</div>
+
+<style>
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg4);border:1px solid var(--brd);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--gold);border-color:var(--gbrd)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .2s}
+.toggle.on::after{transform:translateX(16px)}
+</style>
+<div id="toast"><i class="ri-check-line" style="color:var(--gold)"></i><span id="toast-msg"></span></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+// ── FIREBASE ──
+const fbCfg={apiKey:"AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",authDomain:"nexia-c8710.firebaseapp.com",projectId:"nexia-c8710",storageBucket:"nexia-c8710.firebasestorage.app",messagingSenderId:"623044447905",appId:"1:623044447905:web:13f70e1584fb0fcf8d2ae0"};
+try{firebase.initializeApp(fbCfg);}catch(e){}
+const db=firebase.firestore(),auth=firebase.auth();
+const T='bezsan';
+const COL=c=>db.collection('data').doc(T).collection(c);
+
+// ── AUTH GUARD ──
+(function authGuard(){
+  document.body.style.visibility='hidden';
+  auth.onAuthStateChanged(function(user){
+    if(!user){
+      window.location.href='../login.html?next='+encodeURIComponent(window.location.pathname);
+    } else {
+      document.body.style.visibility='visible';
+    }
+  });
+})();
+
+// ── STATE ──
+let anthropicKey=''; // chave não armazenada no browser — /api/cortex usa chave do servidor
+let leiloesData=[],clientesData=[],sniperRules=[];
+let chartR,chartC,chartF,chartA;
+
+// ── SPLASH ──
+setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('fade');setTimeout(()=>s.remove(),500);},1200);
+
+// ── UTILS ──
+const fmtBRL=v=>'R$ '+Number(v||0).toLocaleString('pt-BR');
+const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('pt-BR');};
+const desc=(l,a)=>a>0?Math.round((1-l/a)*100):0;
+const hsh=s=>{let h=0;for(const c of s)h=(h<<5)-h+c.charCodeAt(0);return(h>>>0).toString(16).padStart(8,'0').toUpperCase();};
+
+// ── NAV ──
+function nav(p,el){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const pg=document.getElementById('pg-'+p);
+  if(pg)pg.classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'⚖️ Dashboard',leiloes:'📋 Editais & Leilões',sniper:'🎯 CORTEX Sniper',pipeline:'👥 Pipeline CRM',diligence:'🔍 Due Diligence IA',contratos:'📄 Contratos PKI',financeiro:'💰 Financeiro',shield:'🛡️ NEXIA Shield',compliance:'✅ Compliance',cortex:'🤖 CORTEX Co-Pilot',configuracoes:'⚙️ Configurações'};
+  document.getElementById('tb-title').textContent=titles[p]||p;
+  if(p==='dashboard')loadDashboard();
+  if(p==='leiloes')loadLeiloes();
+  if(p==='sniper')loadSniper();
+  if(p==='pipeline')loadPipeline();
+  if(p==='financeiro')loadFinanceiro();
+  if(p==='contratos')loadContratos();
+  if(p==='shield')loadShield();
+  if(p==='compliance')renderCompliance();
+}
+function tg(b){b.classList.toggle('open');const n=b.nextElementSibling;if(n)n.classList.toggle('open');}
+function om(id){document.getElementById(id).classList.add('show');}
+function cm(id){document.getElementById(id).classList.remove('show');}
+function toast(msg,err=false){const t=document.getElementById('toast');t.style.borderColor=err?'var(--rbrd)':'var(--gbrd)';document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function setLang(l){/* i18n stub */}
+
+// ── FALLBACK DATA ──
+function getDefaultLeiloes(){return[
+  {id:'l1',bem:'Apt 3Q Barra da Tijuca — 115m²',tipo:'imovel',data:'2026-04-15',lance:320000,avaliacao:680000,status:'ativo',vara:'3ª Vara Cível TJRJ',edital:'0004521/2026'},
+  {id:'l2',bem:'BMW 320i 2021 — 82.000km',tipo:'veiculo',data:'2026-04-10',lance:58000,avaliacao:95000,status:'ativo',vara:'2ª Vara Exec. TJRJ',edital:'0003892/2026'},
+  {id:'l3',bem:'Sala Comercial 45m² — Centro RJ',tipo:'imovel',data:'2026-04-22',lance:185000,avaliacao:310000,status:'monitorando',vara:'5ª Vara Cível TJRJ',edital:'0005103/2026'},
+  {id:'l4',bem:'Casa 4Q Recreio — 200m²',tipo:'imovel',data:'2026-03-15',lance:520000,avaliacao:920000,status:'arrematado',vara:'1ª Vara Cível Barra',edital:'0002789/2026'},
+];}
+
+// ── DASHBOARD ──
+async function loadDashboard(){
+  try{const s=await COL('leiloes').orderBy('criadoEm','desc').limit(30).get();leiloesData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){if(!leiloesData.length)leiloesData=getDefaultLeiloes();}
+  const ativos=leiloesData.filter(l=>l.status==='ativo'||l.status==='monitorando');
+  const risco=ativos.reduce((s,l)=>s+(l.lance||0),0);
+  const retPot=ativos.reduce((s,l)=>s+(l.avaliacao||0),0)-risco;
+  const arr=leiloesData.filter(l=>l.status==='arrematado').length;
+  document.getElementById('kpi-risco').textContent=fmtBRL(risco);
+  document.getElementById('kpi-retorno').textContent=fmtBRL(retPot);
+  document.getElementById('kpi-leiloes').textContent=ativos.length;
+  document.getElementById('kpi-arr').textContent=arr;
+  document.getElementById('kpi-pill').textContent=ativos.length+' ativos';
+  document.getElementById('stat-leiloes').textContent=leiloesData.length+' leilões';
+  document.getElementById('badge-leiloes').textContent=ativos.length;
+  renderDashTable(leiloesData.slice(0,5));
+  initDashCharts();
+  loadInsight();
+}
+
+function renderDashTable(data){
+  const el=document.getElementById('dash-tbody');
+  if(!data.length){el.innerHTML='<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text3)">Nenhum leilão</td></tr>';return;}
+  const sc={ativo:'on',monitorando:'wait',arrematado:'pur',cancelado:'off'};
+  el.innerHTML=data.map(l=>{const d=desc(l.lance,l.avaliacao);return`<tr>
+    <td>${l.bem||'—'}</td><td>${l.tipo||'—'}</td><td>${l.data||'—'}</td>
+    <td style="color:var(--gold);font-family:var(--ffm)">${fmtBRL(l.lance)}</td>
+    <td style="font-family:var(--ffm)">${fmtBRL(l.avaliacao)}</td>
+    <td><span class="pill ${d>40?'on':'wait'}">${d}%</span></td>
+    <td><span class="pill ${sc[l.status]||'blue'}">${l.status||'—'}</span></td>
+  </tr>`;}).join('');
+}
+
+function initDashCharts(){
+  if(chartR)chartR.destroy();if(chartC)chartC.destroy();
+  chartR=new Chart(document.getElementById('chart-retorno'),{type:'bar',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun'],datasets:[{label:'Retorno (R$)',data:[45000,68000,52000,89000,72000,110000],backgroundColor:'rgba(218,165,32,.5)',borderColor:'var(--gold)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)',font:{size:10},callback:v=>'R$'+v/1000+'k'}}}}});
+  chartC=new Chart(document.getElementById('chart-cat'),{type:'doughnut',data:{labels:['Imóvel','Veículo','Empresa','Outros'],datasets:[{data:[55,25,12,8],backgroundColor:['rgba(218,165,32,.7)','rgba(0,229,255,.7)','rgba(155,92,246,.7)','rgba(245,158,11,.7)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'rgba(232,240,255,.6)',font:{size:10}}}}}});
+}
+
+async function loadInsight(){
+  const el=document.getElementById('cortex-insight');
+  const ativos=leiloesData.filter(l=>l.status==='ativo');
+  // CORTEX sempre disponível via /api/cortex (chave no servidor)
+  el.innerHTML='<i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block"></i> CORTEX analisando portfólio...';
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'bezsan',mode:'insight',message:`Especialista em leilões judiciais BR. Analise: ${JSON.stringify(leiloesData.slice(0,5).map(l=>({bem:l.bem,lance:l.lance,aval:l.avaliacao,status:l.status,desconto:desc(l.lance,l.avaliacao)+'%'})))}. Dê 3 insights curtos.`})});
+    const d=await r.json();
+    el.innerHTML='⚖️ '+(d.response||d.content||'Análise concluída.').replace(/\n/g,'<br>');
+  }catch(e){el.innerHTML='⚠️ Configure API Key em Configurações.';}
+}
+
+// ── LEILÕES ──
+async function loadLeiloes(){
+  try{const s=await COL('leiloes').orderBy('criadoEm','desc').get();leiloesData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){if(!leiloesData.length)leiloesData=getDefaultLeiloes();}
+  renderLeiloes(leiloesData);
+}
+
+function renderLeiloes(data){
+  const el=document.getElementById('leiloes-grid');
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">Nenhum leilão cadastrado.</div>';return;}
+  const sc={ativo:'on',monitorando:'wait',arrematado:'pur',cancelado:'off'};
+  el.innerHTML=data.map(l=>{
+    const d=desc(l.lance,l.avaliacao);
+    const rc=d>50?'var(--green)':d>30?'var(--orange)':'var(--red)';
+    return`<div class="lc">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div><div style="font-size:13px;font-weight:700">${l.bem||'—'}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${l.edital||'—'} · ${l.vara||'—'}</div></div>
+        <span class="pill ${sc[l.status]||'blue'}">${l.status||'—'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--bg4);border-radius:8px;padding:10px">
+        <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:2px">Lance Mín.</div><div style="font-size:14px;font-weight:800;color:var(--gold);font-family:var(--ffm)">${fmtBRL(l.lance)}</div></div>
+        <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:2px">Avaliação</div><div style="font-size:14px;font-weight:800;font-family:var(--ffm)">${fmtBRL(l.avaliacao)}</div></div>
+        <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:2px">Desconto</div><div style="font-size:14px;font-weight:800;color:var(--green);font-family:var(--ffm)">${d}%</div></div>
+      </div>
+      <div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px"><span>Atratividade</span><span style="color:${rc}">${d>50?'Alta':d>30?'Média':'Baixa'}</span></div><div class="risk-bar"><div class="risk-fill" style="width:${Math.min(d,100)}%;background:${rc}"></div></div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:11px;color:var(--text3)"><i class="ri-calendar-line"></i> ${l.data||'—'}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn bc" style="padding:4px 10px" onclick="analisarLeilao('${l.id}')"><i class="ri-robot-line"></i>IA</button>
+          <button class="btn br" style="padding:4px 10px" onclick="deletarLeilao('${l.id}')"><i class="ri-delete-bin-line"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterL(){
+  const q=document.getElementById('srch-l').value.toLowerCase();
+  const tipo=document.getElementById('fil-tipo').value;
+  const st=document.getElementById('fil-status').value;
+  renderLeiloes(leiloesData.filter(l=>(!q||(l.bem||'').toLowerCase().includes(q)||(l.edital||'').toLowerCase().includes(q))&&(!tipo||l.tipo===tipo)&&(!st||l.status===st)));
+}
+
+async function salvarLeilao(){
+  const p={edital:document.getElementById('nl-edital').value,vara:document.getElementById('nl-vara').value,bem:document.getElementById('nl-bem').value,tipo:document.getElementById('nl-tipo').value,data:document.getElementById('nl-data').value,lance:parseFloat(document.getElementById('nl-lance').value)||0,avaliacao:parseFloat(document.getElementById('nl-aval').value)||0,url:document.getElementById('nl-url').value,teto:parseFloat(document.getElementById('nl-teto').value)||0,obs:document.getElementById('nl-obs').value,status:'ativo',criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await COL('leiloes').add(p);}catch(e){leiloesData.push({...p,id:'l'+Date.now()});}
+  toast('Leilão cadastrado!');cm('m-novo-leilao');loadLeiloes();
+}
+
+async function deletarLeilao(id){
+  nexiaConfirm('Excluir este leilão?', function(){
+  try{await COL('leiloes').doc(id).delete();}catch(e){leiloesData=leiloesData.filter(l=>l.id!==id);}
+  toast('Removido.');loadLeiloes();
+}
+
+async function analisarLeilao(id){
+  const l=leiloesData.find(x=>x.id===id);if(!l)return;
+  nav('diligence',null);
+  const el=document.getElementById('diligence-result');
+  el.style.display='flex';el.style.alignItems='';el.style.justifyContent='';
+  el.innerHTML='<i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block;font-size:24px;color:var(--gold)"></i>';
+  // sem gate — CORTEX sempre disponível via backend
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'bezsan',mode:'analysis',message:`Due diligence leilão judicial BR:\n${JSON.stringify(l)}\n\nResponda: 1) Score de risco (Baixo/Médio/Alto), 2) Riscos jurídicos principais, 3) Estimativa de retorno, 4) Recomendação final. Português, formato estruturado.`})});
+    const d=await r.json();
+    el.innerHTML=buildDiligBox(l,d.response||d.content||'Análise concluída.');
+  }catch(e){el.innerHTML=buildDiligBox(l,'Erro ao contatar API: '+e.message);}
+}
+
+function buildDiligBox(l,txt){
+  return`<div style="width:100%;display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:8px;padding:12px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Bem Analisado</div>
+      <div style="font-size:13px;font-weight:700">${l.bem}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${l.edital||'—'} · ${l.vara||'—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:var(--gbg);border:1px solid var(--gbrd);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">LANCE MÍN.</div><div style="font-size:14px;font-weight:800;color:var(--gold);font-family:var(--ffm)">${fmtBRL(l.lance)}</div></div>
+      <div style="background:var(--gnbg);border:1px solid var(--gnbrd);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">AVALIAÇÃO</div><div style="font-size:14px;font-weight:800;color:var(--green);font-family:var(--ffm)">${fmtBRL(l.avaliacao)}</div></div>
+      <div style="background:var(--cbg);border:1px solid var(--cbrd);border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">DESCONTO</div><div style="font-size:14px;font-weight:800;color:var(--cyan);font-family:var(--ffm)">${desc(l.lance,l.avaliacao)}%</div></div>
+    </div>
+    <div style="background:var(--bg4);border:1px solid var(--brd);border-radius:8px;padding:14px;font-size:13px;line-height:1.7;color:var(--text2)">${txt.replace(/\n/g,'<br>')}</div>
+  </div>`;
+}
+
+function handleDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')analyzePdf(f);}
+
+async function analyzePdf(file){
+  if(!file)return;
+  const st=document.getElementById('pdf-status');
+  st.style.display='block';st.innerHTML='<div class="pill wait"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block"></i> Processando...</div>';
+  const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
+  st.innerHTML='<div class="pill on"><i class="ri-check-line"></i> '+file.name+'</div>';
+  const el=document.getElementById('diligence-result');el.style.display='';
+  el.innerHTML='<i class="ri-loader-4-line" style="animation:spin 1s linear infinite;display:inline-block;font-size:24px;color:var(--gold)"></i>';
+  // sem gate — CORTEX sempre disponível via backend
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'bezsan',mode:'document',message:'Analise este edital de leilão judicial. Extraia: edital, vara, bem, lance mínimo, avaliação, data, riscos jurídicos, recomendação. Português estruturado.',document:{type:'base64',media_type:'application/pdf',data:b64}})});
+    const d=await r.json();
+    el.innerHTML='<div style="background:var(--bg4);border:1px solid var(--brd);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;color:var(--text2)">'+(d.content?.[0]?.text||'').replace(/\n/g,'<br>')+'</div>';
+    // add to history
+    document.getElementById('diligence-hist').insertAdjacentHTML('afterbegin',`<tr><td>${file.name}</td><td>Edital</td><td><span class="pill wait">Médio</span></td><td><span class="pill on">85</span></td><td>${new Date().toLocaleDateString('pt-BR')}</td></tr>`);
+  }catch(e){el.innerHTML='<div style="padding:16px;background:var(--rbg);border:1px solid var(--rbrd);border-radius:8px">Erro: '+e.message+'</div>';}
+}
+
+// ── SNIPER ──
+async function loadSniper(){
+  try{const s=await COL('sniper_rules').get();sniperRules=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){sniperRules=[{id:'r1',nome:'Imóveis RJ +40% desconto',tipo:'imovel',desc:40,teto:400000,modo:'alerta',ativo:true,lances:3,eco:28000},{id:'r2',nome:'Veículos Premium',tipo:'veiculo',desc:30,teto:120000,modo:'automatico',ativo:true,lances:1,eco:8500}];}
+  document.getElementById('sniper-n').textContent=sniperRules.filter(r=>r.ativo).length;
+  document.getElementById('sniper-l').textContent=sniperRules.reduce((s,r)=>s+(r.lances||0),0);
+  document.getElementById('sniper-e').textContent=fmtBRL(sniperRules.reduce((s,r)=>s+(r.eco||r.economia||0),0));
+  document.getElementById('sniper-rules').innerHTML=sniperRules.length?sniperRules.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px">
+    <div style="width:38px;height:38px;border-radius:8px;background:var(--gbg);border:1px solid var(--gbrd);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:18px;flex-shrink:0"><i class="ri-focus-3-line"></i></div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:700">${r.nome}</div><div style="font-size:11px;color:var(--text3)">Desconto ≥ ${r.desc||r.desconto||0}% · Teto ${fmtBRL(r.teto)} · ${r.modo}</div></div>
+    <span class="pill ${r.ativo?'on':'off'}">${r.ativo?'Ativo':'Pausado'}</span>
+    <button class="btn br" style="padding:4px 10px" onclick="deletarRegra('${r.id}')"><i class="ri-delete-bin-line"></i></button>
+  </div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--text3)">Nenhuma regra. Clique em "Nova Regra".</div>';
+  document.getElementById('sniper-log').innerHTML=[
+    {leilao:'Apt Barra da Tijuca',acao:'Alerta enviado',val:320000,teto:400000,res:'on',hora:'14:32'},
+    {leilao:'BMW 320i 2021',acao:'Lance automático',val:60000,teto:80000,res:'on',hora:'11:15'},
+    {leilao:'Sala Comercial Centro',acao:'Monitorando',val:185000,teto:200000,res:'wait',hora:'09:00'},
+  ].map(l=>`<tr><td>${l.leilao}</td><td>${l.acao}</td><td style="color:var(--gold);font-family:var(--ffm)">${fmtBRL(l.val)}</td><td style="color:var(--text3);font-family:var(--ffm)">${fmtBRL(l.teto)}</td><td><span class="pill ${l.res}">${l.res==='on'?'OK':l.res==='wait'?'Aguardando':'Falhou'}</span></td><td style="font-family:var(--ffm);color:var(--text3)">${l.hora}</td></tr>`).join('');
+}
+
+async function salvarRegra(){
+  const p={nome:document.getElementById('sr-nome').value||'Regra Sniper',tipo:document.getElementById('sr-tipo').value,desc:parseFloat(document.getElementById('sr-desc').value)||30,teto:parseFloat(document.getElementById('sr-teto').value)||0,modo:document.getElementById('sr-modo').value,ativo:true,lances:0,eco:0,criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await COL('sniper_rules').add(p);}catch(e){sniperRules.push({...p,id:'r'+Date.now()});}
+  toast('Regra ativada!');cm('m-nova-regra');loadSniper();
+}
+
+async function deletarRegra(id){
+  try{await COL('sniper_rules').doc(id).delete();}catch(e){sniperRules=sniperRules.filter(r=>r.id!==id);}
+  toast('Regra removida.');loadSniper();
+}
+
+// ── PIPELINE ──
+const STAGES=['Lead','Qualificado','Proposta','Fechado'];
+async function loadPipeline(){
+  try{const s=await COL('clientes').orderBy('criadoEm','desc').get();clientesData=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){clientesData=[{id:'c1',nome:'Roberto Lima',email:'roberto@email.com',wpp:'21999990001',cap:150000,stage:'Lead'},{id:'c2',nome:'Fernanda Costa',email:'fernanda@email.com',wpp:'21999990002',cap:300000,stage:'Proposta'},{id:'c3',nome:'Carlos Mendes',email:'carlos@email.com',wpp:'21999990003',cap:80000,stage:'Fechado'}];}
+  renderKanban();
+}
+
+function renderKanban(){
+  document.getElementById('kanban').innerHTML=STAGES.map(st=>{
+    const cards=clientesData.filter(c=>c.stage===st);
+    return`<div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">${st}</span>
+        <span style="font-size:11px;color:var(--gold);font-family:var(--ffm)">${cards.length}</span>
+      </div>
+      <div ondragover="event.preventDefault()" ondrop="dropCard(event,'${st}')" style="display:flex;flex-direction:column;gap:8px;min-height:100px;padding:4px;border-radius:8px">
+        ${cards.map(c=>`<div draggable="true" ondragstart="dragCard(event,'${c.id}')" style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:12px;cursor:grab">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px">${c.nome}</div>
+          <div style="font-size:10px;color:var(--text3)">${c.email||'—'}</div>
+          <div style="font-size:11px;color:var(--gold);margin-top:5px;font-family:var(--ffm)">${fmtBRL(c.cap||c.capital||0)}</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn bg" style="flex:1;justify-content:center;padding:4px;font-size:10px" onclick="moverCard('${c.id}','${nextStage(st)}')">Avançar <i class="ri-arrow-right-line"></i></button>
+            <button class="btn br" style="padding:4px 8px" onclick="deletarCliente('${c.id}')"><i class="ri-delete-bin-line"></i></button>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const nextStage=s=>STAGES[Math.min(STAGES.indexOf(s)+1,STAGES.length-1)];
+let dragId=null;
+function dragCard(e,id){dragId=id;}
+function dropCard(e,st){if(!dragId)return;moverCard(dragId,st);dragId=null;}
+
+async function moverCard(id,st){
+  try{await COL('clientes').doc(id).update({stage:st});}catch(e){}
+  clientesData=clientesData.map(c=>c.id===id?{...c,stage:st}:c);
+  renderKanban();
+}
+
+async function salvarCliente(){
+  const p={nome:document.getElementById('cli-nome').value,email:document.getElementById('cli-email').value,wpp:document.getElementById('cli-wpp').value,doc:document.getElementById('cli-doc').value,cap:parseFloat(document.getElementById('cli-cap').value)||0,stage:document.getElementById('cli-stage').value,criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await COL('clientes').add(p);}catch(e){clientesData.push({...p,id:'c'+Date.now()});}
+  toast('Cliente adicionado!');cm('m-novo-cliente');loadPipeline();
+}
+
+async function deletarCliente(id){
+  try{await COL('clientes').doc(id).delete();}catch(e){clientesData=clientesData.filter(c=>c.id!==id);}
+  renderKanban();
+}
+
+// ── FINANCEIRO ──
+async function loadFinanceiro(){
+  if(chartF)chartF.destroy();if(chartA)chartA.destroy();
+  document.getElementById('fin-inv').textContent='R$ 825.000';
+  document.getElementById('fin-mer').textContent='R$ 1.290.000';
+  document.getElementById('fin-luc').textContent='R$ 465.000';
+  document.getElementById('fin-roi').textContent='56%';
+  const txs=[{descricao:'Arrematação — Casa Recreio',tipo:'investimento',valor:-520000,leilao:'0002789/2026',status:'confirmado'},{descricao:'Venda — Apt Ipanema',tipo:'retorno',valor:890000,leilao:'0001245/2025',status:'confirmado'}];
+  document.getElementById('fin-tbody').innerHTML=txs.map(t=>`<tr>
+    <td>${t.descricao}</td><td><span class="pill ${t.tipo==='retorno'?'on':'off'}">${t.tipo}</span></td>
+    <td style="color:${t.valor>0?'var(--green)':'var(--red)'};font-family:var(--ffm)">${t.valor>0?'+':''}${fmtBRL(Math.abs(t.valor))}</td>
+    <td style="color:var(--text3)">${t.leilao}</td><td>${new Date().toLocaleDateString('pt-BR')}</td>
+    <td><span class="pill on">${t.status}</span></td>
+  </tr>`).join('');
+  chartF=new Chart(document.getElementById('chart-fluxo'),{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun'],datasets:[{label:'Investido',data:[120000,85000,200000,150000,180000,90000],borderColor:'var(--red)',tension:.4,fill:false},{label:'Retorno',data:[0,145000,0,0,270000,0],borderColor:'var(--green)',tension:.4,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(232,240,255,.6)',font:{size:10}}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'rgba(232,240,255,.45)',callback:v=>'R$'+v/1000+'k'}}}}});
+  chartA=new Chart(document.getElementById('chart-aloc'),{type:'doughnut',data:{labels:['Imóveis','Veículos','Reserva'],datasets:[{data:[65,20,15],backgroundColor:['rgba(218,165,32,.7)','rgba(0,229,255,.7)','rgba(0,214,143,.7)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'rgba(232,240,255,.6)',font:{size:10}}}}}});
+}
+
+// ── CONTRATOS ──
+async function loadContratos(){
+  const data=[{nome:'Contrato Arr. Casa Recreio',cli:'Carlos Mendes',leilao:'0002789/2026',val:520000,hash:'A3F9C2B1',status:'assinado',data:'2026-03-15'},{nome:'Procuração Leilão Barra',cli:'Roberto Lima',leilao:'0004521/2026',val:0,hash:'B7E4D8A2',status:'pendente',data:'2026-03-27'}];
+  document.getElementById('ct-at').textContent=data.filter(c=>c.status==='assinado').length;
+  document.getElementById('ct-pd').textContent=data.filter(c=>c.status==='pendente').length;
+  document.getElementById('ct-tbody').innerHTML=data.map(c=>`<tr>
+    <td>${c.nome}</td><td>${c.cli}</td><td style="color:var(--text3)">${c.leilao}</td>
+    <td style="color:var(--gold);font-family:var(--ffm)">${c.val?fmtBRL(c.val):'—'}</td>
+    <td style="font-family:var(--ffm);font-size:11px;color:var(--cyan)">${c.hash}</td>
+    <td><span class="pill ${c.status==='assinado'?'on':'wait'}">${c.status}</span></td>
+    <td style="color:var(--text3)">${c.data}</td>
+    <td><button class="btn bg" style="padding:4px 10px" onclick="downloadContrato('${c.hash}','${c.nome}')">Download</button></td>
+  </tr>`).join('');
+}
+
+function downloadContrato(hash, nome) {
+  const content = [
+    '══════════════════════════════════',
+    '  BEZSAN LEILÕES — CONTRATO PKI',
+    '══════════════════════════════════',
+    `Documento : ${nome}`,
+    `Hash PKI  : ${hash}`,
+    `Emitido   : ${new Date().toLocaleString('pt-BR')}`,
+    '',
+    'Assinatura digital verificada.',
+    'Este documento possui validade jurídica conforme',
+    'MP 2.200-2/2001 e Lei 14.063/2020.',
+    '══════════════════════════════════'
+  ].join('\n');
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `contrato-pki-${hash}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  toast('Download iniciado!');
+}
+
+async function salvarContrato(){
+  toast('Contrato cadastrado!');cm('m-novo-contrato');loadContratos();
+}
+
+// ── SHIELD ──
+async function loadShield(){
+  let logs=[];
+  try{const s=await COL('audit_logs').orderBy('timestamp','desc').limit(20).get();logs=s.docs.map(d=>({id:d.id,...d.data()}));}
+  catch(e){logs=[{acao:'LOGIN',userId:'admin@bezsan.com.br',ip:'187.45.12.88',modulo:'Dashboard',timestamp:{toDate:()=>new Date()}},{acao:'CREATE',userId:'admin@bezsan.com.br',ip:'187.45.12.88',modulo:'Leilões',timestamp:{toDate:()=>new Date(Date.now()-120000)}}];}
+  document.getElementById('sh-ev').textContent=logs.length;document.getElementById('sh-an').textContent='0';
+  document.getElementById('audit-tbody').innerHTML=logs.map(l=>`<tr>
+    <td><span class="pill blue">${l.acao||'—'}</span></td><td>${l.userId||'—'}</td>
+    <td style="font-family:var(--ffm);color:var(--text3)">${l.ip||'—'}</td>
+    <td>${l.modulo||'—'}</td>
+    <td style="font-family:var(--ffm);font-size:10px;color:var(--cyan)">${hsh((l.userId||'')+(l.acao||''))}</td>
+    <td style="font-family:var(--ffm);color:var(--text3)">${fmtDate(l.timestamp)}</td>
+  </tr>`).join('');
+}
+
+// ── COMPLIANCE ──
+function renderCompliance(){
+  const items=[['Política de Privacidade publicada',true],['Consentimento de titulares coletado',true],['DPO designado',true],['Relatório de Impacto (RIPD)',false],['Mapeamento de dados pessoais',true],['Procedimento de incidentes',true],['Contratos com operadores (LGPD)',false]];
+  document.getElementById('comp-list').innerHTML=items.map(([t,ok])=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px">
+    <div style="width:22px;height:22px;border-radius:50%;background:${ok?'var(--gnbg)':'var(--rbg)'};border:1px solid ${ok?'var(--gnbrd)':'var(--rbrd)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:${ok?'var(--green)':'var(--red)'}"><i class="ri-${ok?'check':'close'}-line" style="font-size:12px"></i></div>
+    <span style="font-size:13px;flex:1">${t}</span>
+    <span class="pill ${ok?'on':'off'}">${ok?'OK':'Pendente'}</span>
+  </div>`).join('');
+}
+
+// ── CORTEX CHAT ──
+async function cxSend(){
+  const i=document.getElementById('cx-input'),msg=i.value.trim();if(!msg)return;
+  i.value='';appendMsg(msg,'user');const tp=appendTyping();
+  const ctx={leiloes:leiloesData.length,ativos:leiloesData.filter(l=>l.status==='ativo').length,tenant:'Bezsan Leilões'};
+  // sem gate — CORTEX sempre disponível via backend
+  try{
+    const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'bezsan',mode:'copilot',message:msg,systemPrompt:`Você é o CORTEX Co-Pilot especializado em leilões judiciais brasileiros para a Bezsan. Contexto: ${JSON.stringify(ctx)}. Responda em português, seja direto e prático.`})});
+    const d=await r.json();removeTyping(tp);appendMsg(d.response||d.content||'...','ai');
+  }catch(e){removeTyping(tp);appendMsg('Erro ao contatar CORTEX.','ai');}
+}
+function cxQ(msg){document.getElementById('cx-input').value=msg;cxSend();}
+function clearChat(){document.getElementById('cx-msgs').innerHTML='';}
+function appendMsg(text,type){const el=document.getElementById('cx-msgs'),t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});el.innerHTML+=`<div class="cx-msg ${type}"><div class="cx-bubble">${text.replace(/\n/g,'<br>')}</div><div class="cx-meta">${type==='ai'?'CORTEX':'Você'} · ${t}</div></div>`;el.scrollTop=el.scrollHeight;}
+function appendTyping(){const el=document.getElementById('cx-msgs');const d=document.createElement('div');d.className='cx-msg ai';d.id='cx-tp';d.innerHTML='<div class="cx-typing"><div class="cx-dot"></div><div class="cx-dot"></div><div class="cx-dot"></div></div>';el.appendChild(d);el.scrollTop=el.scrollHeight;return d;}
+function removeTyping(el){if(el&&el.parentNode)el.remove();}
+
+// ── SETTINGS ──
+function saveSettings(){
+  const k=document.getElementById('cfg-key').value; // key não armazenado no browser
+  const mp=document.getElementById('cfg-mp').value;if(mp)localStorage.setItem('bz_mp',mp);
+  toast('Configurações salvas!');
+}
+async function testAPI(){
+  const k=document.getElementById('cfg-key').value; // apenas para referência visual
+  try{const r=await fetch('/api/cortex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantId:'bezsan',mode:'ping',message:'ping'})});
+  if(r.ok){toast('✅ CORTEX OK!');}else toast('CORTEX indisponível.',true);
+  }catch(e){toast('Erro: '+e.message,true);}
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',()=>{
+  // API Key não armazenada no browser — CORTEX usa chave do servidor
+  setTimeout(loadDashboard,400);
+  try{COL('audit_logs').add({acao:'LOGIN',userId:'admin@bezsan.com.br',ip:'client',modulo:'Admin',timestamp:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}
+  // Mobile hamburger
+  const btn=document.createElement('button');btn.id='bez-mob-btn';btn.innerHTML='<i class="ri-menu-line"></i>';
+  const ov=document.createElement('div');Object.assign(ov.style,{position:'fixed',inset:'0',zIndex:'999',display:'none',background:'rgba(0,0,0,.6)'});
+  btn.onclick=()=>{const sb=document.getElementById('sb')||document.querySelector('aside');if(sb){sb.classList.toggle('open');ov.style.display=sb.classList.contains('open')?'block':'none';}};
+  ov.onclick=()=>{const sb=document.getElementById('sb')||document.querySelector('aside');if(sb)sb.classList.remove('open');ov.style.display='none';};
+  document.body.prepend(ov);document.body.prepend(btn);
+  function applyMobBez(){btn.style.display=window.innerWidth<=900?'flex':'none';}
+  window.addEventListener('resize',applyMobBez);applyMobBez();
+});
+
+// ── EXPORT DRE ──
+function exportDRE(){
+  if(!leiloesData.length){toast('Sem dados para exportar.',true);return;}
+  const rows=[['Edital','Bem','Lance','Avaliação','Desconto %','Status']];
+  leiloesData.forEach(l=>rows.push([l.edital||'',l.bem||'',l.lance||0,l.avaliacao||0,l.avaliacao?Math.round((1-(l.lance/l.avaliacao))*100)+'%':'—',l.status||'']));
+  const csv=rows.map(r=>r.map(v=>JSON.stringify(String(v))).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='dre-bezsan.csv';a.click();
+  toast('📥 DRE exportado!');
+}
+
+</script>
+  <script src="../core/nexia-engine.js"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

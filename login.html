@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXIA OS — Acesso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="core/config.js"></script>
+<script src="core/auth.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;scroll-behavior:smooth}
+:root{
+  --acc:#00E5FF;--acc2:#00B8D4;--acclt:rgba(0,229,255,.08);--accbrd:rgba(0,229,255,.20);
+  --bg:#05070D;--bg2:#090C17;--bg3:#0E1220;--brd:rgba(255,255,255,.06);
+  --txt:#8A9DC0;--txt2:#3F5070;--white:#E8F0FF;--red:#FF3D5A;--green:#2ED080;
+  --ff:'Sora',sans-serif;--ffs:'DM Serif Display',serif;--ffm:'DM Mono',monospace;
+}
+body{
+  font-family:var(--ff);background:var(--bg);color:var(--txt);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50%);
+  width:900px;height:700px;
+  background:radial-gradient(ellipse,var(--acclt) 0%,transparent 60%);
+  pointer-events:none;animation:orbBreath 6s ease-in-out infinite;
+}
+@keyframes orbBreath{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.05)}}
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(var(--brd) 1px,transparent 1px),linear-gradient(90deg,var(--brd) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 100%);
+  pointer-events:none;
+}
+#splash{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .6s ease;
+}
+#splash.out{opacity:0;pointer-events:none;}
+.sp-gem{
+  width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0d1117,var(--acc));
+  box-shadow:0 0 40px var(--acclt);animation:gemPulse 2s ease infinite;
+}
+@keyframes gemPulse{0%,100%{box-shadow:0 0 20px var(--acclt)}50%{box-shadow:0 0 60px var(--accbrd)}}
+.sp-name{font-family:var(--ffs);font-style:italic;font-size:2rem;color:var(--white);}
+.sp-bar{width:60px;height:2px;background:var(--brd);border-radius:1px;overflow:hidden;margin-top:10px;}
+.sp-fill{height:100%;width:0;background:var(--acc);animation:barFill 1s ease .1s forwards;}
+@keyframes barFill{to{width:100%}}
+.card{
+  width:100%;max-width:420px;background:rgba(9,12,23,.95);
+  border:1px solid var(--brd);border-radius:20px;
+  padding:44px 38px 36px;position:relative;z-index:1;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,229,255,.04);
+  opacity:0;transition:opacity .5s;backdrop-filter:blur(20px);
+}
+.card.visible{opacity:1;}
+.card-bar{position:absolute;top:0;left:0;right:0;height:2px;border-radius:20px 20px 0 0;background:linear-gradient(90deg,var(--acc),var(--acc2));}
+.logo{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:32px;}
+.logo-gem{
+  width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#0d1117,#0a2a35);
+  border:1px solid var(--accbrd);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 24px rgba(0,229,255,.12);
+}
+.logo-name{font-family:var(--ffs);font-style:italic;font-size:1.4rem;color:var(--white);}
+.logo-sub{font-family:var(--ffm);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);}
+
+.tabs{display:flex;gap:8px;margin-bottom:24px;background:var(--bg3);border-radius:10px;padding:4px;}
+.tab{
+  flex:1;padding:8px;border:none;border-radius:7px;background:transparent;
+  color:var(--txt);font-family:var(--ff);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;
+}
+.tab.active{background:var(--acclt);color:var(--acc);border:1px solid var(--accbrd);}
+
+.alert{border-radius:8px;padding:10px 14px;font-size:11.5px;margin-bottom:14px;display:none;}
+.alert.show{display:block;}
+.a-err{background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.3);color:var(--red);}
+.a-ok{background:rgba(46,208,128,.1);border:1px solid rgba(46,208,128,.3);color:var(--green);}
+
+.inp{
+  width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;
+  padding:12px 14px;color:var(--white);font-family:var(--ff);font-size:13.5px;
+  outline:none;margin-bottom:12px;transition:border .2s;
+}
+.inp:focus{border-color:var(--accbrd);}
+.inp::placeholder{color:var(--txt2);}
+
+.btn{
+  width:100%;padding:13px;background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(0,184,212,.08));
+  border:1px solid var(--accbrd);border-radius:10px;color:var(--acc);
+  font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.btn:hover{background:var(--acc);color:var(--bg);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-spinner{display:none;width:16px;height:16px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn.loading .btn-text{display:none;}
+.btn.loading .btn-spinner{display:block;}
+
+.ft{margin-top:20px;text-align:center;font-size:9px;color:var(--txt2);}
+.ft a{color:var(--acc);text-decoration:none;}
+</style>
+</head>
+<body>
+<script src="./core/nexia-splash.js"></script>
+
+<div id="splash">
+  <div class="sp-gem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" width="24" height="24">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+  </div>
+  <div class="sp-name" style="font-style:italic">NEXIA<span style="font-family:'Sora',sans-serif;font-style:normal;font-weight:700;font-size:.72rem;letter-spacing:.2em;color:var(--acc);margin-left:6px;vertical-align:middle;">OS</span></div>
+  <div class="sp-bar"><div class="sp-fill"></div></div>
+</div>
+
+<div class="card" id="card">
+  <div class="card-bar"></div>
+  <div class="logo">
+    <div class="logo-gem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" width="24" height="24">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    </div>
+    <div class="logo-name">NEXIA OS</div>
+    <div class="logo-sub">Plataforma de Inteligência</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
+    <button class="tab" id="tab-register" onclick="switchTab('register')">Criar Conta</button>
+  </div>
+
+  <div class="alert a-err" id="a-err"></div>
+  <div class="alert a-ok" id="a-ok"></div>
+
+  <!-- Formulário de Login -->
+  <div id="form-login">
+    <input class="inp" id="l-email" type="email" placeholder="E-mail de acesso" autocomplete="email">
+    <input class="inp" id="l-pass" type="password" placeholder="Senha" autocomplete="current-password">
+    <button class="btn" id="btn-login" onclick="doLogin()">
+      <span class="btn-text">Entrar na Plataforma</span>
+      <span class="btn-spinner"></span>
+    </button>
+  </div>
+
+  <!-- Formulário de Registro -->
+  <div id="form-register" style="display:none">
+    <input class="inp" id="r-name" type="text" placeholder="Nome completo">
+    <input class="inp" id="r-email" type="email" placeholder="E-mail">
+    <input class="inp" id="r-pass" type="password" placeholder="Senha (mín. 6 caracteres)">
+    <button class="btn" id="btn-register" onclick="doRegister()">
+      <span class="btn-text">Criar Conta</span>
+      <span class="btn-spinner"></span>
+    </button>
+  </div>
+
+  <div class="ft">© 2026 NEXIA OS · Powered by Firebase · <a href="mailto:suporte@nexia.app">Suporte</a></div>
+</div>
+
+<script>
+'use strict';
+
+// Splash timing
+setTimeout(() => {
+  document.getElementById('splash').classList.add('out');
+  setTimeout(() => { document.getElementById('card').classList.add('visible'); }, 300);
+}, 1200);
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  hideAlerts();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('a-err');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('a-ok').classList.remove('show');
+}
+function showOk(msg) {
+  const el = document.getElementById('a-ok');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('a-err').classList.remove('show');
+}
+function hideAlerts() {
+  document.getElementById('a-err').classList.remove('show');
+  document.getElementById('a-ok').classList.remove('show');
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.classList.toggle('loading', loading);
+  btn.disabled = loading;
+}
+
+// Redireciona após login com base no role
+async function getRedirectUrl() {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      const profile = NexiaAuth.getProfile();
+      const role = (profile && profile.role) || 'user';
+      if (role === 'master') resolve('/nexia/nexia-master-admin.html');
+      else if (role === 'admin') resolve('/nexia/tenant-hub.html');
+      else resolve((profile && profile.homePage) || '/nexia/my-panel.html');
+    }, 8000);
+
+    NexiaAuth.onChange((profile) => {
+      if (!profile) return;
+      clearTimeout(timer);
+      const role = profile.role || 'user';
+      if (role === 'master') resolve('/nexia/nexia-master-admin.html');
+      else if (role === 'admin') resolve('/nexia/tenant-hub.html');
+      else resolve(profile.homePage || '/nexia/my-panel.html');
+    });
+  });
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email')?.value.trim();
+  const pass  = document.getElementById('l-pass')?.value;
+  if (!email || !pass) { showErr('Preencha e-mail e senha.'); return; }
+
+  setLoading('btn-login', true);
+  hideAlerts();
+
+  const tryLogin = async () => {
+    if (!NEXIA._ready) { setTimeout(tryLogin, 150); return; }
+    try {
+      await NexiaAuth.login(email, pass);
+      showOk('Login realizado! Redirecionando...');
+      const url = await getRedirectUrl();
+      window.location.href = url;
+    } catch(e) {
+      showErr(e.message || 'Erro ao fazer login. Tente novamente.');
+      setLoading('btn-login', false);
+    }
+  };
+  tryLogin();
+}
+
+async function doRegister() {
+  const name  = document.getElementById('r-name')?.value.trim();
+  const email = document.getElementById('r-email')?.value.trim();
+  const pass  = document.getElementById('r-pass')?.value;
+  if (!name || !email || !pass) { showErr('Preencha todos os campos.'); return; }
+  if (pass.length < 6) { showErr('Senha deve ter pelo menos 6 caracteres.'); return; }
+
+  setLoading('btn-register', true);
+  hideAlerts();
+
+  const tryRegister = async () => {
+    if (!NEXIA._ready) { setTimeout(tryRegister, 150); return; }
+    try {
+      // 'guest' default — backend/Firestore rules elevam para o tenant correto após aprovação
+      await NexiaAuth.register(email, pass, name, 'guest');
+      showOk('Conta criada! Redirecionando...');
+      const regUrl = await getRedirectUrl();
+      setTimeout(() => { window.location.href = regUrl; }, 1000);
+    } catch(e) {
+      showErr(e.message || 'Erro ao criar conta. Tente novamente.');
+      setLoading('btn-register', false);
+    }
+  };
+  tryRegister();
+}
+
+// Enter key: submete o formulário ativo
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const tab = document.getElementById('tab-login').classList.contains('active');
+  if (tab) doLogin(); else doRegister();
+});
+
+// Se já logado, redireciona automaticamente
+NEXIA.onReady(() => {
+  if (NEXIA.auth) {
+    const unsub = NEXIA.auth.onAuthStateChanged(async user => {
+      if (user) {
+        unsub(); // cleanup
+        const url = await getRedirectUrl();
+        window.location.href = url;
+      }
+    });
+  }
+});
+</script>
+  <script src="./core/nexia-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "nexia-os-v42",
+  "version": "42.0.0",
+  "description": "NEXIA OS — Plataforma de IA SaaS com AutoDev, RAG, Multi-Model, Multi-Tenant e Monetização",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "test": "node tests/run-tests.js",
+    "deploy": "netlify deploy --prod",
+    "logs": "netlify functions:invoke cortex-logs",
+    "seed": "node seed-firebase.js",
+    "set-master": "node set-master-role.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "node-fetch": "2.7.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "netlify": {
+    "functions": "netlify/functions"
+  }
+}

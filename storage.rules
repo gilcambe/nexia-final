@@ -1,0 +1,82 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isMaster() {
+      return request.auth.token.role == 'master';
+    }
+
+    function belongsToTenant(tenantId) {
+      return request.auth.token.tenantSlug == tenantId || isMaster();
+    }
+
+    function isValidFileType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType == 'text/plain' ||
+             request.resource.contentType == 'text/csv' ||
+             request.resource.contentType == 'application/json';
+    }
+
+    function isUnderSizeLimit() {
+      // Max 20MB per file
+      return request.resource.size < 20 * 1024 * 1024;
+    }
+
+    // ── RAG documents per tenant ────────────────────────────────
+    match /tenants/{tenantId}/rag/{fileName} {
+      allow read:  if isAuthenticated() && belongsToTenant(tenantId);
+      allow write: if isAuthenticated() && belongsToTenant(tenantId)
+                     && isValidFileType() && isUnderSizeLimit();
+      allow delete: if isAuthenticated() && belongsToTenant(tenantId);
+    }
+
+    // ── Contracts & documents per tenant ───────────────────────
+    match /tenants/{tenantId}/documents/{fileName} {
+      allow read:  if isAuthenticated() && belongsToTenant(tenantId);
+      allow write: if isAuthenticated() && belongsToTenant(tenantId)
+                     && isUnderSizeLimit();
+      allow delete: if isAuthenticated() && belongsToTenant(tenantId);
+    }
+
+    // ── White-label assets (logos, banners) ────────────────────
+    match /tenants/{tenantId}/assets/{fileName} {
+      allow read:  if true; // Public read for branded assets
+      allow write: if isAuthenticated() && belongsToTenant(tenantId)
+                     && request.resource.contentType.matches('image/.*')
+                     && isUnderSizeLimit();
+      allow delete: if isAuthenticated() && belongsToTenant(tenantId);
+    }
+
+    // ── NF-e XML files ─────────────────────────────────────────
+    match /tenants/{tenantId}/nfe/{fileName} {
+      allow read:  if isAuthenticated() && belongsToTenant(tenantId);
+      allow write: if false; // Only written by server functions
+      allow delete: if isMaster();
+    }
+
+    // ── User profile photos ────────────────────────────────────
+    match /users/{userId}/profile/{fileName} {
+      allow read:  if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId
+                     && request.resource.contentType.matches('image/.*')
+                     && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // ── Master only: global assets ─────────────────────────────
+    match /global/{allPaths=**} {
+      allow read:  if true;
+      allow write: if isMaster();
+    }
+
+    // Default: deny all
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,123 @@
+name: NEXIA OS — CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      run_agents:
+        description: 'Rodar agentes internos após deploy?'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint:
+    name: 🔍 Syntax & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci --ignore-scripts
+      - name: Check syntax — funções backend
+        run: |
+          ERRORS=0
+          for f in netlify/functions/*.js; do
+            node --check "$f" 2>&1 && echo "✅ $f" || { echo "❌ $f"; ERRORS=$((ERRORS+1)); }
+          done
+          exit $ERRORS
+
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar chaves hardcoded em HTML
+        run: |
+          FOUND=0
+          for f in $(find . -name "*.html" -not -path "./node_modules/*"); do
+            CONTENT=$(awk '/<\/html>/{exit} {print}' "$f")
+            if echo "$CONTENT" | grep -qE 'sk-ant-api[0-9]|sk-proj-[a-zA-Z]|gsk_[a-zA-Z]'; then
+              echo "❌ CHAVE EXPOSTA: $f"; FOUND=$((FOUND+1))
+            fi
+          done
+          [ $FOUND -eq 0 ] && echo "✅ Seguro" || exit 1
+      - name: Verificar chamadas diretas a APIs de IA
+        run: |
+          FOUND=0
+          for f in $(find . -name "*.html" -not -path "./node_modules/*"); do
+            CONTENT=$(awk '/<\/html>/{exit} {print}' "$f")
+            echo "$CONTENT" | grep -q "api.anthropic.com\|api.openai.com" && { echo "❌ $f"; FOUND=$((FOUND+1)); }
+          done
+          [ $FOUND -eq 0 ] && echo "✅ Sem chamadas diretas" || exit 1
+
+  deploy:
+    name: 🚀 Deploy Netlify
+    runs-on: ubuntu-latest
+    needs: [lint, security]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm install -g netlify-cli
+      - name: Deploy produção
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID:    ${{ secrets.NETLIFY_SITE_ID }}
+        run: netlify deploy --prod --dir=. --message "CI deploy — ${{ github.sha }}"
+
+  smoke-test:
+    name: 🧪 Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
+      - name: Aguarda propagação
+        run: sleep 30
+      - name: Testa endpoints críticos
+        env:
+          NEXIA_URL: ${{ secrets.NEXIA_APP_URL }}
+        run: |
+          URL="${NEXIA_URL:-https://nexiaos.netlify.app}"
+          for EP in "/api/kpi?action=summary" "/api/sales"; do
+            S=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL$EP" \
+              -H "Content-Type: application/json" -d '{"tenantId":"nexia","message":"ping"}' 2>/dev/null || echo "000")
+            echo "$EP → $S"
+          done
+          # Testa cortex
+          S=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/api/cortex" \
+            -H "Content-Type: application/json" \
+            -d '{"userId":"ci","tenantId":"nexia","message":"ping","stream":false}')
+          echo "/api/cortex → $S"
+
+  run-agents:
+    name: 🤖 Agentes Pós-Deploy
+    runs-on: ubuntu-latest
+    needs: [smoke-test]
+    if: github.event.inputs.run_agents != 'false'
+    steps:
+      - name: QA + Security Agent
+        env:
+          NEXIA_URL: ${{ secrets.NEXIA_APP_URL }}
+        run: |
+          URL="${NEXIA_URL:-https://nexiaos.netlify.app}"
+          for AGENT in qa security; do
+            echo "--- $AGENT ---"
+            curl -s -X POST "$URL/api/agents" \
+              -H "Content-Type: application/json" \
+              -d "{\"agent\":\"$AGENT\"}" | head -c 200
+            echo ""
+          done

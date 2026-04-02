@@ -1,0 +1,323 @@
+[build]
+  command = "echo 'NEXIA OS v38 — Build OK'"
+  functions = "netlify/functions"
+  publish = "."
+
+
+[functions]
+  node_bundler = "esbuild"
+
+
+[[redirects]]
+  from = "/api/cortex"
+  to = "/.netlify/functions/cortex-chat"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/auth"
+  to = "/.netlify/functions/auth"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/memory"
+  to = "/.netlify/functions/cortex-memory"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/rag"
+  to = "/.netlify/functions/rag-engine"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/autodev"
+  to = "/.netlify/functions/autodev-engine"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/models"
+  to = "/.netlify/functions/multi-model-engine"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/swarm"
+  to = "/.netlify/functions/swarm"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/agents"
+  to = "/.netlify/functions/agents"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/actions"
+  to = "/.netlify/functions/action-engine"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/logs"
+  to = "/.netlify/functions/cortex-logs"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/events"
+  to = "/.netlify/functions/event-processor"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/notifications"
+  to = "/.netlify/functions/notifications"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/tenant"
+  to = "/.netlify/functions/tenant-admin"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/usage"
+  to = "/.netlify/functions/usage"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/billing"
+  to = "/.netlify/functions/billing"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/observe"
+  to = "/.netlify/functions/observability"
+  status = 200
+
+
+
+[[redirects]]
+  from = "/api/learn"
+  to = "/.netlify/functions/cortex-learn"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/agent-run"
+  to = "/.netlify/functions/cortex-agent"
+  status = 200
+
+[[redirects]]
+  from = "/api/pabx"
+  to = "/.netlify/functions/pabx-handler"
+  status = 200
+
+[[redirects]]
+  from = "/api/osint"
+  to = "/.netlify/functions/osint-query"
+  status = 200
+
+[[redirects]]
+  from = "/api/takedown"
+  to = "/.netlify/functions/takedown-gen"
+  status = 200
+
+[[redirects]]
+  from = "/api/payment"
+  to = "/.netlify/functions/payment-engine"
+  status = 200
+
+[[redirects]]
+  from = "/api/metrics"
+  to = "/.netlify/functions/metrics-aggregator"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Required environment variables (set in Netlify Dashboard > Site Settings > Environment Variables):
+# FIREBASE_SERVICE_ACCOUNT  — JSON da service account do Firebase
+# GROQ_API_KEY              — API key do Groq (cortex-chat, multi-model)
+# ANTHROPIC_API_KEY         — API key da Anthropic (takedown-gen, cortex-agent fallback)
+# OPENAI_API_KEY            — API key da OpenAI (multi-model gpt-4o)
+# DEEPSEEK_API_KEY          — API key do DeepSeek (multi-model coder)
+# GEMINI_API_KEY             — API key do Google Gemini (studio.html modelo Gemini 2.0)
+# XAI_API_KEY                — API key do xAI Grok (studio.html modelo Grok 3)
+# STRIPE_SECRET_KEY          — API key Stripe para pagamentos USD (nexia-pay → Stripe)
+# MP_ACCESS_TOKEN           — Token Mercado Pago (payment-engine)
+# MP_WEBHOOK_SECRET         — Chave secreta webhook MP (Painel MP → Webhooks → Chave secreta)
+# NEXIA_APP_URL             — URL pública do deploy (ex: https://nexia.netlify.app)
+# TWILIO_ACCOUNT_SID        — (opcional) SID Twilio para PABX outbound
+# TWILIO_AUTH_TOKEN         — (opcional) Auth Token Twilio
+# TWILIO_FROM               — (opcional) Número Twilio +55...
+
+[[redirects]]
+  from = "/api/architect"
+  to = "/.netlify/functions/architect"
+  status = 200
+
+[[redirects]]
+  from = "/api/whatsapp"
+  to = "/.netlify/functions/whatsapp-business"
+  status = 200
+
+[[redirects]]
+  from = "/api/nfe"
+  to = "/.netlify/functions/nfe-engine"
+  status = 200
+
+[[redirects]]
+  from = "/api/dynamic-pricing"
+  to = "/.netlify/functions/dynamic-pricing"
+  status = 200
+
+[[redirects]]
+  from = "/onboarding"
+  to = "/nexia/architect.html"
+  status = 200
+
+[[redirects]]
+  from = "/api/sentinel"
+  to = "/.netlify/functions/sentinel-iot"
+  status = 200
+
+[[redirects]]
+  from = "/nexia/my-panel"
+  to = "/nexia/my-panel.html"
+  status = 200
+
+[[redirects]]
+  from = "/nexia/pabx"
+  to = "/nexia/pabx-softphone.html"
+  status = 200
+[[redirects]]
+  from = "/api/governance"
+  to = "/.netlify/functions/middleware"
+  status = 200
+
+[[redirects]]
+  from = "/api/crm"
+  to = "/.netlify/functions/tenant-admin"
+  status = 200
+
+[[redirects]]
+  from = "/api/crm/*"
+  to = "/.netlify/functions/tenant-admin"
+  status = 200
+
+
+[[redirects]]
+  from = "/viajante-pro/vp-landing"
+  to = "/viajante-pro/vp-landing.html"
+  status = 200
+
+[[redirects]]
+  from = "/viajante-pro/vp-admin"
+  to = "/viajante-pro/vp-admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/viajante-pro/vp-passenger"
+  to = "/viajante-pro/vp-passenger.html"
+  status = 200
+
+[[redirects]]
+  from = "/viajante-pro/vp-guide"
+  to = "/viajante-pro/vp-guide.html"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/tenant-domain"
+  to = "/.netlify/functions/tenant-domain"
+  status = 200
+
+[[redirects]]
+  from = "/api/dunning"
+  to = "/.netlify/functions/dunning-scheduler"
+  status = 200
+
+# ── Scheduled Functions ─────────────────────────────────────────────
+# Dunning: roda todo dia às 09:00 BRT (12:00 UTC)
+[functions."dunning-scheduler"]
+  schedule = "0 12 * * *"
+
+# Metrics aggregator: roda a cada hora
+[functions."metrics-aggregator"]
+  schedule = "0 * * * *"
+
+[[redirects]]
+  from = "/api/kpi"
+  to = "/.netlify/functions/kpi-engine"
+  status = 200
+
+[[redirects]]
+  from = "/api/churn"
+  to = "/.netlify/functions/churn-predictor"
+  status = 200
+
+[[redirects]]
+  from = "/api/sales"
+  to = "/.netlify/functions/ai-sales-agent"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/financial"
+  to = "/.netlify/functions/ai-financial"
+  status = 200
+
+# ── Scheduled: Internal Agents rodam a cada hora (auto-healing)
+[functions."internal-agents"]
+  schedule = "0 * * * *"
+
+# ── Scheduled: Churn Predictor roda todo dia às 07:00 BRT
+[functions."churn-predictor"]
+  schedule = "0 10 * * *"
+
+# ── Scheduled: KPI Engine snapshot diário às 01:00 BRT
+[functions."kpi-engine"]
+  schedule = "0 4 * * *"
+
+
+[[redirects]]
+  from = "/nexia/qa-test-center"
+  to = "/nexia/qa-test-center.html"
+  status = 200
+
+[[redirects]]
+  from = "/api/internal-agents"
+  to = "/.netlify/functions/internal-agents"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/audit"
+  to = "/.netlify/functions/audit-log"
+  status = 200
+
+# SPA fallback — MUST be last
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ── HTTP Security Headers ─────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://sdk.twilio.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://www.gstatic.com wss://*.firebaseio.com https://api.anthropic.com https://api.groq.com https://api.openai.com https://api.deepseek.com https://generativelanguage.googleapis.com https://api.x.ai https://api.perplexity.ai https://api.together.xyz https://api.cerebras.ai https://api.sambanova.ai https://api.mistral.ai https://api.cohere.ai https://integrate.api.nvidia.com https://openrouter.ai https://router.huggingface.co https://brasilapi.com.br https://www.receitaws.com.br https://api.nfe.io https://api.mercadopago.com https://api.stripe.com https://api.twilio.com https://api.resend.com https://euapi.ttlock.com https://graph.facebook.com https://api.whatsapp.com https://api.qrserver.com https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://youtube.com https://maps.google.com https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests"

@@ -1,0 +1,36 @@
+# NEXIA OS — Netlify Redirects v7.0
+# Multi-tenant routing por URL
+
+/ces              /ces/ces-landing.html 200
+/ces/             /ces/ces-landing.html 200
+/ces/admin        /ces/ces-admin.html 200
+/ces/admin/       /ces/ces-admin.html 200
+/ces/checkin      /ces/checkin.html 200
+
+/vp               /viajante-pro/vp-landing.html 200
+/vp/              /viajante-pro/vp-landing.html 200
+/viajante-pro     /viajante-pro/vp-landing.html 200
+/viajante-pro/    /viajante-pro/vp-landing.html 200
+/vp/admin         /viajante-pro/vp-admin.html 200
+/vp/guia          /viajante-pro/vp-guide.html 200
+/vp/passageiro    /viajante-pro/vp-passenger.html 200
+
+/admin            /nexia/nexia-master-admin.html 200
+/admin/           /nexia/nexia-master-admin.html 200
+/nexia            /nexia/nexia-master-admin.html 200
+/nexia/           /nexia/nexia-master-admin.html 200
+
+/login            /login.html 200
+
+/splash           /splash/splash-landing.html 200
+/splash/          /splash/splash-landing.html 200
+/splash/admin     /splash/splash-admin.html 200
+/splash/admin/    /splash/splash-admin.html 200
+
+/bezsan              /bezsan/bezsan-landing.html 200
+/bezsan/             /bezsan/bezsan-landing.html 200
+/bezsan/admin        /bezsan/bezsan-admin.html 200
+/bezsan/admin/       /bezsan/bezsan-admin.html 200
+
+
+# Catch-all SPA fallback is handled by netlify.toml (must be last there)

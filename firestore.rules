@@ -1,0 +1,439 @@
+rules_version = '2';
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  NEXIA OS v10.1 — FIRESTORE SECURITY RULES (COMPLETO)           ║
+// ║  Cobre: CRM · Cortex · RAG · Usage · Billing · Agentes · Store  ║
+// ║  Corrige: cortex_memory subcollection, rag_index, usage missing  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════
+    function isAuth()        { return request.auth != null; }
+    function uid()           { return request.auth.uid; }
+    function isOwner(u)      { return isAuth() && uid() == u; }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(uid())).data;
+    }
+    function userTenant()    { return userDoc().tenantSlug; }
+    function isMember(t)     { return isAuth() && userTenant() == t; }
+    function isMaster()      { return isAuth() && userTenant() == 'nexia'; }
+
+    function userRole() {
+      return userDoc().role;
+    }
+    function isAdmin(t) {
+      return isMember(t) && (userRole() == 'admin' || userRole() == 'master' || isMaster());
+    }
+    function isManager(t) {
+      return isMember(t) && (userRole() in ['admin','manager','master'] || isMaster());
+    }
+
+    // Schema validators
+    function validClient() {
+      return request.resource.data.keys().hasAll(['nome'])
+          && request.resource.data.nome is string
+          && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 200;
+    }
+    function validTask() {
+      return request.resource.data.keys().hasAll(['titulo'])
+          && request.resource.data.titulo is string
+          && request.resource.data.titulo.size() > 0;
+    }
+    function validFinance() {
+      return request.resource.data.keys().hasAll(['descricao','valor','tipo'])
+          && request.resource.data.valor is number;
+    }
+    function tenantUnchanged(t) {
+      return !('tenantId' in request.resource.data.diff(resource.data).affectedKeys());
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // USERS
+    // ═══════════════════════════════════════════════════════
+    match /users/{docUid} {
+      allow read:   if isAuth() && (isOwner(docUid) || isMaster());
+      allow create: if isAuth() && isOwner(docUid);
+      allow update: if isAuth() && (isOwner(docUid) || isMaster());
+      allow delete: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // TENANTS (raiz + todas subcollections)
+    // ═══════════════════════════════════════════════════════
+    match /tenants/{tenantId} {
+      allow read:  if isMember(tenantId) || isMaster();
+      allow write: if isMaster();
+
+      // Members
+      match /members/{mUid} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+
+      // Config / Brand
+      match /config/{doc} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+
+      // Invites
+      match /invites/{inviteId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+
+      // ── CRM Collections ─────────────────────────────────
+
+      match /clients/{docId} {
+        allow read:   if isMember(tenantId) || isMaster();
+        allow create: if (isMember(tenantId) || isMaster()) && validClient();
+        allow update: if (isMember(tenantId) || isMaster()) && tenantUnchanged(tenantId);
+        allow delete: if isAdmin(tenantId) || isMaster();
+      }
+
+      match /tasks/{docId} {
+        allow read:   if isMember(tenantId) || isMaster();
+        allow create: if (isMember(tenantId) || isMaster()) && validTask();
+        allow update: if (isMember(tenantId) || isMaster()) && tenantUnchanged(tenantId);
+        allow delete: if isManager(tenantId) || isMaster();
+      }
+
+      match /meetings/{docId} {
+        allow read, write: if isMember(tenantId) || isMaster();
+      }
+
+      match /finance/{docId} {
+        allow read:   if isMember(tenantId) || isMaster();
+        allow create: if (isMember(tenantId) || isMaster()) && validFinance();
+        allow update: if (isMember(tenantId) || isMaster()) && tenantUnchanged(tenantId);
+        allow delete: if isAdmin(tenantId) || isMaster();
+      }
+
+      match /notes/{docId} {
+        allow read, write: if isMember(tenantId) || isMaster();
+      }
+
+      // Pipeline CRM (kanban)
+      match /pipeline/{dealId} {
+        allow read, write: if isMember(tenantId) || isMaster();
+        match /activity/{actId} {
+          allow read, write: if isMember(tenantId) || isMaster();
+        }
+      }
+
+      // ── Cortex / IA Collections ──────────────────────────
+
+      // FIX v10.1: cortex_memory AGORA É SUBCOLLECTION DO TENANT
+      // (o backend armazena em tenants/{tenantId}/cortex_memory/{userId_convId})
+      match /cortex_memory/{sessionId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMember(tenantId) || isMaster();
+      }
+
+      // RAG Index (documentos indexados por tenant)
+      match /rag_index/{docId} {
+        allow read:   if isMember(tenantId) || isMaster();
+        allow create: if isMember(tenantId) || isMaster();
+        allow update: if isAdmin(tenantId) || isMaster();
+        allow delete: if isAdmin(tenantId) || isMaster();
+      }
+
+      // Usage / Analytics (escrita pelo backend via Admin SDK)
+      match /usage/{dateDoc} {
+        allow read:          if isMember(tenantId) || isMaster();
+        allow create, update: if isMaster(); // backend usa Admin SDK (bypassa regras)
+        allow delete:        if false;
+      }
+
+      // Cortex Logs (append-only para membros, imutável)
+      match /cortex_logs/{logId} {
+        allow read:           if isMember(tenantId) || isMaster();
+        allow create:         if isMember(tenantId) || isMaster();
+        allow update, delete: if false;
+      }
+
+      // Action Logs (audit trail imutável — só master lê)
+      match /action_logs/{logId} {
+        allow read:           if isAdmin(tenantId) || isMaster();
+        allow create:         if isMember(tenantId) || isMaster();
+        allow update, delete: if false;
+      }
+
+      // Agents (agentes customizados do tenant)
+      match /agents/{agentId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isAdmin(tenantId) || isMaster();
+      }
+
+      // Modules (NexiaEngine ModuleEngine — módulos ativos por tenant)
+      match /modules/{moduleId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+
+      // NEXIA STORE — Módulos licenciados pelo tenant
+      match /store_modules/{moduleId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+
+      // Billing / Subscription info
+      match /billing/{docId} {
+        allow read:  if isAdmin(tenantId) || isMaster();
+        allow write: if isMaster(); // backend Admin SDK gerencia
+      }
+
+      // Alertas do sistema para o tenant
+      match /alerts/{alertId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // AGENTS GLOBAIS (compartilhados entre tenants)
+    // ═══════════════════════════════════════════════════════
+    match /agents/{agentId} {
+      allow read:  if isAuth();
+      allow write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // CORTEX GOOD RESPONSES (auto-aprendizado por tenant)
+    // ═══════════════════════════════════════════════════════
+    match /cortex_good_responses/{tenantId} {
+      allow read, write: if isMember(tenantId) || isMaster();
+      match /examples/{exId} {
+        allow read, write: if isMember(tenantId) || isMaster();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // RATE LIMITS (leitura/escrita autenticados — backend Admin SDK)
+    // ═══════════════════════════════════════════════════════
+    // FIXED: rate_limits — users can read (to check remaining), backend writes via Admin SDK
+    // Prevent users from deleting/resetting their own rate limit records
+    match /rate_limits/{key} {
+      allow read:   if isAuth() && key.matches(uid() + ':.*');
+      allow write:  if false; // only Admin SDK (middleware.js) writes via server
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // EVENT QUEUE (fila de eventos assíncronos)
+    // ═══════════════════════════════════════════════════════
+    // FIXED: event_queue — isolate events per tenant
+    match /event_queue/{evId} {
+      allow read:   if isAuth() && (resource == null || resource.data.tenantId == userTenant() || isMaster());
+      allow create: if isAuth() && request.resource.data.tenantId == userTenant(); // enforce tenant isolation on create
+      allow update: if isMaster(); // only backend (Admin SDK) updates status
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // CORTEX JOBS (agent loop — tarefas longas com polling)
+    // ═══════════════════════════════════════════════════════
+    // FIXED: cortex_jobs — users can only read/update their OWN jobs
+    match /cortex_jobs/{jobId} {
+      allow read:   if isAuth() && (resource == null || resource.data.userId == uid() || isMaster());
+      allow create: if isAuth() && request.resource.data.userId == uid(); // enforce userId ownership on create
+      allow update: if isAuth() && (resource == null || resource.data.userId == uid() || isMaster());
+      allow delete: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // NOTIFICATIONS (por usuário)
+    // ═══════════════════════════════════════════════════════
+    match /notifications/{userId} {
+      allow read, write: if isOwner(userId) || isMaster();
+      match /items/{itemId} {
+        allow read, write: if isOwner(userId) || isMaster();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SYSTEM LOGS (imutáveis — apenas master lê)
+    // ═══════════════════════════════════════════════════════
+    match /system_logs/{logId} {
+      allow read:           if isMaster();
+      allow create:         if isAuth();
+      allow update, delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // HEALTH CHECK (apenas master)
+    // ═══════════════════════════════════════════════════════
+    match /health/{docId} {
+      allow read, write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // NEXIA STORE — Catálogo global de módulos/produtos
+    // ═══════════════════════════════════════════════════════
+    match /store_catalog/{moduleId} {
+      allow read:  if isAuth();
+      allow write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // NEXIA STORE — Transações / Pedidos
+    // ═══════════════════════════════════════════════════════
+    match /store_orders/{orderId} {
+      allow read:  if isAuth() && (resource.data.tenantId == userTenant() || isMaster());
+      allow create: if isAuth() && request.resource.data.tenantId == userTenant(); // enforce tenant on order creation
+      allow update: if isMaster(); // backend atualiza status do pedido
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // PAGES (custom pages builder)
+    // ═══════════════════════════════════════════════════════
+    // FIXED: pages — isolate by tenantId field
+    match /pages/{pageId} {
+      allow read:   if isAuth() && (resource == null || resource.data.tenantId == userTenant() || isMaster());
+      allow create: if isAuth() && request.resource.data.tenantId == userTenant(); // FIXED VULN-07: enforce tenantId on create
+      allow update: if isAuth() && (resource == null || resource.data.tenantId == userTenant() || isMaster());
+      allow delete: if isAuth() && (resource == null || resource.data.tenantId == userTenant() || isMaster());
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // LEGADO: cortex_memory global (rota antiga — mantido por compat)
+    // FIX: agora restringe ao próprio userId
+    // ═══════════════════════════════════════════════════════
+    match /cortex_memory/{sessionId} {
+      allow read, write: if isAuth()
+        && (resource == null
+            || resource.data.userId == uid()
+            || sessionId.matches(uid() + '_.*')
+            || isMaster());
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SHADOW ACCESS (acesso master silencioso a tenants)
+    // ═══════════════════════════════════════════════════════
+    match /shadow_access/{docId} {
+      allow read, write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // AUDIT LOG GLOBAL (imutável — master lê, Admin SDK escreve)
+    // FIXED: removed client-side create — only backend writes audit logs
+    // ═══════════════════════════════════════════════════════
+    match /audit_log_global/{logId} {
+      allow read:           if isMaster();
+      allow create:         if false; // FIXED: Admin SDK only — prevents fake audit entries
+      allow update, delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // EMPIRE METRICS (métricas globais — Admin SDK escreve)
+    // FIXED: deduplicated rule; write only via Admin SDK
+    // ═══════════════════════════════════════════════════════
+    match /empire_metrics/{docId} {
+      allow read:  if isMaster();
+      allow write: if false; // somente via Admin SDK
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // NEXIA PERMISSIONS MATRIX (configurações de permissão)
+    // ═══════════════════════════════════════════════════════
+    match /nexia_permissions_matrix/{docId} {
+      allow read:  if isAuth();
+      allow write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // BILLING ENGINE (cobranças e assinaturas — master + dono)
+    // ═══════════════════════════════════════════════════════
+    match /billing_engine/{docId} {
+      allow read:  if isMaster() || (isAuth() && resource.data.tenantId == userTenant());
+      allow write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ONBOARDING / ARCHITECT (resultado do arquiteto IA)
+    // ═══════════════════════════════════════════════════════
+    match /onboarding/{tenantId} {
+      allow read:   if isMember(tenantId) || isMaster();
+      allow write:  if isMaster();
+      match /architect/{docId} {
+        allow read:  if isMember(tenantId) || isMaster();
+        allow write: if isMaster();
+      }
+    }
+
+    // ── AutoDev Projects ─────────────────────────────────────────
+    match /tenants/{tenantId}/autodev_projects/{docId} {
+      allow read:  if isMember(tenantId) || isMaster();
+      allow create: if isMember(tenantId) || isMaster();
+      allow update, delete: if isMaster();
+    }
+
+    // ── Dunning Log ───────────────────────────────────────────────
+    match /tenants/{tenantId}/dunning_log/{docId} {
+      allow read:  if isMaster();
+      allow write: if false; // somente via Admin SDK (dunning-scheduler)
+    }
+
+    // ── Coleções globais de WhatsApp (somente backend via service account) ──
+    match /whatsapp_inbox/{docId} {
+      allow read, write: if false; // somente via Admin SDK (service account)
+    }
+    match /whatsapp_statuses/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── IoT Events globais ──
+    match /iot_events/{docId} {
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master';
+      allow write: if false; // somente via Admin SDK
+    }
+
+    // ── Aprovações manuais (billing) ──
+    match /manual_approvals/{docId} {
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master';
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master';
+    }
+
+    // ── Empire Metrics — see canonical rule above (deduplicated) ──
+
+    // ── Audit Log Global — see canonical rule above (deduplicated) ──
+
+    // ── Kill Switch ───────────────────────────────────────────────
+    match /kill_switch/{tenantId} {
+      // FIXED: read:true expunha status de suspensão a qualquer utilizador não autenticado.
+      // O frontend deve consultar via /api/tenant (autenticado) ou via onAuthStateChanged.
+      // A leitura pelo próprio tenant é permitida para mostrar mensagem de suspensão.
+      allow read:  if isAuth() && (isMember(tenantId) || isMaster());
+      allow write: if isMaster();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // MODULES (NexiaEngine ModuleEngine — catálogo de módulos)
+    // FIXADO: permitir leitura autenticada para carregar módulos do tenant
+    // ═══════════════════════════════════════════════════════
+    match /modules/{moduleId} {
+      allow read:  if isAuth();
+      allow write: if isMaster();
+    }
+
+    // ── Tenant Settings (white-label, configurações) ──
+    match /tenant_settings/{tenantId} {
+      allow read:  if isMember(tenantId) || isMaster();
+      allow write: if isMaster();
+    }
+
+    // ── Nexia Store global (lista de módulos publicados) ──
+    match /nexia_store/{docId} {
+      allow read:  if isAuth();
+      allow write: if isMaster();
+    }
+
+
+  }
+}

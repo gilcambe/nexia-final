@@ -1,0 +1,2504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CES 2027 — Missão Empresarial Brasileira</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body, html { margin: 0; padding: 0; background-color: #FAF8F5; }
+    #root { width: 100%; min-height: 100vh; }
+  </style>
+  <!-- Firebase SDK (compat) — obrigatório antes do bridge.js e nexia-engine.js -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script>
+    // Firebase Client Config (seguro para expor — segurança real está nas Firestore Rules)
+    if (!firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey:            "AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",
+        authDomain:        "nexia-c8710.firebaseapp.com",
+        projectId:         "nexia-c8710",
+        storageBucket:     "nexia-c8710.firebasestorage.app",
+        messagingSenderId: "623044447905",
+        appId:             "1:623044447905:web:13f70e1584fb0fcf8d2ae0"
+      });
+    }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+/* bridge.js inlined */
+/**
+ * ╔══════════════════════════════════════════════════════════════════════╗
+ * ║  NEXIA OS — BRIDGE v6.0  (Firebase Real · Zero Hardcode)            ║
+ * ║  Motor de Sincronização em Tempo Real                                ║
+ * ║  Firestore onSnapshot · White-Label · Audit · Pub/Sub               ║
+ * ║  Sprint 1: Tenant detectado dinamicamente via NEXIA.currentTenant   ║
+ * ╚══════════════════════════════════════════════════════════════════════╝
+ */
+
+'use strict';
+
+const NexiaBridge = (() => {
+    const _listeners   = {};   // { key: unsubscribeFn }
+    const _cache       = {};   // último dado por evento
+    const _subscribers = {};   // { event: [callbacks] }
+
+    // ── PUB/SUB ────────────────────────────────────────────────────
+    function on(event, cb) {
+        if (!_subscribers[event]) _subscribers[event] = [];
+        _subscribers[event].push(cb);
+        if (_cache[event] !== undefined) {
+            try { cb(_cache[event]); } catch(e) {}
+        }
+    }
+
+    function off(event, cb) {
+        if (!_subscribers[event]) return;
+        _subscribers[event] = _subscribers[event].filter(f => f !== cb);
+    }
+
+    function _emit(event, data) {
+        _cache[event] = data;
+        (_subscribers[event] || []).forEach(cb => { try { cb(data); } catch(e) {} });
+    }
+
+    // ── HELPERS ────────────────────────────────────────────────────
+    function _isReady() {
+        return typeof NEXIA !== 'undefined' && NEXIA._ready && NEXIA.db !== null;
+    }
+
+    function _log(msg, type = 'info') {
+        if (typeof NEXIA !== 'undefined') NEXIA.log(`[BRIDGE] ${msg}`, type);
+    }
+
+    // Retorna o slug do tenant atual (nunca retorna ID hardcoded)
+    function _tenantSlug() {
+        return window.NEXIA?.currentTenant?.slug || null;
+    }
+
+    // Monta referência de doc Firestore por caminho livre
+    function _buildRef(path) {
+        const parts = path.split('/');
+        let ref = firebase.firestore();
+        parts.forEach((seg, i) => {
+            if (i % 2 === 0) ref = ref.collection(seg);
+            else             ref = ref.doc(seg);
+        });
+        return ref;
+    }
+
+    // ── GENERIC REALTIME SYNC ──────────────────────────────────────
+    /**
+     * syncRealtime(path, callback)
+     * Escuta qualquer documento do Firestore em tempo real.
+     * path: 'tenants/viajante-pro/config/brand'
+     */
+    function syncRealtime(path, callback) {
+        if (!_isReady()) { setTimeout(() => syncRealtime(path, callback), 400); return; }
+        const key = 'sync:' + path;
+        if (_listeners[key]) return;
+
+        _listeners[key] = _buildRef(path).onSnapshot(snap => {
+            const data = snap.data ? snap.data() : null;
+            _log(`syncRealtime update: ${path}`, 'ok');
+            callback(data);
+            _emit(key, data);
+        }, err => {
+            _log(`syncRealtime error [${path}]: ${err.message}`, 'err');
+        });
+        _log(`syncRealtime ativo: ${path}`, 'info');
+    }
+
+    // ── FIRESTORE COLLECTION LISTENERS ────────────────────────────
+    // Todos os listeners usam _tenantSlug() — sem ID hardcoded
+
+    function watchPassengers(slug) {
+        if (!slug) { _log('watchPassengers: slug indefinido', 'warn'); return; }
+        const key = `passengers:${slug}`;
+        if (_listeners[key] || !_isReady()) {
+            if (!_isReady()) setTimeout(() => watchPassengers(slug), 400);
+            return;
+        }
+        const ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('passengers').orderBy('createdAt', 'desc');
+
+        _listeners[key] = ref.onSnapshot(snap => {
+            const list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            _emit('passengers:update', list);
+        }, err => _emit('passengers:error', err));
+        _log(`Listener ativo: passengers/${slug}`, 'ok');
+    }
+
+    function watchExpenses(slug, filters = {}) {
+        if (!slug) return;
+        const key = `expenses:${slug}`;
+        if (_listeners[key] || !_isReady()) {
+            if (!_isReady()) setTimeout(() => watchExpenses(slug, filters), 400);
+            return;
+        }
+        let ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('expenses').orderBy('date', 'desc');
+        if (filters.status) ref = ref.where('status', '==', filters.status);
+
+        _listeners[key] = ref.onSnapshot(snap => {
+            const items = []; let totalBRL = 0;
+            snap.forEach(d => {
+                const x = { id: d.id, ...d.data() };
+                items.push(x);
+                totalBRL += parseFloat(x.valueBRL || x.valueUSD || 0);
+            });
+            _emit('expenses:update', { items, totalBRL });
+        }, err => _emit('expenses:error', err));
+        _log(`Listener ativo: expenses/${slug}`, 'ok');
+    }
+
+    function watchMeetings(slug) {
+        if (!slug) return;
+        const key = `meetings:${slug}`;
+        if (_listeners[key] || !_isReady()) {
+            if (!_isReady()) setTimeout(() => watchMeetings(slug), 400);
+            return;
+        }
+        const ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('meetings').orderBy('date', 'asc');
+
+        _listeners[key] = ref.onSnapshot(snap => {
+            const list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            _emit('meetings:update', list);
+        }, err => _log(`meetings error: ${err.message}`, 'err'));
+        _log(`Listener ativo: meetings/${slug}`, 'ok');
+    }
+
+    function watchCadastros(slug) {
+        if (!slug) return;
+        const key = `cadastros:${slug}`;
+        if (_listeners[key] || !_isReady()) {
+            if (!_isReady()) setTimeout(() => watchCadastros(slug), 400);
+            return;
+        }
+        const ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('cadastros').orderBy('criadoEm', 'desc');
+
+        _listeners[key] = ref.onSnapshot(snap => {
+            const list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            _emit('cadastros:update', list);
+        }, err => _emit('cadastros:error', err));
+        _log(`Listener ativo: cadastros/${slug}`, 'ok');
+    }
+
+    function watchAlerts(slug) {
+        if (!slug) return;
+        const key = `alerts:${slug}`;
+        if (_listeners[key] || !_isReady()) {
+            if (!_isReady()) setTimeout(() => watchAlerts(slug), 400);
+            return;
+        }
+        const ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('alerts')
+            .where('active', '==', true)
+            .orderBy('createdAt', 'desc')
+            .limit(10);
+
+        _listeners[key] = ref.onSnapshot(snap => {
+            const list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            _emit('alerts:update', list);
+        }, err => _log(`alerts error: ${err.message}`, 'err'));
+    }
+
+    // ── AUTO-BOOTSTRAP: liga listeners conforme tenant atual ───────
+    function bootstrapTenantListeners() {
+        const slug = _tenantSlug();
+        if (!slug || slug === 'guest') return;
+
+        const tenant = window.NEXIA?.currentTenant;
+        if (!tenant) return;
+
+        const modules = tenant.modules || [];
+        const hasAll  = modules.includes('all');
+
+        if (hasAll || modules.includes('turismo'))    watchPassengers(slug);
+        if (hasAll || modules.includes('financeiro')) watchExpenses(slug);
+        if (hasAll || modules.includes('eventos'))    { watchMeetings(slug); watchCadastros(slug); }
+        if (hasAll || modules.includes('compliance')) watchCadastros(slug);
+
+        watchAlerts(slug);
+        _log(`Bootstrap completo para tenant: ${slug}`, 'ok');
+    }
+
+    // ── WRITE OPERATIONS ──────────────────────────────────────────
+
+    async function saveCadastro(slug, dados) {
+        if (!_isReady() || !slug) throw new Error('NEXIA não pronto ou slug ausente');
+        const ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('cadastros');
+        const doc = await ref.add({
+            ...dados,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            status:   'pendente'
+        });
+        _log(`Cadastro salvo: ${doc.id} em tenants/${slug}/cadastros`, 'ok');
+        return doc.id;
+    }
+
+    async function savePassenger(slug, dados) {
+        if (!_isReady() || !slug) throw new Error('NEXIA não pronto ou slug ausente');
+        const ref = firebase.firestore()
+            .collection('tenants').doc(slug)
+            .collection('passengers');
+        const doc = await ref.add({
+            ...dados,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        _log(`Passageiro salvo: ${doc.id}`, 'ok');
+        return doc.id;
+    }
+
+    async function updateDoc(path, data) {
+        if (!_isReady()) throw new Error('NEXIA não pronto');
+        await _buildRef(path).update({
+            ...data,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        _log(`Documento atualizado: ${path}`, 'ok');
+    }
+
+    // ── AUDIT LOG ─────────────────────────────────────────────────
+    async function audit(action, payload = {}) {
+        if (!_isReady()) return;
+        const slug = _tenantSlug();
+        if (!slug || slug === 'guest') return;
+        try {
+            await firebase.firestore()
+                .collection('tenants').doc(slug)
+                .collection('audit')
+                .add({
+                    action,
+                    payload,
+                    user:      firebase.auth?.()?.currentUser?.email || 'anon',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+        } catch(e) {
+            _log(`Audit falhou: ${e.message}`, 'warn');
+        }
+    }
+
+    // ── REALTIME STATS ────────────────────────────────────────────
+    function watchStats(slug, cb) {
+        syncRealtime(`tenants/${slug}/config/stats`, cb);
+    }
+
+    // ── DESTRUCTOR ────────────────────────────────────────────────
+    function destroy(key) {
+        if (_listeners[key]) { _listeners[key](); delete _listeners[key]; }
+    }
+
+    function destroyAll() {
+        Object.keys(_listeners).forEach(k => { try { _listeners[k](); } catch(e) {} });
+        Object.keys(_listeners).forEach(k => delete _listeners[k]);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────
+    if (typeof NEXIA !== 'undefined') {
+        NEXIA.onReady(bootstrapTenantListeners);
+    } else {
+        // Aguarda NEXIA carregar
+        const iv = setInterval(() => {
+            if (typeof NEXIA !== 'undefined') {
+                clearInterval(iv);
+                NEXIA.onReady(bootstrapTenantListeners);
+            }
+        }, 200);
+    }
+
+    // ── PUBLIC API ────────────────────────────────────────────────
+    return {
+        on,
+        off,
+        syncRealtime,
+        watchPassengers,
+        watchExpenses,
+        watchMeetings,
+        watchCadastros,
+        watchAlerts,
+        watchStats,
+        saveCadastro,
+        savePassenger,
+        updateDoc,
+        audit,
+        destroy,
+        destroyAll,
+        getTenantSlug: _tenantSlug
+    };
+})();
+
+window.NexiaBridge = NexiaBridge;
+
+/* ces-app.js inlined */
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║  CES BRASIL 2027 · app.js — REFACTOR LIGHT/CLEAN MODE v8.0          ║
+// ║  4 Fixes: Hero Left-Align, VP Super Banner, Stats Counter Fix,       ║
+// ║  Chatbot Roulette on Every Open                                      ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════
+// § I · TRADUÇÕES (PT / EN / ES)
+// ═══════════════════════════════════════════════════════════════════
+const LANGS = {
+  pt: {
+    navSobre:'Sobre', navTendencias:'Inovações', navGaleria:'Galeria',
+    navPacotes:'Pacotes', navOrg:'Organização', navIngresso:'Comprar Ingresso',
+    heroEy:'Missão Empresarial Brasileira · cesbrasil.tech',
+    heroTitle:'A MAIOR FEIRA DE TECNOLOGIA DO MUNDO ESTÁ DE VOLTA',
+    heroSub:'CES 2027 · Las Vegas',
+    heroDesc:'Veja como foi a edição mais recente e prepare-se para viver a experiência completa em 2027. Conteúdo baseado na CES 2026 como referência.',
+    heroDisc:'⚠️ A CES 2027 ainda não aconteceu. Todo conteúdo é baseado na CES 2026.',
+    heroCta1:'Comprar Ingresso (Sympla)', heroCta2:'Ver Pacotes de Viagem',
+    heroTrust:['Sympla Parceira','Logística Completa','Ingressos Verificados','Missão Brasileira'],
+    stickyText:'Garanta seu lugar no futuro',
+    stickyBtn:'Comprar Ingresso',
+    statsTitle:'CES 2026 em Números',
+    cdTitle:'O futuro tem data marcada',
+    cdSub:'CES 2027 · Las Vegas · Janeiro de 2027',
+    cdDias:'Dias', cdHoras:'Horas', cdMin:'Minutos', cdSeg:'Segundos',
+    empEy:'Presença Global', empH2:'Empresas em Destaque',
+    empSub:'Marcas que definiram a CES 2026 e moldarão o cenário em 2027.',
+    innovEy:'CES 2026 — Referência', innovH2a:'Top 10', innovH2b:'Inovações',
+    innovSub:'Clique em cada card para explorar a inovação em detalhe.',
+    galEy:'Galeria Premium', galH2a:'A CES em', galH2b:'imagens',
+    galTabFotos:'📷 Fotos', galTabVideos:'🎬 Vídeos Oficiais', galTabTour:'🌐 Tour 3D',
+    galVideoPlaceholder:'Vídeos oficiais da CES em breve — aguarde.',
+    galTourPlaceholder:'Tour 3D interativo em desenvolvimento.',
+    knEy:'Palestrantes & Keynotes', knH2a:'Líderes que', knH2b:'moldaram 2026',
+    knSub:'Baseado na programação da CES 2026. A lista de 2027 está em atualização.',
+    knNota:'⚠️ Programação 2027 em atualização. Lista sujeita a alterações.',
+    sobreEy:'Como Funciona a CES', sobreH2a:'O principal palco global para',
+    sobreH2b:'lançamentos tecnológicos',
+    sobreTexto:'A CES é o principal palco global para lançamentos tecnológicos. Na edição de 2026, milhares de empresas ocuparam Las Vegas com demonstrações de IA, robótica, mobilidade e saúde digital.',
+    sobreChecks:['Contato com as maiores empresas do mundo','Acesso antecipado às tendências globais','Networking internacional de alto nível','Conteúdo estratégico para sua área'],
+    sobreNota:'⚠️ Conteúdo baseado na CES 2026. A CES 2027 pode apresentar alterações.',
+    pkgEy:'Operação Viajante Pro', pkgH2a:'Viva a CES 2027', pkgH2b:'com suporte completo',
+    pkgSub:'Ingressos vendidos via Sympla. Pacotes pela agência Viajante Pro.',
+    symplaNote:'Ingressos disponíveis na Sympla — plataforma parceira de vendas',
+    pkgCta1:'Solicitar Informações', pkgCta2:'Quero Este Pacote',
+    pkgRodape:'💳 Parcelamento facilitado · 🛡️ Pagamento seguro · 📞 Consultoria sem compromisso',
+    orgEy:'Destaque Profissional', orgH2a:'Quem está', orgH2b:'por trás',
+    orgHl:'Responsável pela organização, venda de ingressos e logística completa da missão empresarial brasileira.',
+    orgCoLabel:'Empresas onde atuou como consultor',
+    orgChips:['20+ Anos','Tech','Turismo'], orgRole:'Organizador Geral',
+    orgPastEy:'PRESENÇA BRASILEIRA NA CES',
+    instEy:'Institucional', instH2a:'O ambiente ideal para marcas que desejam',
+    instH2b:'visibilidade global',
+    instTexto:'A missão empresarial brasileira reúne executivos, fundadores, consultores e líderes de tecnologia. Mais do que turismo — é uma operação de inteligência de mercado.',
+    instCta:'Falar com a Organização', parceirosLabel:'Parceiros & Apoiadores',
+    faqEy:'Dúvidas Frequentes', faqH2a:'FAQ —', faqH2b:'Perguntas & Respostas',
+    ctaEy:'Las Vegas · Janeiro 2027', ctaH2a:'Faça parte', ctaH2b:'da história.',
+    ctaSub:'Vagas limitadas. Garanta seu lugar na maior missão empresarial brasileira da CES.',
+    ctaBtn1:'Reservar Minha Vaga', ctaBtn2:'Ver Todos os Pacotes',
+    footerRights:'Todos os direitos reservados.',
+    footerNota:'⚠️ Este portal é gerenciado pela missão empresarial organizadora brasileira e não representa a Consumer Technology Association (CTA). CES® é marca registrada da CTA. Conteúdo baseado na CES 2026 como referência para a CES 2027.',
+    footerRedesSociais:'Redes Sociais',
+    modalClose:'Fechar',
+    priceLabel:'Sob Consulta',
+    chatSub:'Olá! Como posso te ajudar hoje?',
+    chatBtn:'Abrir WhatsApp',
+    chatQ1:'Como comprar ingresso?',
+    chatQ2:'O que inclui o Premium?',
+    chatQ3:'Falar com humano',
+    chatA1:'Os ingressos são vendidos oficialmente via Sympla. Acesse a seção "Pacotes" para garantir o seu. 🎟️',
+    chatA2:'Inclui ingresso VIP, voo executivo, hotel 5★ na Strip, transfer de luxo, concierge 24/7 e muito mais! 🌟',
+    chatA3:'Você pode falar diretamente com a organização pelo e-mail: henrique@cesbrasil.tech 📩',
+    symplaHeroTitle:'Ingressos Oficiais via Sympla',
+    symplaHeroSub:'A Sympla é a única plataforma autorizada para emissão de ingressos CES 2027 Brasil.',
+    symplaHeroBtn:'Comprar na Sympla →',
+    vpHeroTitle:'Logística Completa: Viajante Pro',
+    vpHeroSub:'Passagem, hospedagem 5★ e transfer — tudo cuidado pela agência oficial da missão.',
+    vpHeroBtn:'Conhecer Pacotes →',
+  },
+  en: {
+    navSobre:'About', navTendencias:'Innovations', navGaleria:'Gallery',
+    navPacotes:'Packages', navOrg:'Organization', navIngresso:'Buy Ticket',
+    heroEy:'Brazilian Business Mission · cesbrasil.tech',
+    heroTitle:'THE WORLD\'S LARGEST TECH FAIR IS BACK',
+    heroSub:'CES 2027 · Las Vegas',
+    heroDesc:'See how the latest CES edition went and get ready for the full 2027 experience. Content based on CES 2026 as the official reference.',
+    heroDisc:'⚠️ CES 2027 has not taken place yet. All content is based on CES 2026.',
+    heroCta1:'Buy Ticket (Sympla)', heroCta2:'View Travel Packages',
+    heroTrust:['Sympla Partner','Full Logistics','Verified Tickets','Brazilian Mission'],
+    stickyText:'Secure your place in the future',
+    stickyBtn:'Buy Ticket',
+    statsTitle:'CES 2026 by the Numbers',
+    cdTitle:'The future has a date',
+    cdSub:'CES 2027 · Las Vegas · January 2027',
+    cdDias:'Days', cdHoras:'Hours', cdMin:'Minutes', cdSeg:'Seconds',
+    empEy:'Global Presence', empH2:'Featured Companies',
+    empSub:'Brands that defined CES 2026 and will shape the 2027 landscape.',
+    innovEy:'CES 2026 — Reference', innovH2a:'Top 10', innovH2b:'Innovations',
+    innovSub:'Click each card to explore the innovation in detail.',
+    galEy:'Premium Gallery', galH2a:'CES in', galH2b:'images',
+    galTabFotos:'📷 Photos', galTabVideos:'🎬 Official Videos', galTabTour:'🌐 3D Tour',
+    galVideoPlaceholder:'Official CES videos coming soon — stay tuned.',
+    galTourPlaceholder:'Interactive 3D Tour under development.',
+    knEy:'Speakers & Keynotes', knH2a:'Leaders who', knH2b:'shaped 2026',
+    knSub:'Based on the CES 2026 program. The 2027 list is being updated.',
+    knNota:'⚠️ CES 2027 program under development. Subject to change.',
+    sobreEy:'How CES Works', sobreH2a:'The leading global stage for',
+    sobreH2b:'technology launches',
+    sobreTexto:'CES is the world\'s most influential tech event. In 2026, thousands of companies filled Las Vegas with AI, robotics, mobility and digital health demos.',
+    sobreChecks:['Access to the world\'s biggest companies','Early access to global trends','International high-level networking','Strategic content for your field'],
+    sobreNota:'⚠️ Content based on CES 2026. CES 2027 may have changes.',
+    pkgEy:'Viajante Pro Operation', pkgH2a:'Experience CES 2027', pkgH2b:'with full support',
+    pkgSub:'Tickets sold via Sympla. Official packages organized by Viajante Pro.',
+    symplaNote:'Tickets available on Sympla — partner sales platform',
+    pkgCta1:'Request Information', pkgCta2:'I Want This Package',
+    pkgRodape:'💳 Flexible payments · 🛡️ Secure checkout · 📞 Free consultation',
+    orgEy:'Professional Highlight', orgH2a:'The person', orgH2b:'behind it',
+    orgHl:'Responsible for organizing, ticket sales and full logistics of the Brazilian business mission.',
+    orgCoLabel:'Companies where he worked as a consultant',
+    orgChips:['20+ Years','Tech','Tourism'], orgRole:'General Organizer',
+    orgPastEy:'BRAZILIAN PRESENCE AT CES',
+    instEy:'Institutional', instH2a:'The ideal environment for brands seeking',
+    instH2b:'global visibility',
+    instTexto:'The Brazilian business mission brings together executives, founders, consultants and tech leaders. More than tourism — it\'s a market intelligence operation.',
+    instCta:'Talk to the Organization', parceirosLabel:'Partners & Supporters',
+    faqEy:'Frequently Asked Questions', faqH2a:'FAQ —', faqH2b:'Questions & Answers',
+    ctaEy:'Las Vegas · January 2027', ctaH2a:'Be part', ctaH2b:'of history.',
+    ctaSub:'Limited spots. Secure your place in the largest Brazilian business mission at CES.',
+    ctaBtn1:'Reserve My Spot', ctaBtn2:'All Packages',
+    footerRights:'All rights reserved.',
+    footerNota:'⚠️ This portal is managed by the Brazilian organizing business mission and does not officially represent the Consumer Technology Association (CTA). CES® is a trademark of CTA.',
+    footerRedesSociais:'Social Media',
+    modalClose:'Close',
+    priceLabel:'On Request',
+    chatSub:'Hello! How can I help you today?',
+    chatBtn:'Open WhatsApp',
+    chatQ1:'How to buy a ticket?',
+    chatQ2:'What does Premium include?',
+    chatQ3:'Talk to a human',
+    chatA1:'Tickets are sold officially via Sympla. Go to the "Packages" section to secure yours. 🎟️',
+    chatA2:'Includes VIP ticket, business class flight, 5★ Strip hotel, luxury transfer, 24/7 concierge and much more! 🌟',
+    chatA3:'You can speak directly with the organizer by email: henrique@cesbrasil.tech 📩',
+    symplaHeroTitle:'Official Tickets via Sympla',
+    symplaHeroSub:'Sympla is the only authorized platform for CES 2027 Brasil ticket issuance.',
+    symplaHeroBtn:'Buy on Sympla →',
+    vpHeroTitle:'Full Logistics: Viajante Pro',
+    vpHeroSub:'Flights, 5★ accommodation and transfers — all handled by the official mission agency.',
+    vpHeroBtn:'View Packages →',
+  },
+  es: {
+    navSobre:'Acerca', navTendencias:'Innovaciones', navGaleria:'Galería',
+    navPacotes:'Paquetes', navOrg:'Organización', navIngresso:'Comprar Entrada',
+    heroEy:'Misión Empresarial Brasileña · cesbrasil.tech',
+    heroTitle:'LA MAYOR FERIA DE TECNOLOGÍA DEL MUNDO HA VUELTO',
+    heroSub:'CES 2027 · Las Vegas',
+    heroDesc:'Descubra cómo fue la edición más reciente y prepárese para vivir la experiencia completa en 2027. Contenido basado en la CES 2026 como referencia.',
+    heroDisc:'⚠️ La CES 2027 aún no ha ocurrido. Todo el contenido se basa en la CES 2026.',
+    heroCta1:'Comprar Entrada (Sympla)', heroCta2:'Ver Paquetes de Viaje',
+    heroTrust:['Sympla Partner','Logística Completa','Entradas Verificadas','Misión Brasileña'],
+    stickyText:'Asegure su lugar en el futuro',
+    stickyBtn:'Comprar Entrada',
+    statsTitle:'CES 2026 en Números',
+    cdTitle:'El futuro tiene fecha',
+    cdSub:'CES 2027 · Las Vegas · Enero 2027',
+    cdDias:'Días', cdHoras:'Horas', cdMin:'Minutos', cdSeg:'Segundos',
+    empEy:'Presencia Global', empH2:'Empresas Destacadas',
+    empSub:'Marcas que definieron la CES 2026 y moldearán el escenario en 2027.',
+    innovEy:'CES 2026 — Referencia', innovH2a:'Top 10', innovH2b:'Innovaciones',
+    innovSub:'Haz clic en cada tarjeta para explorar la innovación en detalle.',
+    galEy:'Galería Premium', galH2a:'La CES en', galH2b:'imágenes',
+    galTabFotos:'📷 Fotos', galTabVideos:'🎬 Videos Oficiales', galTabTour:'🌐 Tour 3D',
+    galVideoPlaceholder:'Videos oficiales de la CES próximamente — espera.',
+    galTourPlaceholder:'Tour 3D interactivo en desarrollo.',
+    knEy:'Ponentes & Keynotes', knH2a:'Líderes que', knH2b:'moldearon 2026',
+    knSub:'Basado en el programa de la CES 2026. La lista de 2027 está en actualización.',
+    knNota:'⚠️ Programa 2027 en desarrollo. Sujeto a cambios.',
+    sobreEy:'Cómo Funciona la CES', sobreH2a:'El escenario global líder para',
+    sobreH2b:'lanzamientos tecnológicos',
+    sobreTexto:'La CES es el evento tecnológico más influyente del mundo. En 2026, miles de empresas llenaron Las Vegas con demos de IA, robótica, movilidad y salud digital.',
+    sobreChecks:['Acceso a las mayores empresas del mundo','Acceso anticipado a tendencias globales','Networking internacional de alto nivel','Contenido estratégico para su área'],
+    sobreNota:'⚠️ Contenido basado en la CES 2026. La CES 2027 puede presentar cambios.',
+    pkgEy:'Operación Viajante Pro', pkgH2a:'Vive la CES 2027', pkgH2b:'con soporte completo',
+    pkgSub:'Entradas vendidas por Sympla. Paquetes organizados por Viajante Pro.',
+    symplaNote:'Entradas disponibles en Sympla — plataforma asociada de ventas',
+    pkgCta1:'Solicitar Información', pkgCta2:'Quiero Este Paquete',
+    pkgRodape:'💳 Pagos flexibles · 🛡️ Pago seguro · 📞 Consulta gratuita',
+    orgEy:'Perfil Profesional', orgH2a:'Quién está', orgH2b:'detrás',
+    orgHl:'Responsable de la organización, venta de entradas y logística completa de la misión empresarial brasileña.',
+    orgCoLabel:'Empresas donde trabajó como consultor',
+    orgChips:['20+ Años','Tech','Turismo'], orgRole:'Organizador General',
+    orgPastEy:'PRESENCIA BRASILEÑA EN CES',
+    instEy:'Institucional', instH2a:'El entorno ideal para marcas que buscan',
+    instH2b:'visibilidad global',
+    instTexto:'La misión empresarial brasileña reúne ejecutivos, fundadores, consultores y líderes tecnológicos. Más que turismo — es una operación de inteligencia de mercado.',
+    instCta:'Hablar con la Organización', parceirosLabel:'Socios y Patrocinadores',
+    faqEy:'Preguntas Frecuentes', faqH2a:'FAQ —', faqH2b:'Preguntas y Respuestas',
+    ctaEy:'Las Vegas · Enero 2027', ctaH2a:'Sé parte', ctaH2b:'de la historia.',
+    ctaSub:'Cupos limitados. Asegure su lugar en la mayor misión empresarial brasileña de la CES.',
+    ctaBtn1:'Reservar Mi Lugar', ctaBtn2:'Ver Todos los Paquetes',
+    footerRights:'Todos los derechos reservados.',
+    footerNota:'⚠️ Este portal es administrado por la misión empresarial organizadora brasileña y no representa oficialmente a la Consumer Technology Association (CTA). CES® es marca registrada de la CTA.',
+    footerRedesSociais:'Redes Sociales',
+    modalClose:'Cerrar',
+    priceLabel:'Bajo Consulta',
+    chatSub:'¡Hola! ¿Cómo puedo ayudarte hoy?',
+    chatBtn:'Abrir WhatsApp',
+    chatQ1:'¿Cómo comprar entrada?',
+    chatQ2:'¿Qué incluye el Premium?',
+    chatQ3:'Hablar con humano',
+    chatA1:'Las entradas se venden oficialmente por Sympla. Accede a la sección "Paquetes" para asegurar la tuya. 🎟️',
+    chatA2:'Incluye entrada VIP, vuelo ejecutivo, hotel 5★ en la Strip, transfer de lujo, concierge 24/7 ¡y mucho más! 🌟',
+    chatA3:'Puedes hablar directamente con la organización por email: henrique@cesbrasil.tech 📩',
+    symplaHeroTitle:'Entradas Oficiales vía Sympla',
+    symplaHeroSub:'Sympla es la única plataforma autorizada para emitir entradas CES 2027 Brasil.',
+    symplaHeroBtn:'Comprar en Sympla →',
+    vpHeroTitle:'Logística Completa: Viajante Pro',
+    vpHeroSub:'Vuelos, hospedaje 5★ y transfers — todo gestionado por la agencia oficial de la misión.',
+    vpHeroBtn:'Ver Paquetes →',
+  },
+};
+
+let LANG = 'pt';
+const LANG_NAMES = { pt:'🇧🇷 Português', en:'🇺🇸 English', es:'🇪🇸 Español' };
+
+// ── § II · CHATBOT ROULETTE — FIX v8: sorteia a CADA abertura ──
+// 15 nomes tech icônicos (gênero para renderização condicional)
+const CHAT_NAMES_POOL = [
+  { name:'Steve',   gender:'m' },
+  { name:'Bill',    gender:'m' },
+  { name:'Elon',    gender:'m' },
+  { name:'Jeff',    gender:'m' },
+  { name:'Sam',     gender:'m' },
+  { name:'Jensen',  gender:'m' },
+  { name:'Tim',     gender:'m' },
+  { name:'Mark',    gender:'m' },
+  { name:'Lisa',    gender:'f' },
+  { name:'Safra',   gender:'f' },
+  { name:'Ada',     gender:'f' },
+  { name:'Grace',   gender:'f' },
+  { name:'Mira',    gender:'f' },
+  { name:'Sheryl',  gender:'f' },
+  { name:'Gwynne',  gender:'f' },
+];
+
+// Titan atual (sorteado a cada abertura do chat)
+let CHAT_TITAN = CHAT_NAMES_POOL[Math.floor(Math.random() * CHAT_NAMES_POOL.length)];
+
+// Helpers de avatar por gênero
+const _avatarBg  = (t) => t.gender === 'f' ? '#9333EA' : 'var(--blue)';
+const _avatarLbl = (t) => t.gender === 'f' ? t.name.charAt(0) + '♀' : t.name.charAt(0);
+
+// ═══════════════════════════════════════════════════════════════════
+// § III · DADOS DO SITE
+// ═══════════════════════════════════════════════════════════════════
+const DATA = {
+  site: {
+    agencyName:'Viajante Pro', agencyUrl:'https://viajantepro.com.br',
+    url:'https://cesbrasil.tech', contactEmail:'henrique@cesbrasil.tech',
+    heroVideoId:'0GZCN0Xz_oA', sympla:'#ingressos',
+    whatsapp:'5511999999999',
+    social:{
+      instagram:'https://instagram.com/cesbrasil.tech',
+      linkedin:'https://linkedin.com/company/cesbrasil',
+      youtube:'https://youtube.com/@cesbrasil',
+      twitter:'https://twitter.com/cesbrasil',
+      sympla:'https://sympla.com.br/cesbrasil',
+    },
+    stats:[
+      {value:148000, display:'+148.000', labelPt:'Participantes',    labelEn:'Attendees',          labelEs:'Participantes'},
+      {value:4100,   display:'+4.100',   labelPt:'Expositores',      labelEn:'Exhibitors',          labelEs:'Expositores'},
+      {value:6900,   display:'+6.900',   labelPt:'Profissionais de Mídia', labelEn:'Media Professionals', labelEs:'Profesionales de Medios'},
+      {value:0,      display:'Jan/27',   labelPt:'Próxima Edição',   labelEn:'Next Edition',        labelEs:'Próxima Edición', noCount:true},
+    ],
+    marqueeEmpresas:['Samsung','NVIDIA','Sony','LG','Intel','Qualcomm','AMD','Bosch','Siemens','Lenovo','Hyundai','Kia','Google','Amazon','Caterpillar','Ōura','Havas'],
+    sobreFadingSlider:[
+      'https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=900&q=80',
+      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=900&q=80',
+      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=900&q=80',
+    ],
+    sobreFadingFloating:'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=600&q=80',
+    innovations:[
+      {n:'01',img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80',titlePt:'Robôs Humanoides Comerciais',titleEn:'Commercial Humanoid Robots',titleEs:'Robots Humanoides Comerciales',resumoPt:'Plataformas prontas para linhas de produção.',resumoEn:'Platforms ready for production lines.',resumoEs:'Plataformas listas para líneas de producción.',expandPt:'A robótica avançou para além dos laboratórios. Modelos com destreza motora fina, equilíbrio dinâmico e integração profunda com IA assumem tarefas de risco ou atendimento ao público com eficiência ímpar.',expandEn:'Robotics has moved beyond labs. Models with fine motor dexterity, dynamic balance and deep AI integration now handle hazardous tasks or public-facing roles with unmatched efficiency.',expandEs:'La robótica ha avanzado más allá de los laboratorios. Modelos con destreza motora fina, equilibrio dinámico e integración profunda con IA asumen tareas de riesgo o atención al público con eficiencia inigualable.'},
+      {n:'02',img:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',titlePt:'IA Embarcada em Dispositivos',titleEn:'On-Device Embedded AI',titleEs:'IA Embebida en Dispositivos',resumoPt:'Modelos locais — privacidade e velocidade.',resumoEn:'Local models — privacy and speed.',resumoEs:'Modelos locales — privacidad y velocidad.',expandPt:'Laptops e smartphones agora processam IA sem precisar de nuvem. Latência zero e garantia de que seus dados privados nunca saem do seu dispositivo.',expandEn:'Laptops and smartphones now process AI without cloud dependency. Zero latency and a guarantee that your private data never leaves your device.',expandEs:'Laptops y smartphones ahora procesan IA sin necesidad de la nube. Latencia cero y garantía de que sus datos privados nunca salen del dispositivo.'},
+      {n:'03',img:'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=80',titlePt:'Veículos Autônomos Nível 4',titleEn:'Level 4 Autonomous Vehicles',titleEs:'Vehículos Autónomos Nivel 4',resumoPt:'SAE Nível 4 sem intervenção humana.',resumoEn:'SAE Level 4 without human intervention.',resumoEs:'SAE Nivel 4 sin intervención humana.',expandPt:'O transporte do futuro. De caminhões de carga pesada a robotáxis operando nas vias caóticas das grandes metrópoles.',expandEn:'The future of transport. From heavy freight trucks to robotaxis operating on the chaotic roads of major metropolises.',expandEs:'El transporte del futuro. Desde camiones de carga pesada hasta robotaxis operando en las caóticas vías de las grandes metrópolis.'},
+      {n:'04',img:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',titlePt:'Saúde Digital Preventiva',titleEn:'Preventive Digital Health',titleEs:'Salud Digital Preventiva',resumoPt:'Diagnósticos por wearables e IA clínica.',resumoEn:'Diagnostics via wearables and clinical AI.',resumoEs:'Diagnósticos por wearables e IA clínica.',expandPt:'O monitoramento contínuo da variabilidade cardíaca, glicose e sono alimenta algoritmos que preveem riscos à saúde antes que os sintomas apareçam.',expandEn:'Continuous monitoring of heart rate variability, glucose and sleep feeds algorithms that predict health risks before symptoms appear.',expandEs:'El monitoreo continuo de la variabilidad cardíaca, glucosa y sueño alimenta algoritmos que predicen riesgos de salud antes de que aparezcan los síntomas.'},
+      {n:'05',img:'https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=80',titlePt:'Smart Homes Integradas',titleEn:'AI-Integrated Smart Homes',titleEs:'Hogares Inteligentes con IA',resumoPt:'Casas que aprendem e se reconfiguram.',resumoEn:'Homes that learn and self-configure.',resumoEs:'Hogares que aprenden y se reconfiguran.',expandPt:'Câmeras invisíveis e sensores ajustam a iluminação, música e clima com base no humor dos moradores, otimizando energia.',expandEn:'Invisible cameras and sensors adjust lighting, music and climate based on residents\' mood, optimizing energy use.',expandEs:'Cámaras invisibles y sensores ajustan la iluminación, música y clima según el estado de ánimo de los residentes, optimizando energía.'},
+      {n:'06',img:'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80',titlePt:'Telas Dobráveis & Transparentes',titleEn:'Foldable & Transparent Displays',titleEs:'Pantallas Plegables y Transparentes',resumoPt:'Painéis OLED flexíveis e transparentes.',resumoEn:'Flexible and transparent OLED panels.',resumoEs:'Paneles OLED flexibles y transparentes.',expandPt:'A fronteira física e digital desapareceu. Novas telas OLED podem ser enroladas ou 100% transparentes em janelas e carros.',expandEn:'The physical and digital boundary has vanished. New OLED screens can be rolled up or made 100% transparent in windows and cars.',expandEs:'La frontera física y digital ha desaparecido. Las nuevas pantallas OLED pueden enrollarse o ser 100% transparentes en ventanas y autos.'},
+      {n:'07',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80',titlePt:'Edge AI',titleEn:'Edge AI',titleEs:'Edge AI',resumoPt:'Inferência no dispositivo, latência zero.',resumoEn:'On-device inference, zero latency.',resumoEs:'Inferencia en dispositivo, latencia cero.',expandPt:'Máquinas industriais e infraestrutura crítica agora tomam decisões instantâneas usando redes neurais, sem depender de internet.',expandEn:'Industrial machines and critical infrastructure now make instant decisions using neural networks, without internet dependency.',expandEs:'Las máquinas industriales e infraestructura crítica ahora toman decisiones instantáneas usando redes neuronales, sin depender de internet.'},
+      {n:'08',img:'https://images.unsplash.com/photo-1510017803434-a899398421b3?w=800&q=80',titlePt:'Wearables Avançados',titleEn:'Advanced Wearables',titleEs:'Wearables Avanzados',resumoPt:'Sensores integrados a tecidos inteligentes.',resumoEn:'Sensors integrated into smart fabrics.',resumoEs:'Sensores integrados en tejidos inteligentes.',expandPt:'Roupas que monitoram postura, anéis que rastreiam biomarcadores profundos e óculos superleves projetando o metaverso.',expandEn:'Garments that monitor posture, rings that track deep biomarkers and ultra-light glasses projecting the metaverse.',expandEs:'Ropa que monitorea postura, anillos que rastrean biomarcadores profundos y gafas ultraligeras que proyectan el metaverso.'},
+      {n:'09',img:'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&q=80',titlePt:'Energia Limpa na Mobilidade',titleEn:'Clean Energy & Mobility',titleEs:'Energía Limpia y Movilidad',resumoPt:'Baterias de estado sólido e carregamento ultrarápido.',resumoEn:'Solid-state batteries and ultra-fast charging.',resumoEs:'Baterías de estado sólido y carga ultrarrápida.',expandPt:'Infraestruturas de carregamento que restauram 80% das baterias em minutos e redes elétricas inteligentes descentralizadas.',expandEn:'Charging infrastructure that restores 80% battery in minutes and decentralized smart electrical grids.',expandEs:'Infraestructura de carga que restaura el 80% de la batería en minutos y redes eléctricas inteligentes descentralizadas.'},
+      {n:'10',img:'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=800&q=80',titlePt:'Experiências Imersivas XR',titleEn:'Immersive XR Experiences',titleEs:'Experiencias Inmersivas XR',resumoPt:'Passthrough fotorrealista e háptica avançada.',resumoEn:'Photorealistic passthrough and advanced haptics.',resumoEs:'Passthrough fotorrealista y háptica avanzada.',expandPt:'Luvas e trajes com resposta tátil realista permitem manipular objetos digitais com peso e textura virtuais imitando a física real.',expandEn:'Gloves and suits with realistic tactile feedback allow manipulating digital objects with virtual weight and texture mimicking real physics.',expandEs:'Guantes y trajes con respuesta táctil realista permiten manipular objetos digitales con peso y textura virtual que imitan la física real.'},
+    ],
+    gallery:[
+      {src:'https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=1200&q=80',captionPt:'Multidão no Las Vegas Convention Center (LVCC) descobrindo as tendências de 2026.',captionEn:'Crowd at the Las Vegas Convention Center (LVCC) discovering the trends of 2026.',captionEs:'Multitud en el Las Vegas Convention Center (LVCC) descubriendo las tendencias de 2026.'},
+      {src:'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80',captionPt:'Demonstração ao vivo de robótica aplicada à indústria.',captionEn:'Live demonstration of robotics applied to industry.',captionEs:'Demostración en vivo de robótica aplicada a la industria.'},
+      {src:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80',captionPt:'O poder dos semicondutores e processadores de IA sendo revelados ao mundo.',captionEn:'The power of semiconductors and AI processors being revealed to the world.',captionEs:'El poder de los semiconductores y procesadores de IA siendo revelados al mundo.'},
+      {src:'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&q=80',captionPt:'Painéis OLED transparentes e flexíveis redefinindo o design.',captionEn:'Transparent and flexible OLED panels redefining design.',captionEs:'Paneles OLED transparentes y flexibles redefiniendo el diseño.'},
+      {src:'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1200&q=80',captionPt:'Abertura do evento, reunindo líderes de 140+ países.',captionEn:'Opening of the event, bringing together leaders from 140+ countries.',captionEs:'Inauguración del evento, reuniendo líderes de más de 140 países.'},
+    ],
+    galleryVideos:[
+      {ytId:'0GZCN0Xz_oA', titlePt:'CES 2026 — Highlights Oficiais', titleEn:'CES 2026 — Official Highlights', titleEs:'CES 2026 — Highlights Oficiales'},
+      {ytId:'dQw4w9WgXcQ', titlePt:'Keynotes Imperdíveis da CES 2026', titleEn:'Must-See Keynotes from CES 2026', titleEs:'Keynotes Imperdibles de la CES 2026'},
+    ],
+    keynotes:[
+      {initials:'LS', color:'#0057FF',photo:'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80',company:'AMD',namePt:'Dr. Lisa Su',nameEn:'Dr. Lisa Su',nameEs:'Dr. Lisa Su',rolePt:'CEO & Presidente',roleEn:'CEO & President',roleEs:'CEO & Presidenta',notePt:'Lisa Su apresentou o roadmap de IA para data centers com os novos processadores Ryzen 10000, demonstrando ganhos de até 40% em inferência de LLMs. A AMD consolidou sua posição como principal alternativa à NVIDIA no mercado de aceleradores de IA.',noteEn:'Lisa Su presented AMD\'s AI roadmap for data centers with the new Ryzen 10000 processors, demonstrating up to 40% gains in LLM inference. AMD solidified its position as the leading alternative to NVIDIA in the AI accelerator market.',noteEs:'Lisa Su presentó el roadmap de IA de AMD para centros de datos con los nuevos procesadores Ryzen 10000, demostrando ganancias de hasta el 40% en inferencia de LLMs. AMD consolidó su posición como principal alternativa a NVIDIA en el mercado de aceleradores de IA.'},
+      {initials:'RB', color:'#E53E3E',photo:'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80',company:'Siemens AG',namePt:'Roland Busch',nameEn:'Roland Busch',nameEs:'Roland Busch',rolePt:'Presidente & CEO',roleEn:'President & CEO',roleEs:'Presidente & CEO',notePt:'Busch demonstrou o "Digital Twin Composer" em parceria com a NVIDIA, criando gêmeos digitais de fábricas inteiras em tempo real.',noteEn:'Busch demonstrated the "Digital Twin Composer" in partnership with NVIDIA, creating digital twins of entire factories in real time.',noteEs:'Busch demostró el "Digital Twin Composer" en asociación con NVIDIA, creando gemelos digitales de fábricas enteras en tiempo real.'},
+      {initials:'YY', color:'#D69E2E',photo:'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=600&q=80',company:'Lenovo',namePt:'Yuanqing Yang',nameEn:'Yuanqing Yang',nameEs:'Yuanqing Yang',rolePt:'Chairman & CEO',roleEn:'Chairman & CEO',roleEs:'Chairman & CEO',notePt:'Sob o conceito "AI for All", Yang lançou a nova linha ThinkPad com IA nativa embarcada e o Personal AI Assistant, que aprende o fluxo de trabalho do usuário sem enviar dados à nuvem.',noteEn:'Under the "AI for All" concept, Yang launched the new ThinkPad line with native embedded AI and the Personal AI Assistant, which learns user workflow without sending data to the cloud.',noteEs:'Bajo el concepto "AI for All", Yang lanzó la nueva línea ThinkPad con IA nativa embebida y el Personal AI Assistant, que aprende el flujo de trabajo del usuario sin enviar datos a la nube.'},
+      {initials:'JC', color:'#38A169',photo:'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80',company:'Caterpillar',namePt:'Joe Creed',nameEn:'Joe Creed',nameEs:'Joe Creed',rolePt:'CEO',roleEn:'CEO',roleEs:'CEO',notePt:'Creed revelou a visão "Smart Iron" — transformando a indústria pesada com escavadeiras elétricas autônomas e caminhões de mineração que operam sem motorista em tempo integral.',noteEn:'Creed unveiled the "Smart Iron" vision — transforming heavy industry with autonomous electric excavators and mining trucks that operate fully driverless.',noteEs:'Creed reveló la visión "Smart Iron" — transformando la industria pesada con excavadoras eléctricas autónomas y camiones mineros que operan sin conductor.'},
+      {initials:'TH', color:'#805AD5',photo:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80',company:'Ōura',namePt:'Tom Hale',nameEn:'Tom Hale',nameEs:'Tom Hale',rolePt:'CEO',roleEn:'CEO',roleEs:'CEO',notePt:'Hale apresentou a 4ª geração do Ōura Ring — capaz de detectar padrões de inflamação, prever resfriados com 3 dias de antecedência e monitorar glicose sem picada de dedo.',noteEn:'Hale presented the 4th generation Ōura Ring — capable of detecting inflammation patterns, predicting colds 3 days in advance and monitoring glucose without a finger prick.',noteEs:'Hale presentó la 4ª generación del Ōura Ring — capaz de detectar patrones de inflamación, predecir resfriados con 3 días de anticipación y monitorear glucosa sin pinchar el dedo.'},
+      {initials:'YB', color:'#D53F8C',photo:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80',company:'Havas',namePt:'Yannick Bolloré',nameEn:'Yannick Bolloré',nameEs:'Yannick Bolloré',rolePt:'CEO Global',roleEn:'Global CEO',roleEs:'CEO Global',notePt:'Bolloré explorou como a IA generativa está reconfigurando a publicidade e apresentou o "Havas AI Studio" — plataforma que cria campanhas hiperpersonalizadas em escala.',noteEn:'Bolloré explored how generative AI is reconfiguring advertising and presented "Havas AI Studio" — a platform that creates hyper-personalized campaigns at scale.',noteEs:'Bolloré exploró cómo la IA generativa está reconfigurando la publicidad y presentó "Havas AI Studio" — plataforma que crea campañas hiperpersonalizadas a escala.'},
+      {initials:'KF', color:'#DD6B20',photo:'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80',company:'CTA',namePt:'Kinsey Fabrizio & Gary Shapiro',nameEn:'Kinsey Fabrizio & Gary Shapiro',nameEs:'Kinsey Fabrizio & Gary Shapiro',rolePt:'Presidente / CEO — CTA',roleEn:'President / CEO — CTA',roleEs:'Presidente / CEO — CTA',notePt:'Keynote de abertura "State of the Industry" abordou as políticas globais de IA, regulamentação e inovações em saúde digital, estabelecendo o tom para uma CES histórica com +148 mil participantes.',noteEn:'Opening keynote "State of the Industry" addressed global AI policies, regulation and digital health innovations, setting the tone for a historic CES with 148k+ attendees.',noteEs:'Keynote de apertura "State of the Industry" abordó las políticas globales de IA, regulación e innovaciones en salud digital.'},
+    ],
+    faqs:[
+      {qPt:'O ingresso garante acesso a toda a feira?',aPt:'O ingresso CES 2027 garante acesso às áreas gerais. Zonas especiais (C-Space, By Invitation Only) exigem credencial adicional. Nosso pacote Premium inclui acesso VIP.',qEn:'Does the ticket grant full fair access?',aEn:'The CES 2027 ticket grants access to general areas. Special zones require additional credentials. Our Premium package includes VIP access.',qEs:'¿La entrada garantiza acceso a toda la feria?',aEs:'La entrada CES 2027 garantiza acceso a las áreas generales. Las zonas especiales requieren credencial adicional. Nuestro paquete Premium incluye acceso VIP.'},
+      {qPt:'Posso comprar apenas o ingresso sem o pacote viagem?',aPt:'Sim! Os ingressos são vendidos separadamente via Sympla. Os pacotes de viagem são oferecidos pela Viajante Pro.',qEn:'Can I buy just the ticket without the travel package?',aEn:'Yes! Tickets are sold separately via Sympla. Travel packages are offered by Viajante Pro.',qEs:'¿Puedo comprar solo la entrada sin el paquete de viaje?',aEs:'¡Sí! Las entradas se venden por separado a través de Sympla. Los paquetes de viaje son ofrecidos por Viajante Pro.'},
+      {qPt:'O conteúdo mostrado é da CES 2027?',aPt:'Não. ⚠️ A CES 2027 ainda não aconteceu. Todo conteúdo é baseado na CES 2026, usada como referência.',qEn:'Is the content shown from CES 2027?',aEn:'No. ⚠️ CES 2027 has not happened yet. All content is based on CES 2026 as the reference.',qEs:'¿El contenido mostrado es de la CES 2027?',aEs:'No. ⚠️ La CES 2027 aún no ha ocurrido. Todo el contenido está basado en la CES 2026 como referencia.'},
+      {qPt:'Qual a data exata da CES 2027?',aPt:'As datas serão confirmadas pela CTA. Historicamente a CES ocorre na primeira semana de janeiro.',qEn:'What is the exact date of CES 2027?',aEn:'Dates will be confirmed by CTA. Historically CES takes place in the first week of January.',qEs:'¿Cuál es la fecha exacta de la CES 2027?',aEs:'Las fechas serán confirmadas por la CTA. Históricamente la CES se celebra en la primera semana de enero.'},
+      {qPt:'Como funciona o suporte durante a viagem?',aPt:'Todos os pacotes incluem suporte via WhatsApp. O Premium conta com concierge dedicado 24/7.',qEn:'How does travel support work?',aEn:'All packages include WhatsApp support. The Premium includes a dedicated 24/7 concierge.',qEs:'¿Cómo funciona el soporte durante el viaje?',aEs:'Todos los paquetes incluyen soporte por WhatsApp. El Premium cuenta con concierge dedicado 24/7.'},
+    ],
+    organizer:{
+      name:'Henrique Ofugi Ono',email:'henrique@cesbrasil.tech',
+      linkedinUrl:'https://www.linkedin.com/in/henriqueono/',
+      siteUrl:'https://cesbrasil.tech',
+      bioPt:'Consultor em tecnologia há mais de 20 anos, Henrique Ofugi Ono é o responsável pela missão empresarial brasileira na CES — da logística à venda de ingressos. Empreendedor consolidado nos setores de turismo e eventos corporativos internacionais, já liderou operações para executivos de grandes corporações brasileiras. Sua trajetória combina visão tecnológica e execução de alto nível.',
+      bioEn:'A technology consultant for over 20 years, Henrique Ofugi Ono is responsible for the Brazilian business mission at CES — from logistics to ticket sales. A consolidated entrepreneur in international corporate events and tourism, he has led operations for executives from major Brazilian corporations. His career combines technological vision with top-tier execution.',
+      bioEs:'Consultor en tecnología por más de 20 años, Henrique Ofugi Ono es el responsable de la misión empresarial brasileña en la CES — desde la logística hasta la venta de entradas. Emprendedor consolidado en turismo y eventos corporativos internacionales, ha liderado operaciones para ejecutivos de grandes corporaciones brasileñas.',
+      companies:['Ambev','Porto Seguro','Vivo','OI','Magalu','Casas Bahia','CAIXA','BRB'],
+      avatar:'',
+      pastEvents:[
+        'https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&q=80',
+        'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+        'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80',
+        'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80',
+        'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=800&q=80',
+        'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=800&q=80',
+      ],
+    },
+    partners:['Sympla','CTA','Ambev','Magalu','Porto Seguro','BRB','Vivo','CAIXA','Bosch','Intel'],
+  },
+  packages:[
+    {id:'essencial', namePt:'Essencial', nameEn:'Essential', nameEs:'Esencial',featured:false,badge:'',descPt:'Sua entrada na maior feira de tecnologia do planeta.',descEn:'Your gateway to the world\'s largest tech fair.',descEs:'Tu puerta de entrada a la mayor feria tecnológica del planeta.',featuresPt:['Ingresso CES 2027 (acesso geral)','Voo internacional — classe econômica','Hotel 4★ em Las Vegas (7 noites)','Transfer aeroporto ↔ hotel','App exclusivo da missão','Seguro viagem premium','Suporte WhatsApp VIP'],featuresEn:['CES 2027 ticket (general access)','International flight — economy class','4★ hotel in Las Vegas (7 nights)','Airport ↔ hotel transfer','Exclusive mission app','Premium travel insurance','VIP WhatsApp support'],featuresEs:['Entrada CES 2027 (acceso general)','Vuelo internacional — clase económica','Hotel 4★ en Las Vegas (7 noches)','Transfer aeropuerto ↔ hotel','App exclusiva de la misión','Seguro de viaje premium','Soporte WhatsApp VIP']},
+    {id:'premium', namePt:'Premium', nameEn:'Premium', nameEs:'Premium',featured:true,badge:'Mais Vendido',descPt:'A experiência completa para extrair o máximo da CES 2027.',descEn:'The complete experience to get the most out of CES 2027.',descEs:'La experiencia completa para sacar el máximo de la CES 2027.',featuresPt:['Ingresso CES 2027 (acesso total + VIP)','Voo internacional — classe executiva','Hotel 5★ na Strip de Las Vegas (10 noites)','Transfer em veículo de luxo','Concierge dedicado 24/7','Networking estruturado diário','Jantar com missão e palestrantes','Relatório de tendências exclusivo','Seguro viagem platinum'],featuresEn:['CES 2027 ticket (full access + VIP)','International flight — business class','5★ hotel on the Las Vegas Strip (10 nights)','Luxury vehicle transfer','Dedicated 24/7 concierge','Daily structured networking','Dinner with mission and speakers','Exclusive trends report','Platinum travel insurance'],featuresEs:['Entrada CES 2027 (acceso total + VIP)','Vuelo internacional — clase ejecutiva','Hotel 5★ en la Strip de Las Vegas (10 noches)','Transfer en vehículo de lujo','Concierge dedicado 24/7','Networking estructurado diario','Cena con misión y ponentes','Informe de tendencias exclusivo','Seguro de viaje platinum']},
+    {id:'ultra', namePt:'Ultra', nameEn:'Ultra', nameEs:'Ultra',featured:false,badge:'',descPt:'Presença estratégica máxima. Para líderes que definem o futuro.',descEn:'Maximum strategic presence. For leaders who define the future.',descEs:'Presencia estratégica máxima. Para líderes que definen el futuro.',featuresPt:['Ingresso CES 2027 (C-Space + acesso máximo)','Voo 1ª classe ou jato executivo','Suite hotel 5★ (14 noites)','Motorista exclusivo em Las Vegas','Acesso a festas e eventos VIP','Reuniões privadas com expositores','Personal branding na missão','Relatório executivo personalizado','Seguro viagem ilimitado'],featuresEn:['CES 2027 ticket (C-Space + maximum access)','First class or executive jet flight','5★ hotel suite (14 nights)','Exclusive driver in Las Vegas','Access to VIP parties and events','Private meetings with exhibitors','Personal branding in the mission','Personalized executive report','Unlimited travel insurance'],featuresEs:['Entrada CES 2027 (C-Space + acceso máximo)','Vuelo 1ª clase o jet ejecutivo','Suite hotel 5★ (14 noches)','Conductor exclusivo en Las Vegas','Acceso a fiestas y eventos VIP','Reuniones privadas con expositores','Personal branding en la misión','Informe ejecutivo personalizado','Seguro de viaje ilimitado']},
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// § IV · CSS — LIGHT/CLEAN MODE v8 (4 fixes applied)
+// ═══════════════════════════════════════════════════════════════════
+function injectTheme() {
+  const gf = document.createElement('link');
+  gf.rel = 'stylesheet';
+  gf.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap';
+  document.head.appendChild(gf);
+
+  const s = document.createElement('style');
+  s.id = 'ces27-ds';
+  s.textContent = `
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+/* ── LIGHT MODE TOKENS ── */
+:root{
+  --bg-white:#F9F8F6;
+  --bg-ice:#F2F0ED;
+  --bg-ice2:#EAE8E4;
+  --bg-border:#E2E8F0;
+  --bg-border2:#CBD5E1;
+  --blue:#0057FF;
+  --blue2:#0046CC;
+  --blue3:#003DA8;
+  --blue-light:#EBF2FF;
+  --blue-mid:#DBEAFE;
+  --text:#0F172A;
+  --text2:#334155;
+  --text3:#64748B;
+  --text4:#94A3B8;
+  --orange:#FF5C00;
+  --orange2:#E84F00;
+  --orange-light:#FFF3EB;
+  --gold:#B7791F;
+  --gold-light:#FEFCE8;
+  --green:#16A34A;
+  --green-light:#F0FDF4;
+  --sympla:#00C57A;
+  --sympla-light:#ECFDF5;
+  --vp:#0057FF;
+  --vp-light:#EBF2FF;
+  --sh-xs:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh-sm:0 4px 20px rgba(0,0,0,.04);
+  --sh-md:0 8px 32px rgba(0,0,0,.07);
+  --sh-lg:0 20px 60px rgba(0,0,0,.1);
+  --sh-card:0 2px 8px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.04);
+  --hero-bg:#06090F;
+  --fd:'Inter',sans-serif;
+  --fb:'Inter',sans-serif;
+  --r:8px; --r2:12px; --r3:16px; --r4:24px; --r5:999px;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --max:1160px;
+}
+
+body{
+  background:var(--bg-white);
+  color:var(--text2);
+  font-family:var(--fb);
+  font-size:15px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg-ice)}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:4px}
+
+.wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+@media(max-width:640px){.wrap{padding:0 18px}}
+.sec{padding:80px 0}
+@media(max-width:768px){.sec{padding:56px 0}}
+.sec-ice{background:var(--bg-ice)}
+.sec-white{background:var(--bg-white)}
+.divider{height:1px;background:var(--bg-border);margin:0}
+
+.fd{font-family:var(--fd)}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--fb);font-size:11px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--blue);
+  margin-bottom:14px;
+}
+.eyebrow::before{content:'';display:block;height:1.5px;width:14px;background:var(--blue);border-radius:2px}
+
+.h1{font-family:var(--fd);font-weight:700;font-size:clamp(2rem,4.5vw,4rem);line-height:1.1;letter-spacing:-.03em;color:var(--text)}
+.h2{font-family:var(--fd);font-weight:700;font-size:clamp(1.6rem,3vw,2.8rem);line-height:1.15;letter-spacing:-.025em;color:var(--text)}
+.h3{font-family:var(--fd);font-weight:600;font-size:clamp(1.1rem,2vw,1.5rem);line-height:1.25;letter-spacing:-.015em;color:var(--text)}
+.lead{font-size:clamp(15px,1.5vw,17px);color:var(--text3);line-height:1.75}
+
+.text-blue{color:var(--blue)}
+.text-orange{color:var(--orange)}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--fd);font-weight:600;font-size:13px;letter-spacing:.02em;
+  cursor:pointer;border:none;border-radius:var(--r5);
+  transition:all .22s var(--ease);white-space:nowrap;padding:11px 26px;
+}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,87,255,.25)}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:var(--orange2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,92,0,.25)}
+.btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--bg-border2)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.btn-hero-outline{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25)}
+.btn-hero-outline:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5)}
+.btn-sympla{background:var(--sympla);color:#fff}
+.btn-sympla:hover{background:#00a868;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,197,122,.28)}
+.btn-lg{padding:14px 36px;font-size:15px}
+.btn-sm{padding:8px 18px;font-size:12px}
+
+/* ══ STICKY BAR ══ */
+#sticky-bar{
+  position:fixed;top:-70px;left:0;right:0;z-index:998;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bg-border);
+  box-shadow:var(--sh-sm);
+  transition:top .4s var(--ease);
+}
+#sticky-bar.visible{top:0}
+.sb-inner{max-width:var(--max);margin:0 auto;padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.sb-logo{font-family:var(--fd);font-weight:700;font-size:15px;color:var(--text);display:flex;align-items:center;gap:8px}
+.sb-tag{padding:2px 8px;border-radius:4px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.sb-text{font-size:13px;color:var(--text3)}
+@media(max-width:640px){.sb-text{display:none}}
+
+/* ══ HEADER ══ */
+#hdr{
+  position:fixed;top:0;left:0;right:0;z-index:999;
+  transition:background .35s,box-shadow .35s,border-color .35s;
+  border-bottom:1px solid transparent;
+}
+#hdr.at-hero{background:transparent}
+#hdr.scrolled{
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-color:var(--bg-border);
+  box-shadow:var(--sh-xs);
+}
+.hdr-inner{max-width:var(--max);margin:0 auto;padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-logo-mark{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.hdr-wm{font-family:var(--fd);font-weight:700;font-size:17px;letter-spacing:-.02em;color:#fff;transition:color .3s}
+#hdr.scrolled .hdr-wm{color:var(--text)}
+.hdr-tag{padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.15);color:#fff;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:background .3s,color .3s}
+#hdr.scrolled .hdr-tag{background:var(--blue);color:#fff}
+.hdr-nav{display:flex;align-items:center;gap:4px;list-style:none}
+@media(max-width:900px){.hdr-nav li:not(.hdr-nav-cta){display:none}}
+@media(max-width:520px){.hdr-nav{display:none}}
+.hdr-nav a{font-size:13px;font-weight:500;color:rgba(255,255,255,.75);padding:7px 12px;border-radius:var(--r);transition:all .2s}
+#hdr.scrolled .hdr-nav a{color:var(--text3)}
+.hdr-nav a:hover{color:#fff;background:rgba(255,255,255,.1)}
+#hdr.scrolled .hdr-nav a:hover{color:var(--text);background:var(--bg-ice)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+
+.lang-wrap{position:relative}
+#lang-btn{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r5);
+  background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);
+  font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:.04em;
+  color:rgba(255,255,255,.8);cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+#hdr.scrolled #lang-btn{background:var(--bg-ice);border-color:var(--bg-border);color:var(--text3)}
+#lang-btn:hover,#lang-btn.open{border-color:var(--blue);color:var(--blue)}
+#hdr.scrolled #lang-btn:hover,#hdr.scrolled #lang-btn.open{background:var(--blue-light)}
+.lang-chevron{width:10px;height:10px;transition:transform .22s}
+#lang-btn.open .lang-chevron{transform:rotate(180deg)}
+.lang-dropdown{
+  position:absolute;top:calc(100% + 8px);right:0;min-width:155px;
+  background:var(--bg-white);border:1px solid var(--bg-border);border-radius:var(--r3);
+  box-shadow:var(--sh-md);overflow:hidden;z-index:9999;
+  opacity:0;transform:translateY(-6px) scale(.97);pointer-events:none;
+  transition:opacity .2s var(--ease),transform .2s var(--ease);
+}
+.lang-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.lang-opt{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;transition:background .15s;border-bottom:1px solid var(--bg-border)}
+.lang-opt:last-child{border-bottom:none}
+.lang-opt:hover{background:var(--bg-ice);color:var(--text)}
+.lang-opt.active{color:var(--blue);font-weight:600}
+.lang-flag{font-size:15px;flex-shrink:0}
+
+/* ══ HERO — FIX #1: texto alinhado à ESQUERDA ══ */
+#hero{
+  position:relative;min-height:100svh;
+  display:flex;align-items:center;
+  padding:80px 28px 64px;overflow:hidden;
+  background:var(--hero-bg);
+}
+.hero-vid{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-vid iframe{
+  position:absolute;top:50%;left:50%;
+  width:100vw;height:56.25vw;
+  min-height:100vh;min-width:177.78vh;
+  transform:translate(-50%,-50%);
+  pointer-events:none;border:none;
+}
+.hero-vid::after{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(to right, rgba(6,9,15,.95) 0%, rgba(6,9,15,.72) 45%, rgba(6,9,15,.25) 100%),
+    linear-gradient(to top, rgba(6,9,15,1) 0%, transparent 30%),
+    linear-gradient(to bottom, rgba(6,9,15,.5) 0%, transparent 20%);
+}
+/* FIX #1: hero-content âncora na ESQUERDA */
+.hero-content{
+  position:relative;z-index:2;
+  max-width:640px;
+  text-align:left;
+  margin-left:0;
+  margin-right:auto;
+}
+.hero-ey{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);margin-bottom:20px;
+  justify-content:flex-start;
+}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0;animation:hdot 2s ease-in-out infinite}
+@keyframes hdot{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-h1{
+  font-family:var(--fd);font-weight:700;font-size:clamp(1.8rem,4vw,3.6rem);
+  line-height:1.08;letter-spacing:-.035em;color:#fff;
+  margin-bottom:12px;max-width:640px;
+  text-align:left;
+}
+.hero-sub{
+  font-family:var(--fd);font-weight:500;font-size:clamp(1rem,1.8vw,1.35rem);
+  color:rgba(255,255,255,.45);margin-bottom:18px;letter-spacing:-.01em;
+  text-align:left;
+}
+.hero-p{font-size:14.5px;color:rgba(255,255,255,.45);line-height:1.78;max-width:520px;margin-bottom:10px;text-align:left}
+.hero-disc{
+  font-size:11px;color:rgba(255,180,0,.7);font-style:italic;
+  max-width:480px;margin-bottom:28px;
+  padding:8px 14px;background:rgba(255,180,0,.06);
+  border-left:2px solid rgba(255,180,0,.3);border-radius:0 var(--r) var(--r) 0;
+}
+.hero-ctas{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-bottom:28px;justify-content:flex-start;
+}
+.hero-trust{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-start}
+.hero-trust span{font-size:11px;color:rgba(255,255,255,.3);font-weight:500}
+.hero-trust-sep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0}
+
+/* ══ STATS ══ */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg-white);border-bottom:1px solid var(--bg-border)}
+.stat{padding:40px 24px;text-align:center;border-right:1px solid var(--bg-border);transition:background .2s;cursor:default}
+.stat:last-child{border-right:none}
+.stat:hover{background:var(--bg-ice)}
+/* FIX #3: stat-v starts at "0" via JS; animates up */
+.stat-v{font-family:var(--fd);font-weight:700;font-size:clamp(1.8rem,2.8vw,2.8rem);line-height:1.1;color:var(--blue);letter-spacing:-.03em;margin-bottom:6px}
+.stat-l{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text4)}
+@media(max-width:620px){.stats-row{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:none}.stat{border-bottom:1px solid var(--bg-border)}}
+
+/* ══ COUNTDOWN ══ */
+#countdown-sec{padding:48px 28px;background:var(--bg-ice);border-bottom:1px solid var(--bg-border);text-align:center}
+.cd-title{font-family:var(--fd);font-weight:700;font-size:clamp(1.2rem,2.5vw,2rem);color:var(--text);letter-spacing:-.025em;margin-bottom:4px}
+.cd-sub{font-size:13px;color:var(--text4);margin-bottom:32px;letter-spacing:.04em}
+.cd-grid{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.cd-box{min-width:88px;padding:18px 14px;border-radius:var(--r3);background:var(--bg-white);border:1px solid var(--bg-border);box-shadow:var(--sh-sm);text-align:center}
+.cd-num{font-family:var(--fd);font-weight:700;font-size:clamp(1.8rem,3vw,2.6rem);line-height:1;color:var(--blue);letter-spacing:-.04em;transition:transform .15s}
+.cd-box.tick .cd-num{transform:scale(1.06)}
+.cd-lbl{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text4);margin-top:6px}
+.cd-sep{font-family:var(--fd);font-weight:700;font-size:2rem;color:var(--bg-border2);line-height:1}
+@media(max-width:480px){.cd-box{min-width:64px;padding:12px 8px}.cd-sep{font-size:1.5rem}}
+
+/* ══ MARQUEE ══ */
+#empresas-sec{padding:48px 0;background:var(--bg-white);border-bottom:1px solid var(--bg-border);overflow:hidden}
+.emp-header{text-align:center;padding:0 28px;margin-bottom:32px}
+.marquee-wrap{overflow:hidden;mask-image:linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%)}
+.marquee-track{display:flex;width:max-content;animation:marquee 36s linear infinite}
+.marquee-track:hover{animation-play-state:paused}
+.marquee-item{display:flex;align-items:center;gap:10px;padding:0 32px;border-right:1px solid var(--bg-border);font-family:var(--fd);font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--text4);white-space:nowrap;height:52px;transition:color .2s;cursor:default}
+.marquee-item:hover{color:var(--blue)}
+.marquee-dot{width:4px;height:4px;border-radius:50%;background:var(--blue);opacity:.35;flex-shrink:0}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ══ SOBRE ══ */
+.about-g{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+@media(max-width:820px){.about-g{grid-template-columns:1fr;gap:40px}}
+.about-fading-slider{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--r4);overflow:hidden;background:var(--bg-ice2)}
+.afs-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:afsFade 27s infinite}
+.afs-slide:nth-child(1){animation-delay:0s}
+.afs-slide:nth-child(2){animation-delay:9s}
+.afs-slide:nth-child(3){animation-delay:18s}
+@keyframes afsFade{0%{opacity:0}7.4%{opacity:1}25.9%{opacity:1}33.3%{opacity:0}100%{opacity:0}}
+.about-img-fl{position:absolute;bottom:-16px;right:-16px;width:148px;height:104px;border-radius:var(--r3);overflow:hidden;border:3px solid var(--bg-white);box-shadow:var(--sh-md);z-index:3}
+.about-img-fl img{width:100%;height:100%;object-fit:cover}
+.about-visual{position:relative}
+.check-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.check-li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text2)}
+.chk-icon{width:20px;height:20px;flex-shrink:0;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--blue);margin-top:2px;font-weight:700}
+.sec-nota{margin-top:18px;font-size:12px;color:var(--text4);font-style:italic;padding:10px 14px;background:var(--gold-light);border:1px solid #FDE68A;border-radius:var(--r)}
+
+/* ══ INOVAÇÕES — Slider Horizontal ══ */
+.innov-slider-wrap{position:relative}
+.innov-viewport{overflow:hidden;border-radius:var(--r4)}
+.innov-track{
+  display:grid;grid-auto-flow:column;
+  grid-auto-columns:calc(25% - 12px);
+  gap:16px;
+  transition:transform .5s var(--ease);
+  will-change:transform;
+}
+@media(max-width:1024px){.innov-track{grid-auto-columns:calc(33.333% - 12px)}}
+@media(max-width:768px){.innov-track{grid-auto-columns:calc(50% - 8px)}}
+@media(max-width:480px){.innov-track{grid-auto-columns:88%}}
+
+.inn-card{
+  position:relative;overflow:hidden;cursor:pointer;
+  aspect-ratio:3/4;border-radius:var(--r3);
+  background-size:cover;background-position:center;
+  border:1px solid var(--bg-border);
+  box-shadow:var(--sh-sm);
+  transition:transform .35s var(--ease),box-shadow .35s,border-color .35s;
+  flex-shrink:0;
+}
+.inn-card::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(6,9,15,.88) 0%,rgba(6,9,15,.4) 55%,transparent 100%);transition:opacity .3s;border-radius:var(--r3)}
+.inn-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.12);border-color:var(--blue)}
+.inn-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .55s var(--ease);border-radius:var(--r3)}
+.inn-card:hover .inn-bg{transform:scale(1.06)}
+.inn-body{position:absolute;bottom:0;left:0;right:0;padding:18px 16px;z-index:2}
+.inn-n{font-family:var(--fd);font-size:9px;font-weight:700;letter-spacing:.22em;color:rgba(255,255,255,.5);display:block;margin-bottom:5px}
+.inn-t{font-family:var(--fd);font-size:14px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:4px}
+.inn-resumo{font-size:11px;color:rgba(255,255,255,.55);line-height:1.5}
+.inn-cta{
+  display:inline-flex;align-items:center;gap:4px;margin-top:8px;
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(100,180,255,.9);opacity:0;transform:translateY(6px);
+  transition:opacity .25s,transform .25s;
+}
+.inn-card:hover .inn-cta{opacity:1;transform:translateY(0)}
+.innov-nav{display:flex;align-items:center;gap:10px;margin-top:24px}
+.innov-nav-btn{
+  width:42px;height:42px;border-radius:50%;
+  background:var(--bg-white);border:1.5px solid var(--bg-border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;color:var(--text3);
+  transition:all .22s;box-shadow:var(--sh-xs);
+}
+.innov-nav-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ══ INNOVATION MODAL ══ */
+#inn-modal{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
+#inn-modal.open{background:rgba(0,0,0,.65);pointer-events:all}
+.inn-modal-box{max-width:680px;width:100%;background:var(--bg-white);border:1px solid var(--bg-border);border-radius:var(--r4);overflow:hidden;transform:scale(.93) translateY(20px);opacity:0;transition:transform .35s var(--ease),opacity .35s;position:relative;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg)}
+#inn-modal.open .inn-modal-box{transform:scale(1) translateY(0);opacity:1}
+.inn-modal-img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block}
+.inn-modal-body{padding:28px 32px 32px}
+@media(max-width:560px){.inn-modal-body{padding:20px 18px}}
+.inn-modal-n{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue);margin-bottom:6px;text-transform:uppercase}
+.inn-modal-title{font-family:var(--fd);font-weight:700;font-size:clamp(1.1rem,2.2vw,1.6rem);color:var(--text);letter-spacing:-.02em;margin-bottom:8px;line-height:1.2}
+.inn-modal-resumo{font-size:14px;color:var(--blue);font-weight:600;margin-bottom:14px}
+.inn-modal-text{font-size:14.5px;color:var(--text3);line-height:1.8}
+.modal-close-btn{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:var(--bg-ice);border:1px solid var(--bg-border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text3);transition:all .2s;z-index:10}
+.modal-close-btn:hover{background:var(--bg-ice2);color:var(--text)}
+
+/* ══ GALERIA ══ */
+.gal-tabs{display:flex;gap:6px;margin-bottom:28px;flex-wrap:wrap}
+.gal-tab{
+  padding:8px 20px;border-radius:var(--r5);
+  background:var(--bg-ice);border:1.5px solid var(--bg-border);
+  font-family:var(--fd);font-size:12px;font-weight:600;
+  color:var(--text3);cursor:pointer;transition:all .2s;
+}
+.gal-tab.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(0,87,255,.2)}
+.gal-panel{display:none}
+.gal-panel.active{display:block}
+.slider-wrap{position:relative}
+.slider-viewport{overflow:hidden;border-radius:var(--r4);box-shadow:var(--sh-md)}
+.slider-track{display:flex;transition:transform .5s var(--ease);will-change:transform}
+.slide{flex:0 0 100%;position:relative;cursor:pointer;aspect-ratio:16/7;overflow:hidden;border-radius:var(--r4)}
+.slide img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s var(--ease)}
+.slide:hover img{transform:scale(1.03)}
+.slide-caption{position:absolute;bottom:0;left:0;right:0;padding:24px 28px 20px;background:linear-gradient(to top,rgba(6,9,15,.8) 0%,transparent 100%);font-size:13px;color:rgba(255,255,255,.8);line-height:1.5}
+.slide-counter{position:absolute;top:16px;right:16px;font-family:var(--fd);font-size:11px;font-weight:600;color:rgba(255,255,255,.7);background:rgba(0,0,0,.4);border-radius:var(--r5);padding:4px 12px;backdrop-filter:blur(6px)}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.95);border:1px solid var(--bg-border);box-shadow:var(--sh-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;color:var(--text);font-size:18px;transition:all .22s}
+.slider-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff;transform:translateY(-50%) scale(1.06)}
+.slider-btn.prev{left:14px}
+.slider-btn.next{right:14px}
+.slider-dots{display:flex;justify-content:center;gap:6px;margin-top:16px}
+.s-dot{width:6px;height:6px;border-radius:50%;background:var(--bg-border2);cursor:pointer;transition:all .25s}
+.s-dot.active{background:var(--blue);transform:scale(1.35)}
+.gal-videos-g{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:640px){.gal-videos-g{grid-template-columns:1fr}}
+.gal-video-card{border-radius:var(--r3);overflow:hidden;background:var(--bg-ice);border:1px solid var(--bg-border);box-shadow:var(--sh-xs)}
+.gal-video-card iframe{width:100%;aspect-ratio:16/9;display:block;border:none}
+.gal-video-title{padding:12px 16px;font-family:var(--fd);font-size:13px;font-weight:600;color:var(--text2)}
+.gal-tour-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;aspect-ratio:16/7;border-radius:var(--r4);border:2px dashed var(--bg-border);background:var(--bg-ice);text-align:center;padding:40px}
+.gal-tour-icon{font-size:52px;line-height:1}
+.gal-tour-txt{font-family:var(--fd);font-size:14px;color:var(--text4)}
+#lightbox{position:fixed;inset:0;z-index:9100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
+#lightbox.open{background:rgba(0,0,0,.9);pointer-events:all}
+.lb-img-wrap{max-width:960px;width:100%;transform:scale(.9);opacity:0;transition:transform .35s var(--ease),opacity .35s;position:relative}
+#lightbox.open .lb-img-wrap{transform:scale(1);opacity:1}
+.lb-img{width:100%;border-radius:var(--r3);display:block;max-height:70vh;object-fit:cover}
+.lb-caption{max-width:960px;width:100%;font-size:13px;color:rgba(255,255,255,.5);margin-top:12px;text-align:center}
+.lb-close{position:absolute;top:-12px;right:-12px;width:40px;height:40px;border-radius:50%;background:var(--bg-white);border:1px solid var(--bg-border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);transition:all .2s;box-shadow:var(--sh-sm)}
+.lb-close:hover{background:var(--bg-ice2)}
+
+/* ══ KEYNOTE SLIDER ══ */
+.kn-slider-wrap{position:relative}
+.kn-viewport{overflow:hidden}
+.kn-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc(33.333% - 14px);gap:20px;transition:transform .5s var(--ease);will-change:transform}
+@media(max-width:900px){.kn-track{grid-auto-columns:calc(50% - 10px)}}
+@media(max-width:560px){.kn-track{grid-auto-columns:88%}}
+.kn-card{
+  background:var(--bg-white);border:1px solid var(--bg-border);
+  border-radius:var(--r4);overflow:hidden;
+  box-shadow:var(--sh-card);
+  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;
+  flex-shrink:0;
+}
+.kn-card:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:var(--blue)}
+.kn-photo{width:100%;aspect-ratio:16/9;object-fit:cover;object-position:top center;display:block;transition:transform .4s var(--ease)}
+.kn-card:hover .kn-photo{transform:scale(1.03)}
+.kn-body{padding:20px 20px 24px}
+.kn-co{font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.kn-name{font-family:var(--fd);font-weight:700;font-size:clamp(.9rem,1.4vw,1.1rem);color:var(--text);margin-bottom:3px;line-height:1.2}
+.kn-role{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text4);margin-bottom:12px}
+.kn-note{font-size:13px;color:var(--text3);line-height:1.7}
+.kn-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:24px}
+.kn-nav-btn{width:42px;height:42px;border-radius:50%;background:var(--bg-white);border:1.5px solid var(--bg-border);box-shadow:var(--sh-xs);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:17px;transition:all .22s}
+.kn-nav-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.kn-disc{text-align:center;margin-top:20px;font-size:12px;color:var(--text4);font-style:italic}
+
+/* ══════════════════════════════════════════
+   FIX #2: VP SUPER BANNER + Sympla discreto
+══════════════════════════════════════════ */
+
+/* Animações keyframes */
+@keyframes floatPlane{
+  0%  {transform:translateX(0) translateY(0) rotate(-8deg)}
+  30% {transform:translateX(18px) translateY(-10px) rotate(-4deg)}
+  60% {transform:translateX(36px) translateY(-16px) rotate(0deg)}
+  80% {transform:translateX(52px) translateY(-8px) rotate(4deg)}
+  100%{transform:translateX(68px) translateY(0) rotate(-8deg)}
+}
+@keyframes vpPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.2),0 24px 64px rgba(0,57,168,.4)}
+  50%{box-shadow:0 0 0 14px rgba(255,255,255,0),0 28px 72px rgba(0,57,168,.6)}
+}
+@keyframes shimmerLine{
+  0%{background-position:200% center}
+  100%{background-position:-200% center}
+}
+@keyframes borderGlow{0%,100%{border-color:rgba(0,197,122,.3)}50%{border-color:rgba(0,197,122,.7)}}
+
+/* ─── VP SUPER BANNER ─── */
+.vp-super-banner{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#001F6B 0%,#0038CC 35%,#0057FF 65%,#1B6EFF 100%);
+  border-radius:24px;
+  padding:52px 48px;
+  margin-bottom:28px;
+  display:flex;align-items:center;justify-content:space-between;gap:32px;
+  box-shadow:0 24px 64px rgba(0,57,168,.35),0 4px 12px rgba(0,0,0,.1);
+  animation:vpPulse 4s ease-in-out infinite;
+}
+.vp-super-banner::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 60%);
+  pointer-events:none;
+}
+.vp-super-banner::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+.vp-banner-left{position:relative;z-index:2;flex:1;min-width:0}
+.vp-banner-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 14px;border-radius:var(--r5);
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.9);margin-bottom:18px;
+  backdrop-filter:blur(4px);
+}
+.vp-banner-badge-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0;box-shadow:0 0 6px #4ADE80}
+.vp-banner-title{
+  font-family:var(--fd);font-weight:700;
+  font-size:clamp(1.6rem,3vw,2.6rem);
+  color:#fff;letter-spacing:-.03em;line-height:1.1;
+  margin-bottom:12px;
+}
+.vp-banner-title span{
+  background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.7) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.vp-banner-sub{font-size:15px;color:rgba(255,255,255,.65);line-height:1.7;max-width:480px;margin-bottom:28px}
+.vp-banner-ctas{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-vp-white{
+  background:#fff;color:var(--blue2);
+  font-family:var(--fd);font-weight:700;font-size:14px;
+  padding:13px 32px;border-radius:var(--r5);
+  display:inline-flex;align-items:center;gap:8px;
+  transition:all .25s var(--ease);box-shadow:0 4px 16px rgba(0,0,0,.15);
+}
+.btn-vp-white:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.2)}
+.btn-vp-ghost{
+  background:rgba(255,255,255,.12);color:#fff;
+  border:1.5px solid rgba(255,255,255,.3);
+  font-family:var(--fd);font-weight:600;font-size:14px;
+  padding:12px 28px;border-radius:var(--r5);
+  display:inline-flex;align-items:center;gap:8px;
+  transition:all .25s;backdrop-filter:blur(4px);
+}
+.btn-vp-ghost:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5)}
+.vp-banner-right{position:relative;z-index:2;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.vp-plane-container{position:relative;width:160px;height:120px}
+.vp-plane-emoji{
+  font-size:72px;line-height:1;
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-8deg);
+  animation:floatPlane 3.5s ease-in-out infinite;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,.3));
+}
+.vp-plane-trail{
+  position:absolute;bottom:30px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  animation:shimmerLine 2s linear infinite;
+  background-size:200% auto;
+}
+@media(max-width:640px){
+  .vp-super-banner{flex-direction:column;padding:36px 28px;gap:24px}
+  .vp-banner-right{display:none}
+}
+
+/* ─── SYMPLA ─── */
+.sympla-compact-banner{
+  display:flex;align-items:center;gap:16px;
+  background:linear-gradient(90deg,#ECFDF5,#D1FAE5);
+  border:1.5px solid var(--sympla);border-radius:var(--r3);
+  padding:16px 22px;margin-bottom:36px;
+  box-shadow:0 2px 12px rgba(0,197,122,.08);
+  animation:borderGlow 3.5s ease-in-out infinite;
+}
+.sympla-compact-icon{font-size:24px;flex-shrink:0}
+.sympla-compact-text{flex:1}
+.sympla-compact-title{font-family:var(--fd);font-weight:700;font-size:14px;color:var(--text);margin-bottom:2px}
+.sympla-compact-sub{font-size:12px;color:var(--text3)}
+@media(max-width:520px){.sympla-compact-banner{flex-direction:column;align-items:flex-start;gap:10px}}
+
+/* ══ PACOTES ══ */
+.pkg-g{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
+@media(max-width:840px){.pkg-g{grid-template-columns:1fr;max-width:440px;margin:0 auto}}
+.pkg{
+  background:var(--bg-white);border:1.5px solid var(--bg-border);
+  border-radius:var(--r4);padding:32px 26px;
+  display:flex;flex-direction:column;
+  box-shadow:var(--sh-card);
+  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;
+  position:relative;overflow:hidden;
+}
+.pkg:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:var(--bg-border2)}
+.pkg-ft{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(0,87,255,.08),var(--sh-md);
+  background:var(--bg-white);
+}
+.pkg-ft:hover{transform:translateY(-6px);box-shadow:0 0 0 3px rgba(0,87,255,.12),0 20px 48px rgba(0,0,0,.1)}
+.pkg-ft-stripe{
+  position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--blue),#60A5FA);
+}
+.pkg-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 12px;
+  border-radius:var(--r5);background:var(--blue);color:#fff;
+  font-family:var(--fd);font-size:9px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:18px;
+}
+.pkg-tier{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text4);margin-bottom:6px}
+.pkg-price{font-family:var(--fd);font-weight:700;font-size:clamp(1.1rem,2vw,1.6rem);color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.pkg-price-badge{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--blue-light);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);border:1px solid rgba(0,87,255,.15)}
+.pkg-desc{font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bg-border)}
+.pkg-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:24px;flex:1}
+.pkg-feat{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);line-height:1.4}
+.pck{flex-shrink:0;margin-top:2px;font-size:12px;color:var(--blue);font-weight:700}
+.pkg-cta{
+  width:100%;padding:12px;border-radius:var(--r5);
+  font-family:var(--fd);font-weight:600;font-size:13px;
+  cursor:pointer;border:none;transition:all .22s;text-align:center;
+}
+.pkg-cta-primary{background:var(--blue);color:#fff}
+.pkg-cta-primary:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,87,255,.22)}
+.pkg-cta-outline{background:transparent;color:var(--text);border:1.5px solid var(--bg-border2)}
+.pkg-cta-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.pkg-rodape{text-align:center;margin-top:28px;font-size:12px;color:var(--text4)}
+
+/* ══ ORGANIZADOR ══ */
+.org-wrap{background:var(--bg-white);border:1.5px solid var(--bg-border);border-radius:var(--r4);overflow:hidden;display:grid;grid-template-columns:280px 1fr;box-shadow:var(--sh-sm)}
+@media(max-width:760px){.org-wrap{grid-template-columns:1fr}}
+.org-side{background:var(--bg-ice);border-right:1px solid var(--bg-border);padding:48px 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+@media(max-width:760px){.org-side{border-right:none;border-bottom:1px solid var(--bg-border)}}
+.org-ring{width:110px;height:110px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--blue),#60A5FA);flex-shrink:0}
+.org-ring-in{width:100%;height:100%;border-radius:50%;background:var(--bg-white);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.org-ini{font-family:var(--fd);font-size:28px;font-weight:700;color:var(--blue)}
+.org-name{font-family:var(--fd);font-weight:700;font-size:16px;color:var(--text);line-height:1.3}
+.org-role{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.org-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.org-chip{padding:3px 10px;border-radius:var(--r5);background:var(--blue-light);border:1px solid rgba(0,87,255,.15);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.org-lks{margin-top:10px;width:100%;display:flex;flex-direction:column;gap:7px}
+.org-lk{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--text3);padding:9px 12px;border-radius:var(--r);border:1px solid var(--bg-border);transition:all .2s;word-break:break-all;background:var(--bg-white)}
+.org-lk:hover{color:var(--blue);border-color:rgba(0,87,255,.25);background:var(--blue-light)}
+.org-lk svg{flex-shrink:0;width:13px;height:13px}
+.org-body{padding:48px}
+@media(max-width:760px){.org-body{padding:28px 20px}}
+.org-hl{font-family:var(--fd);font-weight:700;font-size:clamp(1rem,1.8vw,1.45rem);line-height:1.3;color:var(--text);margin-bottom:14px}
+.org-bio{font-size:14.5px;color:var(--text3);line-height:1.9;margin-bottom:24px}
+.co-lbl{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text4);margin-bottom:10px}
+.co-g{display:flex;gap:7px;flex-wrap:wrap}
+.co-p{padding:5px 12px;border-radius:var(--r);background:var(--bg-ice);border:1px solid var(--bg-border);font-size:12px;font-weight:500;color:var(--text2);transition:all .2s;cursor:default}
+.co-p:hover{border-color:rgba(0,87,255,.25);color:var(--blue)}
+#past-events-sec{background:var(--bg-ice);border-top:1px solid var(--bg-border);padding:56px 0}
+.past-eyebrow{text-align:center;margin-bottom:28px}
+.past-slider-wrap{overflow:hidden;border-radius:var(--r4)}
+.past-track{display:flex;transition:transform .7s var(--ease);will-change:transform}
+.past-slide{flex:0 0 33.333%;padding:0 8px}
+@media(max-width:760px){.past-slide{flex:0 0 55%}}
+@media(max-width:480px){.past-slide{flex:0 0 85%}}
+.past-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r3);display:block;border:1px solid var(--bg-border);transition:transform .35s,box-shadow .35s;box-shadow:var(--sh-xs)}
+.past-img:hover{transform:scale(1.02);box-shadow:var(--sh-md)}
+.past-nav{display:flex;justify-content:center;gap:10px;margin-top:18px}
+.past-nav-btn{width:40px;height:40px;border-radius:50%;background:var(--bg-white);border:1.5px solid var(--bg-border);box-shadow:var(--sh-xs);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:16px;transition:all .22s}
+.past-nav-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ══ INSTITUCIONAL ══ */
+.inst-g{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+@media(max-width:780px){.inst-g{grid-template-columns:1fr}}
+.part-g{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:20px}
+@media(max-width:640px){.part-g{grid-template-columns:repeat(3,1fr)}}
+.part-logo{aspect-ratio:16/7;background:var(--bg-ice);border:1px solid var(--bg-border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:600;font-size:10px;color:var(--text4);letter-spacing:.06em;text-transform:uppercase;transition:all .2s;cursor:default}
+.part-logo:hover{border-color:rgba(0,87,255,.25);color:var(--blue)}
+
+/* ══ FAQ ══ */
+.faq-l{display:flex;flex-direction:column;gap:4px;max-width:720px;margin:0 auto}
+.faq-it{background:var(--bg-white);border:1px solid var(--bg-border);border-radius:var(--r3);overflow:hidden;box-shadow:var(--sh-xs)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px;cursor:pointer;font-family:var(--fd);font-weight:600;font-size:14px;color:var(--text);transition:background .2s;user-select:none}
+.faq-q:hover{background:var(--bg-ice)}
+.faq-ic{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--blue-light);border:1px solid rgba(0,87,255,.15);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--blue);transition:transform .3s,background .2s;font-weight:400}
+.faq-it.open .faq-ic{transform:rotate(45deg);background:var(--bg-ice2);border-color:var(--bg-border2);color:var(--text)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s var(--ease),padding .3s;font-size:13.5px;color:var(--text3);line-height:1.75}
+.faq-it.open .faq-a{max-height:200px;padding:0 22px 20px}
+
+/* ══ CTA FINAL ══ */
+#cta-sec{
+  background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 60%,var(--blue3) 100%);
+  padding:96px 0;text-align:center;
+}
+.cta-h2{font-family:var(--fd);font-weight:700;font-size:clamp(2rem,4vw,3.5rem);color:#fff;letter-spacing:-.035em;margin-bottom:16px;line-height:1.1}
+.cta-sub{font-size:17px;color:rgba(255,255,255,.7);max-width:400px;margin:0 auto 40px;line-height:1.65}
+.cta-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:16px}
+.cta-eyebrow::before{content:'';width:14px;height:1.5px;background:rgba(255,255,255,.4)}
+.btn-white{background:#fff;color:var(--blue);font-family:var(--fd);font-weight:700}
+.btn-white:hover{background:#F1F5FF;transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.15)}
+.btn-cta-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35)}
+.btn-cta-outline:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.6)}
+
+/* ══ FOOTER ══ */
+#footer{border-top:1px solid var(--bg-border);padding:48px 28px;background:var(--bg-white);text-align:center;font-size:13px;color:var(--text4)}
+.ft-brand{font-family:var(--fd);font-weight:700;font-size:18px;color:var(--text);margin-bottom:6px}
+.ft-sep{width:32px;height:1.5px;background:var(--bg-border);margin:16px auto}
+.ft-socials{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.ft-social-lk{width:38px;height:38px;border-radius:50%;background:var(--bg-ice);border:1px solid var(--bg-border);display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--text3)}
+.ft-social-lk:hover{background:var(--blue);border-color:var(--blue);color:#fff;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,87,255,.22)}
+.ft-social-lk svg{width:16px;height:16px}
+.ft-partners-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text4);margin-bottom:10px}
+.ft-partners-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.ft-partner-badge{padding:4px 12px;border-radius:var(--r5);background:var(--bg-ice);border:1px solid var(--bg-border);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text4);transition:all .2s;cursor:default}
+.ft-partner-badge:hover{color:var(--blue);border-color:rgba(0,87,255,.25)}
+#footer a{color:var(--blue)}
+#footer a:hover{text-decoration:underline}
+
+/* ══ CHATBOT ══ */
+#chat-fab{position:fixed;bottom:24px;right:24px;z-index:9500;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.chat-window{
+  width:312px;background:var(--bg-white);
+  border:1px solid var(--bg-border);border-radius:var(--r4);
+  box-shadow:0 20px 60px rgba(0,0,0,.14);overflow:hidden;
+  opacity:0;transform:translateY(12px) scale(.96);pointer-events:none;
+  transition:opacity .25s var(--ease),transform .25s var(--ease);
+  display:flex;flex-direction:column;max-height:460px;
+}
+#chat-fab.open .chat-window{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+@media(max-width:380px){.chat-window{width:calc(100vw - 32px)}}
+.chat-win-header{
+  display:flex;align-items:center;gap:10px;padding:14px 14px;
+  background:var(--blue);flex-shrink:0;
+}
+.chat-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:700;font-size:12px;color:#fff;position:relative}
+.chat-avatar::after{content:'';position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#4ADE80;border:2px solid var(--blue)}
+.chat-win-info{flex:1;min-width:0}
+.chat-win-name{font-family:var(--fd);font-weight:700;font-size:13px;color:#fff;line-height:1.2}
+.chat-win-status{font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.03em}
+.chat-win-close{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#fff;transition:all .2s;line-height:1}
+.chat-win-close:hover{background:rgba(255,255,255,.25)}
+.chat-messages{flex:1;overflow-y:auto;padding:14px 12px 8px;display:flex;flex-direction:column;gap:10px;min-height:100px}
+.chat-msg{display:flex;align-items:flex-end;gap:6px;animation:msgIn .22s var(--ease) both}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg.bot{justify-content:flex-start}
+.chat-msg.user{justify-content:flex-end}
+.chat-mini-av{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:9px;font-weight:700;color:#fff}
+.chat-bbl{max-width:82%;padding:9px 12px;border-radius:12px;font-size:12.5px;line-height:1.55}
+.chat-msg.bot .chat-bbl{background:var(--bg-ice);border:1px solid var(--bg-border);color:var(--text2);border-bottom-left-radius:3px}
+.chat-msg.user .chat-bbl{background:var(--blue);color:#fff;border-bottom-right-radius:3px}
+.chat-typing{display:flex;align-items:center;gap:4px;padding:4px 2px}
+.chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--text4);animation:tyDot .9s infinite both}
+.chat-typing span:nth-child(2){animation-delay:.15s}
+.chat-typing span:nth-child(3){animation-delay:.3s}
+@keyframes tyDot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+.chat-quick-wrap{padding:8px 12px 12px;display:flex;flex-direction:column;gap:5px;flex-shrink:0;border-top:1px solid var(--bg-border)}
+.chat-quick-btn{width:100%;padding:8px 13px;text-align:left;background:var(--bg-ice);border:1px solid var(--bg-border);border-radius:8px;font-family:var(--fb);font-size:11.5px;color:var(--text2);cursor:pointer;transition:all .18s;line-height:1.35}
+.chat-quick-btn:hover{background:var(--blue-light);border-color:rgba(0,87,255,.25);color:var(--blue)}
+.chat-quick-btn:disabled{opacity:.4;cursor:default;pointer-events:none}
+.chat-toggle{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--blue);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(0,87,255,.35);
+  transition:transform .25s var(--ease),box-shadow .25s;position:relative;flex-shrink:0;
+}
+.chat-toggle:hover{transform:scale(1.08);box-shadow:0 12px 32px rgba(0,87,255,.45)}
+.chat-toggle-icon{color:#fff;transition:opacity .2s,transform .2s;position:absolute;line-height:1}
+.chat-toggle-icon.ci-chat{font-size:22px}
+.chat-toggle-icon.ci-x{opacity:0;transform:rotate(-90deg);font-size:20px}
+#chat-fab.open .chat-toggle-icon.ci-chat{opacity:0;transform:rotate(90deg)}
+#chat-fab.open .chat-toggle-icon.ci-x{opacity:1;transform:rotate(0deg)}
+.chat-badge{position:absolute;top:-3px;right:-3px;width:18px;height:18px;border-radius:50%;background:#EF4444;border:2px solid var(--bg-white);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;animation:cbPulse 2.5s ease-in-out infinite}
+#chat-fab.open .chat-badge{display:none}
+@keyframes cbPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+
+/* ══ SCROLL REVEAL ══ */
+.sr{opacity:0;transform:translateY(28px);transition:opacity .65s var(--ease),transform .65s var(--ease);will-change:opacity,transform}
+.sr.vis{opacity:1;transform:translateY(0)}
+
+/* ══ MOBILE ══ */
+@media(max-width:480px){
+  .hero-h1{font-size:1.75rem}
+  .hero-ctas{flex-direction:column;align-items:stretch}
+  .hero-ctas .btn{justify-content:center}
+}
+  `;
+  document.head.appendChild(s);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § V · RENDER SITE
+// ═══════════════════════════════════════════════════════════════════
+function renderSite() {
+  const root = document.getElementById('root') || document.body;
+  const L = LANGS[LANG];
+  const S = DATA.site;
+  const PKG = DATA.packages;
+
+  const arr = `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 6.5h10M7 2l4.5 4.5L7 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const chevL = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const chevR = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const chk = `<span class="pck">✓</span>`;
+  const initials = (n) => n.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  const icoLinkedIn = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7" x2="8.01" y2="7" stroke-width="2.5"/><path d="M12 11v6M16 11v3a3 3 0 01-6 0"/></svg>`;
+  const icoMail   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>`;
+  const icoExt    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+  const icoGlobe  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>`;
+  const icoIG     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`;
+  const icoYT     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="4"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>`;
+  const icoTW     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.7 5.3 4.3 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>`;
+  const icoSympla = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>`;
+  const icoWA     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>`;
+
+  // FIX #3: stat-v starts as "0" so IntersectionObserver can animate from 0 → target
+  const statsH = S.stats.map((s,i) => `
+    <div class="stat sr" style="transition-delay:${i*.08}s">
+      <div class="stat-v" data-count="${s.value}" data-display="${s.display}" data-nocount="${s.noCount||false}">0</div>
+      <div class="stat-l">${LANG==='pt'?s.labelPt:LANG==='en'?s.labelEn:s.labelEs}</div>
+    </div>`).join('');
+
+  const mqItems = [...S.marqueeEmpresas,...S.marqueeEmpresas]
+    .map(e=>`<div class="marquee-item"><span class="marquee-dot"></span>${e}</div>`).join('');
+
+  const getInnTitle  = (it) => LANG==='pt'?it.titlePt :LANG==='en'?it.titleEn :it.titleEs;
+  const getInnResumo = (it) => LANG==='pt'?it.resumoPt:LANG==='en'?it.resumoEn:it.resumoEs;
+  const learnMore    = LANG==='pt'?'Ver mais':LANG==='en'?'Learn more':'Ver más';
+
+  const innovH = S.innovations.map((it,i) => `
+    <div class="inn-card sr" style="transition-delay:${(i%4)*.06}s"
+         role="button" tabindex="0" aria-label="${getInnTitle(it)}"
+         onclick="openInnModal(${i})"
+         onkeydown="if(event.key==='Enter'||event.key===' ')openInnModal(${i})">
+      <div class="inn-bg" style="background-image:url('${it.img}')"></div>
+      <div class="inn-body">
+        <span class="inn-n">${it.n}</span>
+        <div class="inn-t">${getInnTitle(it)}</div>
+        <div class="inn-resumo">${getInnResumo(it)}</div>
+        <div class="inn-cta">${learnMore} ${arr}</div>
+      </div>
+    </div>`).join('');
+
+  const getGalCaption = (g) => LANG==='pt'?g.captionPt:LANG==='en'?g.captionEn:g.captionEs;
+  const galSlidesH = S.gallery.map((g,i) => `
+    <div class="slide" onclick="openLightbox(${i})" role="button" tabindex="0"
+         aria-label="${getGalCaption(g)}" onkeydown="if(event.key==='Enter')openLightbox(${i})">
+      <img src="${g.src}" alt="${getGalCaption(g)}" loading="lazy">
+      <div class="slide-caption">${getGalCaption(g)}</div>
+    </div>`).join('');
+  const galDotsH = S.gallery.map((_,i) => `<div class="s-dot${i===0?' active':''}" onclick="galGoTo(${i})"></div>`).join('');
+
+  const galVideosH = (() => {
+    const vids = (S.galleryVideos && S.galleryVideos.length) ? S.galleryVideos
+      : [{ytId:'0GZCN0Xz_oA',titlePt:'CES 2026 — Highlights',titleEn:'CES 2026 — Highlights',titleEs:'CES 2026 — Highlights'}];
+    return vids.map(v => {
+      const title = LANG==='pt'?v.titlePt:LANG==='en'?v.titleEn:v.titleEs;
+      return `<div class="gal-video-card">
+        <div style="position:relative;padding-bottom:56.25%;overflow:hidden">
+          <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:block"
+            src="https://www.youtube.com/embed/${v.ytId}?rel=0&modestbranding=1&color=white"
+            title="${title}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+            allowfullscreen loading="lazy"></iframe>
+        </div>
+        <div class="gal-video-title">${title}</div>
+      </div>`;
+    }).join('');
+  })();
+
+  const getKnName = (k) => LANG==='pt'?k.namePt:LANG==='en'?k.nameEn:k.nameEs;
+  const getKnRole = (k) => LANG==='pt'?k.rolePt:LANG==='en'?k.roleEn:k.roleEs;
+  const getKnNote = (k) => LANG==='pt'?k.notePt:LANG==='en'?k.noteEn:k.noteEs;
+  const knH = S.keynotes.map((k,i) => `
+    <div class="kn-card sr" style="transition-delay:${i*.09}s">
+      <img class="kn-photo" src="${k.photo}" alt="${getKnName(k)}" loading="lazy">
+      <div class="kn-body">
+        <div class="kn-co" style="color:${k.color}">${k.company}</div>
+        <div class="kn-name">${getKnName(k)}</div>
+        <div class="kn-role">${getKnRole(k)}</div>
+        <div class="kn-note">${getKnNote(k)}</div>
+      </div>
+    </div>`).join('');
+
+  const getPkgName  = (p) => LANG==='pt'?p.namePt :LANG==='en'?p.nameEn :p.nameEs;
+  const getPkgDesc  = (p) => LANG==='pt'?p.descPt :LANG==='en'?p.descEn :p.descEs;
+  const getPkgFeats = (p) => LANG==='pt'?p.featuresPt:LANG==='en'?p.featuresEn:p.featuresEs;
+  const pkgH = PKG.map((p,i) => `
+    <div class="pkg ${p.featured?'pkg-ft':''} sr" style="transition-delay:${i*.1}s">
+      ${p.featured?'<div class="pkg-ft-stripe"></div>':''}
+      ${p.badge?`<div class="pkg-badge">★ ${p.badge}</div>`:''}
+      <div class="pkg-tier">${getPkgName(p)}</div>
+      <div class="pkg-price">${L.priceLabel}<span class="pkg-price-badge">Viajante Pro</span></div>
+      <div class="pkg-desc">${getPkgDesc(p)}</div>
+      <ul class="pkg-feats">
+        ${getPkgFeats(p).map(f=>`<li class="pkg-feat">${chk}<span>${f}</span></li>`).join('')}
+      </ul>
+      <button class="pkg-cta ${p.featured?'pkg-cta-primary':'pkg-cta-outline'}"
+              onclick="window.open('${S.sympla}','_blank')">
+        ${p.featured?L.pkgCta1:L.pkgCta2} ${arr}
+      </button>
+    </div>`).join('');
+
+  const getFaqQ = (f) => LANG==='pt'?f.qPt:LANG==='en'?f.qEn:f.qEs;
+  const getFaqA = (f) => LANG==='pt'?f.aPt:LANG==='en'?f.aEn:f.aEs;
+  const faqH = S.faqs.map((f,i) => `
+    <div class="faq-it" id="fq${i}">
+      <div class="faq-q" role="button" tabindex="0" aria-expanded="false"
+           onclick="cesFaq(${i})" onkeydown="if(event.key==='Enter')cesFaq(${i})">
+        <span>${getFaqQ(f)}</span><span class="faq-ic">+</span>
+      </div>
+      <div class="faq-a">${getFaqA(f)}</div>
+    </div>`).join('');
+
+  const afsSlidesH = S.sobreFadingSlider.map(src =>
+    `<div class="afs-slide" style="background-image:url('${src}')"></div>`).join('');
+
+  const partH = S.partners.map(p=>`<div class="part-logo">${p}</div>`).join('');
+  const getOrgBio = () => LANG==='pt'?S.organizer.bioPt:LANG==='en'?S.organizer.bioEn:S.organizer.bioEs;
+  const pastSlidesH = S.organizer.pastEvents.map((src,i) =>
+    `<div class="past-slide"><img class="past-img" src="${src}" alt="CES ${i+1}" loading="lazy"></div>`).join('');
+  const ftPartnersH = S.partners.map(p=>`<span class="ft-partner-badge">${p}</span>`).join('');
+
+  const langOptsH = [
+    {code:'pt',label:'Português',flag:'🇧🇷'},
+    {code:'en',label:'English',  flag:'🇺🇸'},
+    {code:'es',label:'Español',  flag:'🇪🇸'},
+  ].map(o=>`
+    <div class="lang-opt ${LANG===o.code?'active':''}" onclick="cesSetLang('${o.code}')">
+      <span class="lang-flag">${o.flag}</span><span>${o.label}</span>
+    </div>`).join('');
+
+  // FIX #4: chatbot HTML uses CHAT_TITAN (current) for initial render
+  const chatLabel = LANG==='pt'?'Assistente Virtual':LANG==='en'?'Virtual Assistant':'Asistente Virtual';
+  const chatName  = `${CHAT_TITAN.name} — ${chatLabel}`;
+
+  // VP Banner label helpers
+  const vpBadgeLabel   = LANG==='pt'?'Agência Oficial · Verificada':LANG==='en'?'Official Agency · Verified':'Agencia Oficial · Verificada';
+  const symplaLabel    = LANG==='pt'?'Ingressos Verificados via Sympla':LANG==='en'?'Verified Tickets via Sympla':'Entradas Verificadas vía Sympla';
+  const symplaSubLabel = LANG==='pt'?'A única plataforma autorizada para emissão dos seus ingressos CES 2027.':LANG==='en'?'The only authorized platform to issue your CES 2027 tickets.':'La única plataforma autorizada para emitir tus entradas CES 2027.';
+  const sympBuyNow     = LANG==='pt'?'Garantir Ingresso →':LANG==='en'?'Get Ticket →':'Conseguir Entrada →';
+
+  root.innerHTML = `
+
+  <div id="sticky-bar">
+    <div class="sb-inner">
+      <div class="sb-logo"><span>CES 2027</span><span class="sb-tag">Brasil</span></div>
+      <span class="sb-text">${L.stickyText}</span>
+      <a href="${S.sympla}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">${L.stickyBtn} ${arr}</a>
+    </div>
+  </div>
+
+  <header id="hdr" class="at-hero">
+    <div class="hdr-inner">
+      <a href="/" class="hdr-logo">
+        <div class="hdr-logo-mark">C</div>
+        <span class="hdr-wm">CES 2027</span>
+        <span class="hdr-tag">Brasil</span>
+      </a>
+      <nav>
+        <ul class="hdr-nav">
+          <li><a href="#ces">${L.navSobre}</a></li>
+          <li><a href="#tendencias">${L.navTendencias}</a></li>
+          <li><a href="#galeria">${L.navGaleria}</a></li>
+          <li><a href="#pacotes">${L.navPacotes}</a></li>
+          <li><a href="#organizador">${L.navOrg}</a></li>
+          <li class="hdr-nav-cta">
+            <a href="${S.sympla}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">${L.navIngresso}</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="hdr-right">
+        <div class="lang-wrap" id="lang-wrap">
+          <button id="lang-btn" onclick="cesToggleLang(event)" aria-expanded="false" aria-haspopup="listbox">
+            🌐 ${LANG.toUpperCase()}
+            <svg class="lang-chevron" viewBox="0 0 10 10" fill="none">
+              <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="lang-dropdown" id="lang-dropdown" role="listbox">${langOptsH}</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="hero">
+    <div class="hero-vid">
+      <iframe src="https://www.youtube.com/embed/Wy6-p71zSLU?autoplay=1&mute=1&loop=1&playlist=Wy6-p71zSLU&controls=0&playsinline=1&showinfo=0&rel=0" style="position:absolute;top:50%;left:50%;width:120vw;height:120vh;transform:translate(-50%,-50%);border:none;opacity:0.3;pointer-events:none;" allow="autoplay;encrypted-media" allowfullscreen></iframe>
+    </div>
+    <div class="wrap" style="width:100%;max-width:var(--max);margin:0 auto">
+      <div class="hero-content">
+        <div class="hero-ey sr"><span class="hero-dot"></span>${L.heroEy}</div>
+        <h1 class="hero-h1 sr" style="transition-delay:.07s">${L.heroTitle}</h1>
+        <p class="hero-sub sr" style="transition-delay:.12s">${L.heroSub}</p>
+        <p class="hero-p sr" style="transition-delay:.17s">${L.heroDesc}</p>
+        <div class="hero-disc sr" style="transition-delay:.21s">${L.heroDisc}</div>
+        <div class="hero-ctas sr" style="transition-delay:.27s">
+          <a href="${S.sympla}" class="btn btn-primary btn-lg" target="_blank" rel="noopener">${L.heroCta1} ${arr}</a>
+          <a href="#pacotes" class="btn btn-hero-outline btn-lg">${L.heroCta2}</a>
+        </div>
+        <div class="hero-trust sr" style="transition-delay:.34s">
+          ${L.heroTrust.map((t,i)=>`${i>0?'<span class="hero-trust-sep"></span>':''}<span>${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stats-sec"><div class="stats-row">${statsH}</div></section>
+
+  <section id="countdown-sec">
+    <h2 class="cd-title sr">${L.cdTitle}</h2>
+    <p class="cd-sub sr" style="transition-delay:.07s">${L.cdSub}</p>
+    <div class="cd-grid sr" style="transition-delay:.13s">
+      <div class="cd-box" id="cd-dias"><div class="cd-num" id="cd-d">000</div><div class="cd-lbl">${L.cdDias}</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-box" id="cd-horas"><div class="cd-num" id="cd-h">00</div><div class="cd-lbl">${L.cdHoras}</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-box" id="cd-minutos"><div class="cd-num" id="cd-m">00</div><div class="cd-lbl">${L.cdMin}</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-box" id="cd-segundos"><div class="cd-num" id="cd-s">00</div><div class="cd-lbl">${L.cdSeg}</div></div>
+    </div>
+  </section>
+
+  <section id="empresas-sec">
+    <div class="emp-header">
+      <p class="eyebrow sr">${L.empEy}</p>
+      <h2 class="h2 sr" style="transition-delay:.08s">${L.empH2}</h2>
+      <p class="lead sr" style="margin-top:8px;transition-delay:.14s">${L.empSub}</p>
+    </div>
+    <div class="marquee-wrap"><div class="marquee-track">${mqItems}</div></div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="ces" class="sec sec-white">
+    <div class="wrap">
+      <div class="about-g">
+        <div class="about-visual sr">
+          <div class="about-fading-slider">
+            ${afsSlidesH}
+            <div class="about-img-fl"><img src="${S.sobreFadingFloating}" alt="CES detail" loading="lazy"></div>
+          </div>
+        </div>
+        <div>
+          <p class="eyebrow sr" style="transition-delay:.1s">${L.sobreEy}</p>
+          <h2 class="h2 sr" style="transition-delay:.15s">${L.sobreH2a}<br><span class="text-blue">${L.sobreH2b}</span></h2>
+          <p class="lead sr" style="margin-top:14px;transition-delay:.2s">${L.sobreTexto}</p>
+          <ul class="check-list sr" style="transition-delay:.25s">
+            ${L.sobreChecks.map(t=>`<li class="check-li"><span class="chk-icon">✓</span><span>${t}</span></li>`).join('')}
+          </ul>
+          <div class="sec-nota sr" style="transition-delay:.3s">${L.sobreNota}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="tendencias" class="sec sec-ice">
+    <div class="wrap">
+      <div style="text-align:center;margin-bottom:44px">
+        <p class="eyebrow sr">${L.innovEy}</p>
+        <h2 class="h2 sr" style="transition-delay:.08s">${L.innovH2a} <span class="text-blue">${L.innovH2b}</span></h2>
+        <p class="lead sr" style="max-width:440px;margin:10px auto 0;transition-delay:.14s">${L.innovSub}</p>
+      </div>
+      <div class="innov-slider-wrap sr" style="transition-delay:.1s">
+        <div class="innov-viewport">
+          <div class="innov-track" id="innov-track">${innovH}</div>
+        </div>
+        <div class="innov-nav">
+          <button class="innov-nav-btn" id="innov-prev">${chevL}</button>
+          <button class="innov-nav-btn" id="innov-next">${chevR}</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="inn-modal" role="dialog" aria-modal="true" onclick="closeInnModal(event)">
+    <div class="inn-modal-box">
+      <button class="modal-close-btn" onclick="closeInnModalForce()">✕</button>
+      <img class="inn-modal-img" id="inn-modal-img" src="" alt="">
+      <div class="inn-modal-body">
+        <div class="inn-modal-n" id="inn-modal-n"></div>
+        <div class="inn-modal-title" id="inn-modal-title"></div>
+        <div class="inn-modal-resumo" id="inn-modal-resumo"></div>
+        <div class="inn-modal-text" id="inn-modal-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <section id="galeria" class="sec sec-white">
+    <div class="wrap">
+      <div style="margin-bottom:28px">
+        <p class="eyebrow sr">${L.galEy}</p>
+        <h2 class="h2 sr" style="transition-delay:.08s">${L.galH2a} <span class="text-blue">${L.galH2b}</span></h2>
+      </div>
+      <div class="gal-tabs sr" style="transition-delay:.12s">
+        <button class="gal-tab active" onclick="galSwitchTab('fotos',this)">${L.galTabFotos}</button>
+        <button class="gal-tab" onclick="galSwitchTab('videos',this)">${L.galTabVideos}</button>
+        <button class="gal-tab" onclick="galSwitchTab('tour',this)">${L.galTabTour}</button>
+      </div>
+      <div class="gal-panel active" id="gal-panel-fotos">
+        <div class="slider-wrap sr" style="transition-delay:.16s">
+          <div class="slider-viewport">
+            <div class="slider-track" id="gal-track">${galSlidesH}</div>
+          </div>
+          <div class="slide-counter" id="gal-counter">1 / ${S.gallery.length}</div>
+          <button class="slider-btn prev" id="gal-prev">${chevL}</button>
+          <button class="slider-btn next" id="gal-next">${chevR}</button>
+        </div>
+        <div class="slider-dots">${galDotsH}</div>
+      </div>
+      <div class="gal-panel" id="gal-panel-videos">
+        <div class="gal-videos-g">${galVideosH}</div>
+      </div>
+      <div class="gal-panel" id="gal-panel-tour">
+        <div class="gal-tour-placeholder">
+          <div class="gal-tour-icon">🌐</div>
+          <div class="gal-tour-txt">${L.galTourPlaceholder}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="lightbox" role="dialog" onclick="closeLightbox(event)">
+    <div class="lb-img-wrap">
+      <button class="lb-close" onclick="closeLightboxForce()">✕</button>
+      <img class="lb-img" id="lb-img" src="" alt="">
+    </div>
+    <div class="lb-caption" id="lb-caption"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <section id="keynotes" class="sec sec-ice">
+    <div class="wrap">
+      <div style="margin-bottom:40px">
+        <p class="eyebrow sr">${L.knEy}</p>
+        <h2 class="h2 sr" style="transition-delay:.08s">${L.knH2a} <span class="text-blue">${L.knH2b}</span></h2>
+        <p class="lead sr" style="max-width:520px;margin-top:10px;transition-delay:.14s">${L.knSub}</p>
+      </div>
+      <div class="kn-slider-wrap">
+        <div class="kn-viewport">
+          <div class="kn-track" id="kn-track">${knH}</div>
+        </div>
+        <div class="kn-nav">
+          <button class="kn-nav-btn" id="kn-prev">${chevL}</button>
+          <button class="kn-nav-btn" id="kn-next">${chevR}</button>
+        </div>
+      </div>
+      <p class="kn-disc sr" style="transition-delay:.28s">${L.knNota}</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="pacotes" class="sec sec-white">
+    <div class="wrap">
+      <div style="text-align:center;margin-bottom:36px">
+        <p class="eyebrow sr">${L.pkgEy}</p>
+        <h2 class="h2 sr" style="transition-delay:.08s">${L.pkgH2a} <span class="text-blue">${L.pkgH2b}</span></h2>
+        <p class="lead sr" style="max-width:520px;margin:12px auto 0;transition-delay:.14s">${L.pkgSub}</p>
+      </div>
+
+      <div class="vp-super-banner sr" style="transition-delay:.16s">
+        <div class="vp-banner-left">
+          <div class="vp-banner-badge">
+            <span class="vp-banner-badge-dot"></span>
+            ${vpBadgeLabel}
+          </div>
+          <div class="vp-banner-title">
+            <span>${L.vpHeroTitle}</span>
+          </div>
+          <div class="vp-banner-sub">${L.vpHeroSub}</div>
+          <div class="vp-banner-ctas">
+            <a href="${S.agencyUrl}" class="btn-vp-white" target="_blank" rel="noopener">
+              ✈️ ${L.vpHeroBtn}
+            </a>
+            <a href="mailto:${S.contactEmail}" class="btn-vp-ghost">
+              ${LANG==='pt'?'Falar com a Equipe':LANG==='en'?'Talk to the Team':'Hablar con el Equipo'}
+            </a>
+          </div>
+        </div>
+        <div class="vp-banner-right">
+          <div class="vp-plane-container">
+            <span class="vp-plane-emoji">✈️</span>
+            <div class="vp-plane-trail"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sympla-compact-banner sr" style="transition-delay:.2s">
+        <span class="sympla-compact-icon">🎟️</span>
+        <div class="sympla-compact-text">
+          <div class="sympla-compact-title">${symplaLabel}</div>
+          <div class="sympla-compact-sub">${symplaSubLabel}</div>
+        </div>
+        <a href="${S.sympla}" class="btn btn-sympla btn-sm" target="_blank" rel="noopener" style="flex-shrink:0">${sympBuyNow}</a>
+      </div>
+
+      <div class="pkg-g">${pkgH}</div>
+      <p class="pkg-rodape sr" style="transition-delay:.3s">${L.pkgRodape}</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="organizador" class="sec sec-ice">
+    <div class="wrap">
+      <div style="margin-bottom:40px">
+        <p class="eyebrow sr">${L.orgEy}</p>
+        <h2 class="h2 sr" style="transition-delay:.08s">${L.orgH2a} <span class="text-blue">${L.orgH2b}</span></h2>
+      </div>
+      <div class="org-wrap sr" style="transition-delay:.1s">
+        <aside class="org-side">
+          <div class="org-ring">
+            <div class="org-ring-in">
+              ${S.organizer.avatar
+                ?`<img src="${S.organizer.avatar}" alt="${S.organizer.name}" style="width:100%;height:100%;object-fit:cover">`
+                :`<span class="org-ini">${initials(S.organizer.name)}</span>`}
+            </div>
+          </div>
+          <div class="org-name">${S.organizer.name}</div>
+          <div class="org-role">${L.orgRole}</div>
+          <div class="org-chips">${L.orgChips.map(c=>`<span class="org-chip">${c}</span>`).join('')}</div>
+          <div class="org-lks">
+            <a href="${S.organizer.linkedinUrl}" target="_blank" rel="noopener" class="org-lk">${icoLinkedIn} LinkedIn</a>
+            <a href="mailto:${S.organizer.email}" class="org-lk">${icoMail} ${S.organizer.email}</a>
+            <a href="${S.agencyUrl}" target="_blank" rel="noopener" class="org-lk">${icoExt} ${S.agencyName}</a>
+            <a href="${S.organizer.siteUrl}" target="_blank" rel="noopener" class="org-lk">${icoGlobe} cesbrasil.tech</a>
+          </div>
+        </aside>
+        <div class="org-body">
+          <h3 class="org-hl">${L.orgHl}</h3>
+          <p class="org-bio">${getOrgBio()}</p>
+          <p class="co-lbl">${L.orgCoLabel}</p>
+          <div class="co-g">${S.organizer.companies.map(c=>`<span class="co-p">${c}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="past-events-sec">
+    <div class="wrap">
+      <div class="past-eyebrow"><p class="eyebrow sr">${L.orgPastEy}</p></div>
+      <div class="past-slider-wrap sr" style="transition-delay:.08s">
+        <div class="past-track" id="past-track">${pastSlidesH}</div>
+      </div>
+      <div class="past-nav">
+        <button class="past-nav-btn" id="past-prev">${chevL}</button>
+        <button class="past-nav-btn" id="past-next">${chevR}</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="institucional" class="sec sec-white">
+    <div class="wrap">
+      <div class="inst-g">
+        <div>
+          <p class="eyebrow sr">${L.instEy}</p>
+          <h2 class="h2 sr" style="transition-delay:.1s">${L.instH2a}<br><span class="text-blue">${L.instH2b}</span></h2>
+          <p class="lead sr" style="margin-top:14px;transition-delay:.16s">${L.instTexto}</p>
+          <div class="sr" style="margin-top:22px;transition-delay:.22s">
+            <a href="mailto:${S.organizer.email}" class="btn btn-outline">${L.instCta} ${arr}</a>
+          </div>
+        </div>
+        <div class="sr" style="transition-delay:.14s">
+          <p style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text4);margin-bottom:14px">${L.parceirosLabel}</p>
+          <div class="part-g">${partH}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="faq" class="sec sec-ice">
+    <div class="wrap">
+      <div style="text-align:center;margin-bottom:40px">
+        <p class="eyebrow sr">${L.faqEy}</p>
+        <h2 class="h2 sr" style="transition-delay:.08s">${L.faqH2a} <span class="text-blue">${L.faqH2b}</span></h2>
+      </div>
+      <div class="faq-l sr" style="transition-delay:.1s">${faqH}</div>
+    </div>
+  </section>
+
+  <section id="cta-sec">
+    <div class="wrap">
+      <div class="cta-eyebrow sr">${L.ctaEy}</div>
+      <h2 class="cta-h2 sr" style="transition-delay:.08s">${L.ctaH2a} ${L.ctaH2b}</h2>
+      <p class="cta-sub sr" style="transition-delay:.16s">${L.ctaSub}</p>
+      <div class="sr" style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;transition-delay:.22s">
+        <a href="${S.sympla}" class="btn btn-white btn-lg" target="_blank" rel="noopener">${L.ctaBtn1} ${arr}</a>
+        <a href="#pacotes" class="btn btn-cta-outline btn-lg">${L.ctaBtn2}</a>
+      </div>
+    </div>
+  </section>
+
+  <footer id="footer">
+    <div class="wrap">
+      <div class="ft-brand">CES 2027 Brasil</div>
+      <div class="ft-sep"></div>
+      <p class="ft-partners-label">${L.footerRedesSociais}</p>
+      <div class="ft-socials">
+        <a href="${S.social.instagram}" target="_blank" rel="noopener" class="ft-social-lk" title="Instagram">${icoIG}</a>
+        <a href="${S.social.linkedin}"  target="_blank" rel="noopener" class="ft-social-lk" title="LinkedIn">${icoLinkedIn}</a>
+        <a href="${S.social.youtube}"   target="_blank" rel="noopener" class="ft-social-lk" title="YouTube">${icoYT}</a>
+        <a href="${S.social.twitter}"   target="_blank" rel="noopener" class="ft-social-lk" title="Twitter/X">${icoTW}</a>
+        <a href="${S.social.sympla}"    target="_blank" rel="noopener" class="ft-social-lk" title="Sympla">${icoSympla}</a>
+        <a href="https://wa.me/${S.whatsapp}" target="_blank" rel="noopener" class="ft-social-lk" title="WhatsApp">${icoWA}</a>
+      </div>
+      <p class="ft-partners-label">${LANG==='pt'?'Parceiros & Apoiadores':LANG==='en'?'Partners & Supporters':'Socios y Patrocinadores'}</p>
+      <div class="ft-partners-row">${ftPartnersH}</div>
+      <p>
+        ${LANG==='pt'?'Agência Parceira:':LANG==='en'?'Partner Agency:':'Agencia Asociada:'}
+        <a href="${S.agencyUrl}" target="_blank" rel="noopener">${S.agencyName}</a>
+        &nbsp;·&nbsp;<a href="mailto:${S.organizer.email}">${S.organizer.email}</a>
+        &nbsp;·&nbsp;<a href="${S.url}">${S.url}</a>
+      </p>
+      <div class="ft-sep"></div>
+      <p style="margin-bottom:6px">© ${new Date().getFullYear()} ${LANG==='pt'?'Missão Empresarial Brasileira CES 2027.':LANG==='en'?'Brazilian Business Mission CES 2027.':'Misión Empresarial Brasileña CES 2027.'} ${L.footerRights}</p>
+      <p style="max-width:640px;margin:0 auto;font-size:11px;line-height:1.7;color:var(--text4)">${L.footerNota}</p>
+    </div>
+  </footer>
+
+  <div id="chat-fab">
+    <div class="chat-window" role="dialog" aria-label="${chatName}">
+      <div class="chat-win-header" id="chat-win-header">
+        <div class="chat-avatar" id="chat-avatar" style="background:${_avatarBg(CHAT_TITAN)}">${_avatarLbl(CHAT_TITAN)}</div>
+        <div class="chat-win-info">
+          <div class="chat-win-name" id="chat-win-name">${chatName}</div>
+          <div class="chat-win-status">● Online</div>
+        </div>
+        <button class="chat-win-close" onclick="cesToggleChat()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="chat-messages" id="chat-msgs"></div>
+      <div class="chat-quick-wrap" id="chat-quick">
+        <button class="chat-quick-btn" onclick="cesAsk(0)">${L.chatQ1}</button>
+        <button class="chat-quick-btn" onclick="cesAsk(1)">${L.chatQ2}</button>
+        <button class="chat-quick-btn" onclick="cesAsk(2)">${L.chatQ3}</button>
+      </div>
+    </div>
+    <button class="chat-toggle" onclick="cesToggleChat()" aria-label="${chatName}">
+      <span class="chat-toggle-icon ci-chat">💬</span>
+      <span class="chat-toggle-icon ci-x">✕</span>
+      <span class="chat-badge">1</span>
+    </button>
+  </div>
+  `;
+
+  /* Header scroll */
+  const hdr = document.getElementById('hdr');
+  const stickyBar = document.getElementById('sticky-bar');
+  const heroEl = document.getElementById('hero');
+  const onScroll = () => {
+    const past = window.scrollY > 48;
+    hdr.classList.toggle('scrolled', past);
+    hdr.classList.toggle('at-hero', !past);
+    if (heroEl) {
+      const heroBottom = heroEl.offsetTop + heroEl.offsetHeight;
+      stickyBar.classList.toggle('visible', window.scrollY > heroBottom - 80);
+    }
+  };
+  window.removeEventListener('scroll', window._cesScroll);
+  window._cesScroll = onScroll;
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('lang-wrap');
+    if (wrap && !wrap.contains(e.target)) cesCloseLangDropdown();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § VI · COUNTDOWN
+// ═══════════════════════════════════════════════════════════════════
+let _cdInterval = null;
+function initCountdown() {
+  if (_cdInterval) clearInterval(_cdInterval);
+  const target = new Date('2027-01-05T08:00:00-08:00').getTime();
+  const pad = (n) => String(n).padStart(2,'0');
+  const pad3 = (n) => String(n).padStart(3,'0');
+  const tick = () => {
+    const diff = target - Date.now();
+    if (diff <= 0) { clearInterval(_cdInterval); return; }
+    const dias = Math.floor(diff/86400000);
+    const horas = Math.floor((diff%86400000)/3600000);
+    const mins = Math.floor((diff%3600000)/60000);
+    const segs = Math.floor((diff%60000)/1000);
+    const elD=document.getElementById('cd-d'), elH=document.getElementById('cd-h'),
+          elM=document.getElementById('cd-m'), elS=document.getElementById('cd-s');
+    if (elD) elD.textContent=pad3(dias);
+    if (elH) elH.textContent=pad(horas);
+    if (elM) elM.textContent=pad(mins);
+    if (elS) {
+      const prev=elS.textContent; elS.textContent=pad(segs);
+      if (prev!==pad(segs)) {
+        const box=document.getElementById('cd-segundos');
+        if (box){box.classList.remove('tick');void box.offsetWidth;box.classList.add('tick');setTimeout(()=>box.classList.remove('tick'),150)}
+      }
+    }
+  };
+  tick(); _cdInterval=setInterval(tick,1000);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § VII · INNOVATION SLIDER
+// ═══════════════════════════════════════════════════════════════════
+let _innovIdx = 0;
+function initInnovSlider() {
+  const track = document.getElementById('innov-track');
+  const prevBtn = document.getElementById('innov-prev');
+  const nextBtn = document.getElementById('innov-next');
+  if (!track || !prevBtn) return;
+  const total = DATA.site.innovations.length;
+
+  const visCount = () => {
+    const w = window.innerWidth;
+    if (w >= 1024) return 4;
+    if (w >= 768)  return 3;
+    if (w >= 480)  return 2;
+    return 1;
+  };
+
+  const update = () => {
+    const vc = visCount();
+    const maxIdx = Math.max(0, total - vc);
+    _innovIdx = Math.min(_innovIdx, maxIdx);
+    const trackW = track.parentElement.offsetWidth;
+    const gap = 16;
+    const cardW = (trackW - gap * (vc - 1)) / vc;
+    track.style.transform = `translateX(-${_innovIdx * (cardW + gap)}px)`;
+    prevBtn.style.opacity = _innovIdx === 0 ? '.35' : '1';
+    nextBtn.style.opacity = _innovIdx >= maxIdx ? '.35' : '1';
+  };
+
+  prevBtn.addEventListener('click', () => { if (_innovIdx > 0) { _innovIdx--; update(); } });
+  nextBtn.addEventListener('click', () => {
+    const vc = visCount();
+    if (_innovIdx < Math.max(0, total - vc)) { _innovIdx++; update(); }
+  });
+
+  let sx = 0;
+  const vp = track.parentElement;
+  vp.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+  vp.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 40) {
+      const vc = visCount();
+      if (dx < 0 && _innovIdx < Math.max(0, total - vc)) { _innovIdx++; update(); }
+      else if (dx > 0 && _innovIdx > 0) { _innovIdx--; update(); }
+    }
+  });
+
+  window.addEventListener('resize', update, {passive:true});
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § VIII · INNOVATION MODAL
+// ═══════════════════════════════════════════════════════════════════
+window.openInnModal = function(idx) {
+  const it = DATA.site.innovations[idx]; if (!it) return;
+  const modal = document.getElementById('inn-modal');
+  const title  = LANG==='pt'?it.titlePt :LANG==='en'?it.titleEn :it.titleEs;
+  const resumo = LANG==='pt'?it.resumoPt:LANG==='en'?it.resumoEn:it.resumoEs;
+  const expand = LANG==='pt'?it.expandPt:LANG==='en'?it.expandEn:it.expandEs;
+  document.getElementById('inn-modal-img').src   = it.img;
+  document.getElementById('inn-modal-img').alt   = title;
+  document.getElementById('inn-modal-n').textContent     = it.n;
+  document.getElementById('inn-modal-title').textContent  = title;
+  document.getElementById('inn-modal-resumo').textContent = resumo;
+  document.getElementById('inn-modal-text').textContent   = expand;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeInnModal = function(e) {
+  if (e && e.target !== document.getElementById('inn-modal')) return;
+  _closeInnModal();
+};
+window.closeInnModalForce = function() { _closeInnModal(); };
+function _closeInnModal() {
+  const m = document.getElementById('inn-modal');
+  if (m) m.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { _closeInnModal(); _closeLightbox(); cesCloseLangDropdown(); }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// § IX · GALLERY SLIDER + LIGHTBOX + ABA SWITCH
+// ═══════════════════════════════════════════════════════════════════
+let _galIdx = 0, _galAutoTimer = null;
+
+window.galGoTo = function(idx) {
+  const track = document.getElementById('gal-track');
+  const dots   = document.querySelectorAll('.s-dot');
+  const counter = document.getElementById('gal-counter');
+  const total = DATA.site.gallery.length;
+  if (!track) return;
+  _galIdx = ((idx % total) + total) % total;
+  track.style.transform = `translateX(-${_galIdx * 100}%)`;
+  dots.forEach((d, i) => d.classList.toggle('active', i === _galIdx));
+  if (counter) counter.textContent = `${_galIdx + 1} / ${total}`;
+};
+
+window.galSwitchTab = function(tab, el) {
+  document.querySelectorAll('.gal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.gal-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const panel = document.getElementById(`gal-panel-${tab}`);
+  if (panel) panel.classList.add('active');
+};
+
+function initGallerySlider() {
+  const prev = document.getElementById('gal-prev');
+  const next = document.getElementById('gal-next');
+  if (!prev) return;
+  prev.addEventListener('click', () => { galGoTo(_galIdx - 1); resetGalAuto(); });
+  next.addEventListener('click', () => { galGoTo(_galIdx + 1); resetGalAuto(); });
+  const vp = document.querySelector('.slider-viewport');
+  if (vp) {
+    let sx = 0;
+    vp.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+    vp.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 40) { dx < 0 ? galGoTo(_galIdx + 1) : galGoTo(_galIdx - 1); resetGalAuto(); }
+    });
+  }
+  _galAutoTimer = setInterval(() => galGoTo(_galIdx + 1), 6000);
+}
+function resetGalAuto() {
+  clearInterval(_galAutoTimer);
+  _galAutoTimer = setInterval(() => galGoTo(_galIdx + 1), 6000);
+}
+
+window.openLightbox = function(idx) {
+  const g = DATA.site.gallery[idx]; if (!g) return;
+  const caption = LANG==='pt'?g.captionPt:LANG==='en'?g.captionEn:g.captionEs;
+  document.getElementById('lb-img').src = g.src;
+  document.getElementById('lb-img').alt = caption;
+  document.getElementById('lb-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeLightbox = function(e) {
+  if (e && e.target !== document.getElementById('lightbox')) return;
+  _closeLightbox();
+};
+window.closeLightboxForce = function() { _closeLightbox(); };
+function _closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (lb) lb.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § X · KEYNOTE SLIDER
+// ═══════════════════════════════════════════════════════════════════
+let _knIdx = 0;
+function initKeynoteSlider() {
+  const track   = document.getElementById('kn-track');
+  const prevBtn = document.getElementById('kn-prev');
+  const nextBtn = document.getElementById('kn-next');
+  if (!track || !prevBtn) return;
+  const total = DATA.site.keynotes.length;
+  const visCount = () => window.innerWidth >= 900 ? 3 : window.innerWidth >= 560 ? 2 : 1;
+  const update = () => {
+    const vc = visCount(), maxIdx = Math.max(0, total - vc);
+    _knIdx = Math.min(_knIdx, maxIdx);
+    const trackW = track.parentElement.offsetWidth;
+    const cardW  = (trackW - 20 * (vc - 1)) / vc;
+    track.style.transform = `translateX(-${_knIdx * (cardW + 20)}px)`;
+    prevBtn.style.opacity = _knIdx === 0 ? '.35' : '1';
+    nextBtn.style.opacity = _knIdx >= maxIdx ? '.35' : '1';
+  };
+  prevBtn.addEventListener('click', () => { if (_knIdx > 0) { _knIdx--; update(); } });
+  nextBtn.addEventListener('click', () => {
+    const vc = visCount();
+    if (_knIdx < Math.max(0, total - vc)) { _knIdx++; update(); }
+  });
+  let sx = 0;
+  const vp = track.parentElement;
+  vp.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+  vp.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 40) {
+      const vc = visCount();
+      if (dx < 0 && _knIdx < Math.max(0, total - vc)) { _knIdx++; update(); }
+      else if (dx > 0 && _knIdx > 0) { _knIdx--; update(); }
+    }
+  });
+  window.addEventListener('resize', update, {passive:true});
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § XI · PAST EVENTS SLIDER
+// ═══════════════════════════════════════════════════════════════════
+let _pastIdx = 0, _pastAutoTimer = null;
+function initPastSlider() {
+  const track   = document.getElementById('past-track');
+  const prevBtn = document.getElementById('past-prev');
+  const nextBtn = document.getElementById('past-next');
+  if (!track || !prevBtn) return;
+  const total = DATA.site.organizer.pastEvents.length;
+  const visCount = () => window.innerWidth >= 760 ? 3 : window.innerWidth >= 480 ? 2 : 1;
+  const update = () => {
+    const vc = visCount(), maxIdx = Math.max(0, total - vc);
+    _pastIdx = Math.min(_pastIdx, maxIdx);
+    const slideW = track.parentElement.offsetWidth / vc;
+    track.style.transform = `translateX(-${_pastIdx * slideW}px)`;
+    prevBtn.style.opacity = _pastIdx === 0 ? '.35' : '1';
+    nextBtn.style.opacity = _pastIdx >= maxIdx ? '.35' : '1';
+  };
+  prevBtn.addEventListener('click', () => { if (_pastIdx > 0) { _pastIdx--; update(); resetPastAuto(); } });
+  nextBtn.addEventListener('click', () => {
+    const vc = visCount(), maxIdx = Math.max(0, total - vc);
+    if (_pastIdx < maxIdx) { _pastIdx++; update(); resetPastAuto(); }
+  });
+  _pastAutoTimer = setInterval(() => {
+    const vc = visCount(), maxIdx = Math.max(0, total - vc);
+    _pastIdx = _pastIdx >= maxIdx ? 0 : _pastIdx + 1;
+    update();
+  }, 4500);
+  window.addEventListener('resize', update, {passive:true});
+  update();
+}
+function resetPastAuto() {
+  clearInterval(_pastAutoTimer);
+  _pastAutoTimer = setInterval(() => {
+    const track = document.getElementById('past-track');
+    if (!track) return;
+    const vc = window.innerWidth >= 760 ? 3 : window.innerWidth >= 480 ? 2 : 1;
+    const maxIdx = Math.max(0, DATA.site.organizer.pastEvents.length - vc);
+    _pastIdx = _pastIdx >= maxIdx ? 0 : _pastIdx + 1;
+    track.style.transform = `translateX(-${_pastIdx * (track.parentElement.offsetWidth / vc)}px)`;
+  }, 4500);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § XII · STAT COUNTERS — FIX #3: corrected to start from "0"
+// ═══════════════════════════════════════════════════════════════════
+function initCounters() {
+  const els = document.querySelectorAll('.stat-v[data-count]');
+  if (!els.length) return;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      // noCount items just show display value immediately
+      if (el.dataset.nocount === 'true') {
+        el.textContent = el.dataset.display;
+        io.unobserve(el);
+        return;
+      }
+      const target  = parseInt(el.dataset.count, 10);
+      const display = el.dataset.display;
+      const prefix  = display.startsWith('+') ? '+' : '';
+      // Ensure starts from 0
+      el.textContent = prefix + '0';
+      const dur = 1800, t0 = performance.now();
+      const tick = now => {
+        const p = Math.min((now - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        const current = Math.round(ease * target);
+        el.textContent = prefix + current.toLocaleString('pt-BR').replace(/,/g,'.');
+        if (p < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = display;
+        }
+      };
+      requestAnimationFrame(tick);
+      io.unobserve(el);
+    });
+  }, {threshold: 0.5});
+  els.forEach(el => io.observe(el));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § XIII · SCROLL REVEAL
+// ═══════════════════════════════════════════════════════════════════
+function initScrollReveal() {
+  const els = document.querySelectorAll('.sr');
+  if (!els.length) return;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.classList.add('vis'); io.unobserve(e.target); });
+  }, {threshold:.07, rootMargin:'0px 0px -36px 0px'});
+  els.forEach(el => io.observe(el));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § XIV · FAQ
+// ═══════════════════════════════════════════════════════════════════
+window.cesFaq = function(i) {
+  const item = document.getElementById('fq' + i); if (!item) return;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-it.open').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-q').setAttribute('aria-expanded','false');
+  });
+  if (!isOpen) { item.classList.add('open'); item.querySelector('.faq-q').setAttribute('aria-expanded','true'); }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// § XV · DROPDOWN DE IDIOMAS
+// ═══════════════════════════════════════════════════════════════════
+window.cesToggleLang = function(e) {
+  e.stopPropagation();
+  const btn = document.getElementById('lang-btn');
+  const dd  = document.getElementById('lang-dropdown');
+  const isOpen = dd.classList.contains('open');
+  if (isOpen) { cesCloseLangDropdown(); }
+  else { dd.classList.add('open'); btn.classList.add('open'); btn.setAttribute('aria-expanded','true'); }
+};
+window.cesCloseLangDropdown = function() {
+  const btn = document.getElementById('lang-btn');
+  const dd  = document.getElementById('lang-dropdown');
+  if (dd)  dd.classList.remove('open');
+  if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+};
+window.cesSetLang = function(code) {
+  if (code === LANG) { cesCloseLangDropdown(); return; }
+  const scrollY = window.scrollY;
+  LANG = code;
+  _galIdx = 0; _knIdx = 0; _pastIdx = 0; _innovIdx = 0;
+  cesCloseLangDropdown();
+  _chatOpen = false;
+  renderSite();
+  initScrollReveal(); initCounters(); initCountdown();
+  initGallerySlider(); initKeynoteSlider(); initPastSlider(); initInnovSlider();
+  window.scrollTo({top: scrollY, behavior:'instant'});
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// § XVI · CHATBOT — FIX #4: ROLETA A CADA ABERTURA
+// ═══════════════════════════════════════════════════════════════════
+let _chatOpen = false;
+
+/**
+ * FIX #4 Implementation:
+ * - A cada vez que _chatOpen torna-se TRUE, sorteia um novo agente do CHAT_NAMES_POOL
+ * - Atualiza avatar + nome no DOM
+ * - Limpa mensagens anteriores
+ * - Envia saudação inicial com nova identidade
+ */
+window.cesToggleChat = function() {
+  const fab = document.getElementById('chat-fab');
+  if (!fab) return;
+  _chatOpen = !_chatOpen;
+  fab.classList.toggle('open', _chatOpen);
+
+  if (_chatOpen) {
+    // Sorteia novo agente a cada abertura
+    CHAT_TITAN = CHAT_NAMES_POOL[Math.floor(Math.random() * CHAT_NAMES_POOL.length)];
+
+    // Atualiza avatar no DOM
+    const avatarEl = document.getElementById('chat-avatar');
+    if (avatarEl) {
+      avatarEl.style.background = _avatarBg(CHAT_TITAN);
+      avatarEl.textContent = _avatarLbl(CHAT_TITAN);
+    }
+
+    // Atualiza nome no header do chat
+    const nameEl = document.getElementById('chat-win-name');
+    const chatLabel = LANG==='pt'?'Assistente Virtual':LANG==='en'?'Virtual Assistant':'Asistente Virtual';
+    if (nameEl) nameEl.textContent = `${CHAT_TITAN.name} — ${chatLabel}`;
+
+    // Limpa mensagens anteriores
+    const msgs = document.getElementById('chat-msgs');
+    if (msgs) msgs.innerHTML = '';
+
+    // Reabilita botões de perguntas rápidas
+    document.querySelectorAll('.chat-quick-btn').forEach(b => b.disabled = false);
+
+    // Saudação inicial com nova identidade
+    _chatAddMsg('bot', LANGS[LANG].chatSub);
+  }
+};
+
+window.cesAsk = function(idx) {
+  const L = LANGS[LANG];
+  const questions = [L.chatQ1, L.chatQ2, L.chatQ3];
+  const answers   = [L.chatA1, L.chatA2, L.chatA3];
+  document.querySelectorAll('.chat-quick-btn').forEach(b => b.disabled = true);
+  _chatAddMsg('user', questions[idx]);
+  const msgs = document.getElementById('chat-msgs');
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot'; typing.id = 'chat-typing-ind';
+  typing.innerHTML = `<div class="chat-mini-av" style="background:${_avatarBg(CHAT_TITAN)}">${_avatarLbl(CHAT_TITAN)}</div>
+    <div class="chat-bbl chat-typing"><span></span><span></span><span></span></div>`;
+  if (msgs) { msgs.appendChild(typing); msgs.scrollTop = msgs.scrollHeight; }
+  setTimeout(() => {
+    const ti = document.getElementById('chat-typing-ind');
+    if (ti) ti.remove();
+    _chatAddMsg('bot', answers[idx]);
+    setTimeout(() => { document.querySelectorAll('.chat-quick-btn').forEach(b => b.disabled = false); }, 350);
+  }, 1050 + Math.random() * 400);
+};
+
+function _chatAddMsg(role, text) {
+  const msgs = document.getElementById('chat-msgs');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  const av = role === 'bot'
+    ? `<div class="chat-mini-av" style="background:${_avatarBg(CHAT_TITAN)}">${_avatarLbl(CHAT_TITAN)}</div>`
+    : '';
+  div.innerHTML = `${av}<div class="chat-bbl">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// § XVII · BOOT
+// ═══════════════════════════════════════════════════════════════════
+function boot() {
+  injectTheme();
+  renderSite();
+  initScrollReveal();
+  initCounters();
+  initCountdown();
+  initGallerySlider();
+  initKeynoteSlider();
+  initPastSlider();
+  initInnovSlider();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();  </script>
+  <script src="../core/nexia-engine.js"></script>
+  <!-- AI Sales Agent Widget CES -->
+  <script src="../core/sales-agent-widget.js" data-tenant="ces" data-name="SOFIA" data-color="#3b82f6"></script>
+</body>
+</html>

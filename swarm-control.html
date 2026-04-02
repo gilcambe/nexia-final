@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXIA OS — Swarm Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script src="../core/data.js"></script>
+<script src="../core/event-system.js"></script>
+<script src="../core/agent-factory.js"></script>
+<script src="../core/action-engine.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070D;--bg2:#090C17;--bg3:#0D1220;--bg4:#111827;
+  --cyan:#00E5FF;--cyan2:rgba(0,229,255,.08);--cyanbrd:rgba(0,229,255,.2);
+  --purple:#7B5CFA;--purplebrd:rgba(123,92,250,.2);
+  --green:#2ED080;--greenbrd:rgba(46,208,128,.2);
+  --red:#FF3D5A;--redbrd:rgba(255,61,90,.2);
+  --gold:#F59E0B;--goldbrd:rgba(245,158,11,.2);
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.1);
+  --txt:#8A9DC0;--txt2:#3F5070;--white:#E8F0FF;
+  --ff:'Sora',sans-serif;--ffm:'DM Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--ff);background:var(--bg);color:var(--white);display:flex;flex-direction:column;}
+
+/* TOPBAR */
+#topbar{
+  height:54px;background:var(--bg2);border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;
+}
+.top-brand{display:flex;align-items:center;gap:9px;}
+.top-gem{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#0a1628,#0a2a35);border:1px solid var(--cyanbrd);display:flex;align-items:center;justify-content:center;}
+.top-title{font-size:13px;font-weight:700;color:var(--white);}
+.top-sub{font-size:10px;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.back-btn{padding:6px 14px;background:transparent;border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:var(--ff);font-size:11px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:5px;}
+.back-btn:hover{color:var(--white);border-color:var(--brd2);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* LAYOUT */
+#layout{flex:1;display:grid;grid-template-columns:1fr 340px;grid-template-rows:1fr 280px;gap:0;overflow:hidden;}
+
+/* PANELS */
+.panel{background:var(--bg2);border:1px solid var(--brd);overflow:hidden;display:flex;flex-direction:column;}
+.panel-header{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.panel-title{font-size:11px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:7px;}
+.panel-body{flex:1;overflow-y:auto;padding:16px;}
+.panel-body::-webkit-scrollbar{width:3px;}
+.panel-body::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px;}
+
+/* SWARM DISPATCH */
+#panel-dispatch{grid-row:1;grid-column:1;}
+.dispatch-wrap{display:flex;flex-direction:column;gap:14px;height:100%;}
+.dispatch-top{display:flex;gap:10px;}
+.task-input{
+  flex:1;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;
+  padding:12px 14px;color:var(--white);font-family:var(--ff);font-size:13px;
+  outline:none;resize:none;min-height:80px;transition:border .2s;
+}
+.task-input:focus{border-color:var(--cyanbrd);}
+.task-input::placeholder{color:var(--txt2);}
+.dispatch-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.mode-select{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:7px;
+  padding:7px 10px;color:var(--txt);font-family:var(--ff);font-size:11px;outline:none;
+}
+.agent-toggles{display:flex;gap:6px;}
+.agent-toggle{
+  padding:5px 10px;border-radius:6px;border:1px solid var(--brd);
+  background:transparent;color:var(--txt);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.agent-toggle.on.business{background:rgba(46,208,128,.12);border-color:var(--greenbrd);color:var(--green);}
+.agent-toggle.on.dev{background:rgba(123,92,250,.12);border-color:var(--purplebrd);color:var(--purple);}
+.agent-toggle.on.security{background:rgba(255,61,90,.1);border-color:var(--redbrd);color:var(--red);}
+.dispatch-btn{
+  padding:8px 20px;background:var(--cyan2);border:1px solid var(--cyanbrd);border-radius:7px;
+  color:var(--cyan);font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.dispatch-btn:hover{background:var(--cyan);color:var(--bg);}
+.dispatch-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* RESULT AREA */
+#result-area{
+  flex:1;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;
+  padding:16px;font-size:12.5px;line-height:1.7;color:var(--white);
+  overflow-y:auto;white-space:pre-wrap;font-family:var(--ff);
+  min-height:100px;
+}
+#result-area::-webkit-scrollbar{width:3px;}
+#result-area::-webkit-scrollbar-thumb{background:var(--brd2);}
+.result-placeholder{color:var(--txt2);font-style:italic;}
+.result-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.result-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 8px;
+  border-radius:4px;font-size:10px;font-weight:600;font-family:var(--ffm);
+}
+.rb-agent{background:rgba(0,229,255,.08);color:var(--cyan);border:1px solid var(--cyanbrd);}
+.rb-time{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid var(--goldbrd);}
+.rb-mode{background:rgba(123,92,250,.08);color:var(--purple);border:1px solid var(--purplebrd);}
+.rb-action{background:rgba(46,208,128,.08);color:var(--green);border:1px solid var(--greenbrd);}
+.rb-err{background:rgba(255,61,90,.08);color:var(--red);border:1px solid var(--redbrd);}
+
+/* AGENTS PANEL */
+#panel-agents{grid-row:1;grid-column:2;border-left:none;}
+.agents-grid{display:flex;flex-direction:column;gap:8px;}
+.agent-card{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:10px;
+  padding:12px 14px;transition:border .2s;
+}
+.agent-card:hover{border-color:var(--brd2);}
+.agent-card.active{border-color:var(--cyanbrd);background:rgba(0,229,255,.03);}
+.agent-row{display:flex;align-items:center;gap:8px;}
+.agent-icon{font-size:18px;flex-shrink:0;}
+.agent-info{flex:1;min-width:0;}
+.agent-name{font-size:11px;font-weight:700;color:var(--white);}
+.agent-desc{font-size:10px;color:var(--txt);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agent-status{
+  padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.st-sleeping{background:rgba(107,114,128,.1);color:#9CA3AF;border:1px solid rgba(107,114,128,.2);}
+.st-active{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid var(--cyanbrd);}
+.st-running{background:rgba(245,158,11,.1);color:var(--gold);border:1px solid var(--goldbrd);animation:pulse 1s infinite;}
+.agent-meta{display:flex;gap:8px;margin-top:8px;font-size:9px;color:var(--txt);font-family:var(--ffm);}
+.agent-run-btn{
+  padding:4px 10px;background:transparent;border:1px solid var(--brd);
+  border-radius:5px;color:var(--txt);font-family:var(--ff);font-size:9px;cursor:pointer;
+  transition:all .15s;
+}
+.agent-run-btn:hover{border-color:var(--cyanbrd);color:var(--cyan);}
+
+/* LOGS PANEL */
+#panel-logs{grid-row:2;grid-column:1 / span 2;border-top:none;}
+.logs-list{display:flex;flex-direction:column;gap:2px;font-family:var(--ffm);font-size:10.5px;}
+.log-entry{
+  display:grid;grid-template-columns:70px 90px 110px 1fr;gap:8px;
+  padding:4px 6px;border-radius:4px;transition:background .1s;
+}
+.log-entry:hover{background:rgba(255,255,255,.025);}
+.log-time{color:var(--txt2);}
+.log-level{font-weight:700;text-transform:uppercase;}
+.log-level.info{color:var(--cyan);}
+.log-level.warn{color:var(--gold);}
+.log-level.error{color:var(--red);}
+.log-level.ok,.log-level.debug{color:var(--green);}
+.log-module{color:var(--purple);}
+.log-msg{color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* SPINNER */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ADD AGENT MODAL */
+#add-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+}
+#add-modal.open{display:flex;}
+.modal-box{
+  background:var(--bg2);border:1px solid var(--brd);border-radius:14px;
+  padding:24px;width:100%;max-width:420px;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+}
+.modal-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:16px;}
+.form-g{margin-bottom:12px;}
+.form-l{font-size:9px;color:var(--txt);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:4px;}
+.form-inp,.form-sel{
+  width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;
+  padding:9px 11px;color:var(--white);font-family:var(--ff);font-size:12px;outline:none;
+}
+.form-inp:focus,.form-sel:focus{border-color:var(--cyanbrd);}
+.form-sel option{background:var(--bg3);}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.btn-sm{padding:7px 14px;border-radius:6px;font-family:var(--ff);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-outline{background:transparent;border:1px solid var(--brd2);color:var(--txt);}
+.btn-outline:hover{color:var(--white);}
+.btn-fill{background:var(--cyan2);border:1px solid var(--cyanbrd);color:var(--cyan);}
+.btn-fill:hover{background:var(--cyan);color:var(--bg);}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="top-brand">
+    <div class="top-gem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" width="13" height="13">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="top-title">SWARM CONTROL</div>
+      <div class="top-sub">NEXIA OS v7</div>
+    </div>
+  </div>
+  <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);margin-left:8px;" class="status-dot"></div>
+  <span style="font-size:10px;color:var(--txt)" id="tenant-badge">—</span>
+  <div class="top-right">
+    <a class="back-btn" href="nexia-master-admin.html">← Dashboard</a>
+    <a class="back-btn" href="cortex-app.html">⚡ CORTEX</a>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SWARM DISPATCH -->
+  <div class="panel" id="panel-dispatch">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span>🌐</span>SWARM DISPATCH
+      </div>
+      <span style="font-size:10px;color:var(--txt)" id="dispatch-status">Pronto</span>
+    </div>
+    <div class="panel-body">
+      <div class="dispatch-wrap">
+        <textarea class="task-input" id="task-input"
+          placeholder="Digite a tarefa para o Swarm...&#10;&#10;Ex: 'Analisar o pipeline de vendas e criar tarefas de follow-up para os leads pendentes'"></textarea>
+
+        <div class="dispatch-controls">
+          <select class="mode-select" id="mode-select">
+            <option value="auto">🤖 Auto (IA decide)</option>
+            <option value="sequential">⛓ Sequencial</option>
+            <option value="parallel">⚡ Paralelo</option>
+          </select>
+          <div class="agent-toggles">
+            <button class="agent-toggle on business" id="tog-business" onclick="toggleAgent('business')">📈 BIZ</button>
+            <button class="agent-toggle on dev"      id="tog-dev"      onclick="toggleAgent('dev')">⚙️ DEV</button>
+            <button class="agent-toggle on security" id="tog-security" onclick="toggleAgent('security')">🔒 SEC</button>
+          </div>
+          <button class="dispatch-btn" id="dispatch-btn" onclick="dispatchTask()">▶ Executar Swarm</button>
+        </div>
+
+        <div id="result-area">
+          <span class="result-placeholder">O resultado do Swarm aparecerá aqui...</span>
+        </div>
+        <div class="result-meta" id="result-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTS PANEL -->
+  <div class="panel" id="panel-agents">
+    <div class="panel-header">
+      <div class="panel-title"><span>🤖</span>AGENTES</div>
+      <button class="agent-run-btn" onclick="openAddModal()">+ Criar</button>
+    </div>
+    <div class="panel-body">
+      <div class="agents-grid" id="agents-grid">
+        <div style="color:var(--txt2);font-size:11px;text-align:center;padding:20px">Carregando agentes...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE JOBS PANEL (cortex_jobs real-time) -->
+  <div class="panel" id="panel-live-jobs">
+    <div class="panel-header">
+      <div class="panel-title"><span>⚡</span>JOBS AO VIVO</div>
+      <span id="jobs-live-dot" style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 1.5s ease-in-out infinite"></span>
+    </div>
+    <div class="panel-body" style="padding:0">
+      <div id="live-jobs-panel" style="max-height:280px;overflow-y:auto">
+        <div style="color:var(--txt2);font-size:11px;text-align:center;padding:20px">Aguardando jobs...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGS PANEL -->
+  <div class="panel" id="panel-logs">
+    <div class="panel-header">
+      <div class="panel-title"><span>📊</span>LOGS DO SISTEMA</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:9px;color:var(--txt)" id="log-count">0 entradas</span>
+        <button class="agent-run-btn" onclick="clearLogs()">Limpar</button>
+      </div>
+    </div>
+    <div class="panel-body" style="padding:8px 12px">
+      <div class="logs-list" id="logs-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD AGENT MODAL -->
+<div id="add-modal">
+  <div class="modal-box">
+    <div class="modal-title">Criar Agente Customizado</div>
+    <div class="form-g"><label class="form-l">Nome do Agente</label><input class="form-inp" id="a-name" placeholder="ex: SALES_AGENT"></div>
+    <div class="form-g"><label class="form-l">Descrição</label><input class="form-inp" id="a-desc" placeholder="ex: Especialista em vendas B2B"></div>
+    <div class="form-g">
+      <label class="form-l">Tipo</label>
+      <select class="form-sel" id="a-type">
+        <option value="business">Business</option>
+        <option value="dev">Dev</option>
+        <option value="security">Security</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="form-g"><label class="form-l">System Prompt (instrução principal)</label>
+      <textarea class="form-inp" id="a-prompt" rows="3" placeholder="Você é um agente especializado em..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-outline" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn-sm btn-fill" onclick="createAgent()">Criar Agente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+NexiaAuth.requireAuth('../login.html');
+
+// ── Estado ────────────────────────────────────────────────────
+let selectedAgents = { business: true, dev: true, security: true };
+let localLogs = [];
+let agentsUnsubscribe = null;
+let jobsUnsubscribe = null;
+
+// ── Boot ─────────────────────────────────────────────────────
+NEXIA.onReady(() => {
+  document.getElementById('tenant-badge').textContent = NEXIA.currentTenant?.name || 'NEXIA';
+  NEXIA.auth?.onAuthStateChanged(user => {
+    if (!user) return;
+    loadAgents();
+    watchLiveJobs();
+    watchSystemLogs();
+    NexiaLogger.info('SWARM', 'Painel Swarm Control carregado');
+  });
+});
+
+// ── Agentes ───────────────────────────────────────────────────
+function loadAgents() {
+  if (agentsUnsubscribe) agentsUnsubscribe();
+  agentsUnsubscribe = NexiaAgentFactory.watch(agents => renderAgents(agents));
+}
+
+// ── Jobs ao vivo (cortex_jobs) ────────────────────────────────
+function watchLiveJobs() {
+  if (jobsUnsubscribe) jobsUnsubscribe();
+  jobsUnsubscribe = NexiaAgentFactory.watchJobs(jobs => renderLiveJobs(jobs));
+}
+
+function renderLiveJobs(jobs) {
+  const container = document.getElementById('live-jobs-panel');
+  if (!container) return;
+  if (!jobs.length) {
+    container.innerHTML = '<div style="color:var(--txt2);font-size:11px;text-align:center;padding:12px">Nenhum job em execução.</div>';
+    return;
+  }
+  const statusColor = { running: '#f59e0b', completed: '#10b981', failed: '#ef4444', pending: '#6366f1' };
+  container.innerHTML = jobs.map(j => {
+    const st = j.status || 'pending';
+    const color = statusColor[st] || '#888';
+    const ts = j.createdAt?.toDate ? j.createdAt.toDate().toLocaleTimeString('pt-BR') : '—';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:0.5px solid var(--b);font-size:11px">
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;${st==='running'?'animation:pulse 1s infinite':''}"></span>
+      <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)">${j.task || j.id}</span>
+      <span style="color:${color};font-weight:500;white-space:nowrap">${st}</span>
+      <span style="color:var(--txt2);white-space:nowrap">${ts}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderAgents(agents) {
+  const grid = document.getElementById('agents-grid');
+  if (!agents.length) { grid.innerHTML = '<div style="color:var(--txt2);font-size:11px;text-align:center;padding:20px">Nenhum agente.</div>'; return; }
+  grid.innerHTML = agents.map(a => `
+    <div class="agent-card ${a.status === 'active' ? 'active' : ''}" id="ac-${a.id}">
+      <div class="agent-row">
+        <span class="agent-icon">${a.icon || '🤖'}</span>
+        <div class="agent-info">
+          <div class="agent-name">${a.displayName || a.name}</div>
+          <div class="agent-desc">${a.description || '—'}</div>
+        </div>
+        <span class="agent-status st-${a.status || 'sleeping'}">${a.status || 'sleeping'}</span>
+      </div>
+      <div class="agent-meta">
+        <span>Runs: ${a.runCount || 0}</span>
+        <span>Temp: ${a.temperature ?? '—'}</span>
+        <span>${a.model ? a.model.split('-')[0] : '—'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleAgent(name) {
+  selectedAgents[name] = !selectedAgents[name];
+  const btn = document.getElementById('tog-' + name);
+  btn.classList.toggle('on', selectedAgents[name]);
+}
+
+// ── Dispatch Swarm ────────────────────────────────────────────
+async function dispatchTask() {
+  const task = document.getElementById('task-input').value.trim();
+  if (!task) return;
+
+  const btn = document.getElementById('dispatch-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Executando...';
+  document.getElementById('dispatch-status').textContent = 'Executando Swarm...';
+  document.getElementById('result-area').innerHTML = '<span class="result-placeholder">Agentes trabalhando...</span>';
+  document.getElementById('result-meta').innerHTML = '';
+
+  const modeSelect = document.getElementById('mode-select').value;
+  const agents = Object.entries(selectedAgents).filter(([,v]) => v).map(([k]) => k);
+  const tenantId = NEXIA.currentTenant?.slug || 'nexia';
+
+  // Ativa os agentes selecionados no Firestore
+  for (const a of agents) {
+    NEXIA.db?.collection('agents').doc(a).update({
+      status: 'running',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
+  }
+
+  NexiaLogger.info('SWARM', `Disparando: "${task.slice(0,50)}"`, { agents, mode: modeSelect });
+  NexiaEventSystem.emit(NexiaEventSystem.EVENTS.SWARM_STARTED, { task, agents, mode: modeSelect, tenantId });
+
+  const start = performance.now();
+  try {
+    const res = await fetch('/api/swarm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        task,
+        tenantId,
+        agents: modeSelect !== 'auto' ? agents : undefined,
+        mode:   modeSelect !== 'auto' ? modeSelect : undefined
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    const ms = Math.round(performance.now() - start);
+
+    document.getElementById('result-area').textContent = data.reply;
+
+    // Badges de metadados
+    const metaBadges = [
+      `<span class="result-badge rb-agent">🤖 ${data.agentsUsed?.join(' + ') || 'auto'}</span>`,
+      `<span class="result-badge rb-mode">${data.mode || '—'}</span>`,
+      `<span class="result-badge rb-time">⏱ ${ms}ms</span>`
+    ];
+    if (data.actions?.length) {
+      for (const act of data.actions) {
+        try {
+          const id = await NexiaActionEngine.execute(act.action, act.payload, tenantId);
+          metaBadges.push(`<span class="result-badge rb-action">✅ ${act.action} → ${id}</span>`);
+          NexiaLogger.ok('ACTION', `${act.action} executado: ${id}`);
+        } catch(e) {
+          metaBadges.push(`<span class="result-badge rb-err">❌ ${act.action}: ${e.message}</span>`);
+        }
+      }
+    }
+    document.getElementById('result-meta').innerHTML = metaBadges.join('');
+
+    // Agentes voltam a dormir
+    for (const a of (data.agentsUsed || agents)) {
+      NexiaAgentFactory.incrementRunCount(a);
+    }
+
+    NexiaLogger.ok('SWARM', `Concluído em ${ms}ms`, { agents: data.agentsUsed });
+    NexiaEventSystem.emit(NexiaEventSystem.EVENTS.SWARM_COMPLETED, { task, result: data.reply, ms });
+    document.getElementById('dispatch-status').textContent = `Concluído em ${ms}ms`;
+
+  } catch(e) {
+    document.getElementById('result-area').innerHTML = `<span style="color:var(--red)">❌ Erro: ${e.message}</span>`;
+    document.getElementById('dispatch-status').textContent = 'Erro na execução';
+    NexiaLogger.error('SWARM', e.message);
+    // Coloca agentes de volta a dormir mesmo com erro
+    for (const a of agents) {
+      NEXIA.db?.collection('agents').doc(a).update({ status: 'sleeping' }).catch(() => {});
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '▶ Executar Swarm';
+}
+
+// ── Logs em tempo real ────────────────────────────────────────
+function watchSystemLogs() {
+  // Também ouve eventos locais do NexiaEventSystem
+  NexiaEventSystem.on('*', (event) => {
+    addLogEntry({
+      level:   'info',
+      module:  event.type,
+      message: JSON.stringify(event.data).slice(0, 120),
+      ts:      event.timestamp
+    });
+  });
+
+  // Ouve do Firestore (logs persistidos)
+  if (NEXIA.db) {
+    NexiaLogger.watchLogs(docs => {
+      localLogs = docs.slice(0, 80);
+      renderLogs();
+    }, { limit: 80 });
+  }
+}
+
+function addLogEntry(entry) {
+  localLogs.unshift(entry);
+  if (localLogs.length > 100) localLogs.pop();
+  renderLogs();
+}
+
+function renderLogs() {
+  const list = document.getElementById('logs-list');
+  document.getElementById('log-count').textContent = `${localLogs.length} entradas`;
+  list.innerHTML = localLogs.map(l => {
+    const time = l.ts ? new Date(l.ts).toLocaleTimeString('pt-BR', { hour12: false }) : '—';
+    return `<div class="log-entry">
+      <span class="log-time">${time}</span>
+      <span class="log-level ${l.level || 'info'}">${l.level || 'info'}</span>
+      <span class="log-module">${(l.module || '—').slice(0, 14)}</span>
+      <span class="log-msg">${l.message || ''}</span>
+    </div>`;
+  }).join('');
+}
+
+function clearLogs() { localLogs = []; renderLogs(); }
+
+// ── Add Agent Modal ───────────────────────────────────────────
+function openAddModal()  { document.getElementById('add-modal').classList.add('open'); }
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+async function createAgent() {
+  const name   = document.getElementById('a-name').value.trim();
+  const desc   = document.getElementById('a-desc').value.trim();
+  const type   = document.getElementById('a-type').value;
+  const prompt = document.getElementById('a-prompt').value.trim();
+  if (!name) return;
+  try {
+    await NexiaAgentFactory.create({ name, displayName: name, description: desc, type, systemPrompt: prompt, icon: '🤖' });
+    closeAddModal();
+    NexiaLogger.ok('FACTORY', `Agente criado: ${name}`);
+  } catch(e) {
+    NexiaLogger.error('FACTORY', e.message);
+  }
+}
+
+// Enter no task-input não submete
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('task-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) dispatchTask();
+  });
+});
+</script>
+  <script src="../core/nexia-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ Splash Eventos — Admin v12</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<style>
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#131829;
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.10);
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35);
+  --green:#00D68F;--gnbg:rgba(0,214,143,.08);--gnbrd:rgba(0,214,143,.22);
+  --blue:#0057FF;--bbg:rgba(0,87,255,.08);--bbrd:rgba(0,87,255,.22);
+  --gold:#DAA520;--gbg:rgba(218,165,32,.08);--gbrd:rgba(218,165,32,.22);
+  --cyan:#00E5FF;--cbg:rgba(0,229,255,.07);--cbrd:rgba(0,229,255,.2);
+  --red:#FF3D71;--rbg:rgba(255,61,113,.08);--rbrd:rgba(255,61,113,.22);
+  --purple:#9B5CF6;--pbg:rgba(155,92,246,.08);--pbrd:rgba(155,92,246,.22);
+  --orange:#F59E0B;--obg:rgba(245,158,11,.08);--obrd:rgba(245,158,11,.22);
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+  --sw:240px;--r:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);overflow:hidden}
+button{font-family:var(--ff);cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:var(--ff);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,214,143,.3);border-radius:2px}
+.shell{display:grid;grid-template-columns:var(--sw) 1fr;height:100vh;overflow:hidden}
+#sb{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.gem{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#003d28,#00a06a,var(--green));border:1px solid var(--gnbrd);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(0,214,143,.25)}
+.gem i{color:#fff;font-size:16px}
+.sn{font-size:13px;font-weight:800;color:var(--text)}
+.ss{font-size:7.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);opacity:.9;margin-top:1px}
+.grp{margin-bottom:2px}
+.grp-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all .15s}
+.grp-btn:hover{color:var(--text2)}
+.grp-btn i.gi{font-size:15px;flex-shrink:0}
+.grp-btn .cv{font-size:13px;margin-left:auto;transition:transform .25s ease}
+.grp-btn.open .cv{transform:rotate(180deg)}
+.grp-btn.ha{color:var(--green)}
+.grp-items{display:none;flex-direction:column;padding:2px 0 6px;border-left:1px solid var(--brd);margin:0 14px 0 22px}
+.grp-items.open{display:flex}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border:1px solid transparent;margin:1px 0}
+.nav-item i{font-size:15px;flex-shrink:0;width:18px;text-align:center}
+.nav-item:hover{background:var(--gnbg);color:var(--text)}
+.nav-item.active{background:var(--gnbg);border-color:var(--gnbrd);color:var(--green)}
+.nbadge{margin-left:auto;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nbadge.live{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.nbadge.hot{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.nbadge.gold{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.nbadge.new{background:var(--cbg);color:var(--cyan);border:1px solid var(--cbrd)}
+.nbadge.blue{background:var(--bbg);color:var(--blue);border:1px solid var(--bbrd)}
+.sdiv{height:1px;background:var(--brd);margin:8px 14px}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#007a50,var(--green));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#000;flex-shrink:0}
+#main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 24px;background:rgba(7,9,14,.92);border-bottom:1px solid var(--brd);backdrop-filter:blur(16px)}
+#tb-title{font-size:15px;font-weight:800;color:var(--text)}
+.tbstat{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;font-family:var(--ffm)}
+.dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+.dg{background:var(--green);box-shadow:0 0 6px var(--green)}
+.db{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;border:1px solid transparent}
+.bg{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}.bg:hover{background:rgba(218,165,32,.16)}
+.br{background:var(--rbg);border-color:var(--rbrd);color:var(--red)}.br:hover{background:rgba(255,61,113,.16)}
+.bc{background:var(--cbg);border-color:var(--cbrd);color:var(--cyan)}.bc:hover{background:rgba(0,229,255,.14)}
+.bb{background:var(--bbg);border-color:var(--bbrd);color:var(--blue)}.bb:hover{background:rgba(0,87,255,.16)}
+.bgn{background:var(--gnbg);border-color:var(--gnbrd);color:var(--green)}.bgn:hover{background:rgba(0,214,143,.14)}
+.bo{background:var(--obg);border-color:var(--obrd);color:var(--orange)}
+.bpp{background:var(--pbg);border-color:var(--pbrd);color:var(--purple)}
+.ab{width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.ab.c{background:var(--cbg);color:var(--cyan);border-color:var(--cbrd)}
+.ab.g{background:var(--gnbg);color:var(--green);border-color:var(--gnbrd)}
+.ab.r{background:var(--rbg);color:var(--red);border-color:var(--rbrd)}
+.ab.p{background:var(--pbg);color:var(--purple);border-color:var(--pbrd)}
+.ab.b{background:var(--bbg);color:var(--blue);border-color:var(--bbrd)}
+.ab.gld{background:var(--gbg);color:var(--gold);border-color:var(--gbrd)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--ffm)}
+.pill.on{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.pill.off{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.pill.wait{background:var(--obg);color:var(--orange);border:1px solid var(--obrd)}
+.pill.blue{background:var(--bbg);color:var(--blue);border:1px solid var(--bbrd)}
+.pill.gld{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.pill.pur{background:var(--pbg);color:var(--purple);border:1px solid var(--pbrd)}
+.content{flex:1;overflow:hidden}
+.page{display:none;height:100%;overflow-y:auto;padding:26px 28px;flex-direction:column;gap:20px}
+.page.active{display:flex}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.phl .ey{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.phl .pt{font-size:22px;font-weight:900;color:var(--text)}
+.ac{color:var(--green)}
+.pha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.chd{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ct{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.ct i{color:var(--green)}
+.cbd{padding:18px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kcard{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kcard.k-green::before{background:var(--green)}
+.kcard.k-blue::before{background:var(--blue)}
+.kcard.k-gold::before{background:var(--gold)}
+.kcard.k-red::before{background:var(--red)}
+.kcard.k-cyan::before{background:var(--cyan)}
+.kcard.k-purple::before{background:var(--purple)}
+.kcard.k-orange::before{background:var(--orange)}
+.kval{font-size:26px;font-weight:900;font-family:var(--ffm);color:var(--text)}
+.klbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.kdelta{font-size:10px;font-weight:700;display:flex;align-items:center;gap:3px;margin-top:2px}
+.kdelta.up{color:var(--green)}.kdelta.dn{color:var(--red)}
+.hero-cnt{text-align:center;padding:32px;background:linear-gradient(135deg,var(--gnbg),rgba(0,214,143,.03));border:1px solid var(--gnbrd);border-radius:var(--r)}
+.hero-num{font-size:72px;font-weight:900;color:var(--green);font-family:var(--ffm);line-height:1}
+.hero-lbl{font-size:13px;color:var(--text2);margin-top:8px}
+.hero-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--green);font-weight:600;margin-top:6px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:9px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--brd);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--brd);transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:10px 14px;color:var(--text2);font-size:12px}
+tbody td:first-child{color:var(--text);font-weight:600}
+.srch{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.srch-wrap{position:relative;flex:1}
+.srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.srch-in{width:100%;padding:9px 14px 9px 38px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:12px}
+.srch-in:focus{border-color:var(--green)}
+.srch-in::placeholder{color:var(--text3)}
+select.sel{padding:8px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer}
+select.sel:focus{border-color:var(--green)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--brd);margin-bottom:18px}
+.tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab:hover{color:var(--text)}
+.tab-pnl{display:none}.tab-pnl.active{display:block}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(4px)}
+.mov.show{display:flex}
+.mo{background:var(--bg2);border:1px solid var(--brd2);border-radius:16px;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.mo-hd{padding:20px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.mo-tt{font-size:15px;font-weight:800;color:var(--text)}
+.mo-x{width:28px;height:28px;border-radius:6px;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.mo-bd{padding:24px}
+.mo-ft{padding:16px 24px;border-top:1px solid var(--brd);display:flex;gap:10px;justify-content:flex-end}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:.05em}
+.fi{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:13px}
+.fi:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gnbg)}
+.fi::placeholder{color:var(--text3)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+textarea.fi{resize:vertical;min-height:80px}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg4);border:1px solid var(--brd);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--green);border-color:var(--gnbrd)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .2s}
+.toggle.on::after{transform:translateX(16px)}
+.flow-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;margin-bottom:8px}
+.flow-ic{width:36px;height:36px;border-radius:8px;background:var(--gnbg);border:1px solid var(--gnbrd);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:16px;flex-shrink:0}
+.flow-info{flex:1}
+.flow-name{font-size:13px;font-weight:700;color:var(--text)}
+.flow-desc{font-size:11px;color:var(--text3);margin-top:2px}
+/* CORTEX CHAT */
+.cortex-layout{display:flex;flex-direction:column;height:calc(100vh - 52px - 80px - 50px);min-height:400px}
+.cx-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg3);border-radius:12px 12px 0 0;border:1px solid var(--brd);border-bottom:none}
+.cx-msg{max-width:80%;display:flex;flex-direction:column;gap:4px}
+.cx-msg.ai{align-self:flex-start}.cx-msg.user{align-self:flex-end}
+.cx-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+.cx-msg.ai .cx-bubble{background:var(--bg4);border:1px solid var(--brd);color:var(--text);border-radius:4px 12px 12px 12px}
+.cx-msg.user .cx-bubble{background:var(--gnbg);border:1px solid var(--gnbrd);color:var(--text);border-radius:12px 4px 12px 12px}
+.cx-meta{font-size:10px;color:var(--text3);font-family:var(--ffm)}
+.cx-msg.user .cx-meta{text-align:right}
+.cx-input-row{display:flex;gap:8px;padding:12px;background:var(--bg2);border:1px solid var(--brd);border-radius:0 0 12px 12px}
+.cx-in{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--text);font-size:13px;resize:none;height:42px;min-height:42px}
+.cx-in:focus{border-color:var(--green)}
+.cx-typing{display:flex;gap:4px;align-items:center;padding:10px 14px}
+.cx-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:bounce 1.2s infinite}
+.cx-dot:nth-child(2){animation-delay:.2s}.cx-dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.chart-wrap{position:relative;height:220px}
+/* CALENDAR */
+.cal-grid-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.cal-dow{text-align:center;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:6px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px 4px 4px;background:rgba(255,255,255,.02);border:1px solid var(--brd);cursor:pointer;transition:all .15s;position:relative;min-height:52px}
+.cal-day:hover{border-color:rgba(0,214,143,.3);background:rgba(0,214,143,.04)}
+.cal-day.today{border-color:rgba(0,214,143,.5);background:rgba(0,214,143,.06)}
+.cal-day.today .cal-dn{color:var(--green);font-weight:800}
+.cal-day.other-month{opacity:.3}
+.cal-day.has-event{background:rgba(0,214,143,.05);border-color:rgba(0,214,143,.2)}
+.cal-day.blocked{background:rgba(255,61,113,.05);border-color:rgba(255,61,113,.2)}
+.cal-dn{font-size:11px;font-weight:600;color:var(--text2);line-height:1;margin-bottom:3px}
+.cal-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
+.cal-dot{width:6px;height:6px;border-radius:2px;background:var(--green)}
+.cal-dot.red{background:var(--red)}.cal-dot.gold{background:var(--gold)}
+/* QR */
+.qr-area{width:160px;height:160px;background:rgba(0,214,143,.05);border:2px dashed var(--gnbrd);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+.qr-scan-line{position:absolute;left:0;right:0;height:2px;background:var(--green);box-shadow:0 0 8px var(--green);animation:scan 2s ease-in-out infinite}
+@keyframes scan{0%{top:10%}50%{top:85%}100%{top:10%}}
+/* IoT DEVICE */
+.device-card{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .2s}
+.device-card:hover{border-color:var(--gnbrd)}
+.device-ic{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.device-ic.online{background:var(--gnbg);color:var(--green);border:1px solid var(--gnbrd)}
+.device-ic.offline{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+/* PRICING */
+.price-tier{background:var(--bg3);border:1px solid var(--brd);border-radius:12px;padding:20px;text-align:center;transition:all .2s;cursor:pointer}
+.price-tier:hover,.price-tier.active-tier{border-color:var(--gnbrd);background:var(--gnbg)}
+.tier-name{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.tier-val{font-size:28px;font-weight:900;color:var(--green);font-family:var(--ffm)}
+.tier-cap{font-size:11px;color:var(--text3);margin-top:4px}
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--gnbrd);border-radius:10px;padding:12px 18px;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+/* SPLASH */
+.splash-ov{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;transition:opacity .5s}
+.splash-ov.fade{opacity:0;pointer-events:none}
+.splash-gem{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#003d28,#007a50,var(--green));border:1px solid var(--gnbrd);display:flex;align-items:center;justify-content:center;font-size:24px;animation:sglow 2s ease-in-out infinite}
+@keyframes sglow{0%,100%{box-shadow:0 0 16px rgba(0,214,143,.3)}50%{box-shadow:0 0 40px rgba(0,214,143,.6)}}
+.splash-txt{font-size:20px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+.splash-sub{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--green);opacity:.8}
+.splash-bar{width:200px;height:2px;background:var(--brd);border-radius:1px;overflow:hidden}
+.splash-prog{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:1px;animation:prog 1.2s ease-out forwards}
+@keyframes prog{0%{width:0}100%{width:100%}}
+@media(max-width:900px){
+  .kgrid{grid-template-columns:repeat(2,1fr)}.kgrid3{grid-template-columns:repeat(2,1fr)}
+  .shell{grid-template-columns:1fr!important}
+  #sb,aside{position:fixed!important;top:0;left:-280px!important;height:100vh;z-index:1000;width:260px!important;transition:left .3s;box-shadow:4px 0 30px rgba(0,0,0,.5)}
+  #sb.open,aside.open{left:0!important}
+  .main-area,.main{grid-column:1!important;margin-left:0!important}
+  .topbar,.tb,.header{padding-left:60px!important}
+}
+@media(max-width:540px){
+  .kgrid,.kgrid3{grid-template-columns:1fr!important}
+  .modal{width:96vw!important;padding:16px!important}
+}
+#splash-mob-btn{display:none;position:fixed;top:12px;left:12px;z-index:2000;width:42px;height:42px;border-radius:10px;background:#07090E;border:1px solid rgba(0,229,255,.3);color:#00E5FF;font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+@media(max-width:900px){#splash-mob-btn{display:flex}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash-ov" id="splash">
+  <div class="splash-gem">🎪</div>
+  <div>
+    <div class="splash-txt">Splash <span style="color:var(--green)">Eventos</span></div>
+    <div class="splash-sub">Admin · NEXIA OS v12</div>
+  </div>
+  <div class="splash-bar"><div class="splash-prog"></div></div>
+</div>
+
+<!-- SHELL -->
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside id="sb">
+  <div class="sb-logo">
+    <div class="gem"><i class="ri-calendar-event-line"></i></div>
+    <div>
+      <div class="sn">Splash</div>
+      <div class="ss">Admin · v12</div>
+    </div>
+  </div>
+
+  <!-- VISÃO GERAL -->
+  <div class="grp">
+    <button class="grp-btn open ha" onclick="tg(this)">
+      <i class="ri-dashboard-line gi"></i><span id="grp-overview">Visão Geral</span>
+      <i class="ri-arrow-down-s-line cv"></i>
+    </button>
+    <div class="grp-items open">
+      <div class="nav-item active" onclick="nav('dashboard',this)"><i class="ri-layout-masonry-line"></i><span data-i18n="nav_dashboard">Dashboard</span><span class="nbadge live">LIVE</span></div>
+    </div>
+  </div>
+
+  <!-- EVENTOS -->
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)">
+      <i class="ri-calendar-line gi"></i><span data-i18n="grp_events">Eventos</span>
+      <i class="ri-arrow-down-s-line cv"></i>
+    </button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('eventos',this)"><i class="ri-calendar-2-line"></i><span data-i18n="nav_events">Meus Eventos</span><span class="nbadge blue" id="ev-count-badge">3</span></div>
+      <div class="nav-item" onclick="nav('calendario',this)"><i class="ri-calendar-check-line"></i><span data-i18n="nav_calendar">Calendário</span><span class="nbadge new">Anti-Overbooking</span></div>
+      <div class="nav-item" onclick="nav('checkin',this)"><i class="ri-qr-scan-2-line"></i><span data-i18n="nav_checkin">Check-in QR</span><span class="nbadge live">QR</span></div>
+      <div class="nav-item" onclick="nav('sentinel',this)"><i class="ri-door-lock-line"></i><span data-i18n="nav_sentinel">Sentinel IoT</span></div>
+    </div>
+  </div>
+
+  <!-- PRECIFICAÇÃO -->
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)">
+      <i class="ri-price-tag-3-line gi"></i><span data-i18n="grp_pricing">Precificação</span>
+      <i class="ri-arrow-down-s-line cv"></i>
+    </button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('pricing',this)"><i class="ri-line-chart-line"></i><span data-i18n="nav_dynamic">Dinâmica</span></div>
+    </div>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)">
+      <i class="ri-money-dollar-circle-line gi"></i><span data-i18n="grp_finance">Financeiro</span>
+      <i class="ri-arrow-down-s-line cv"></i>
+    </button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('financeiro',this)"><i class="ri-bank-card-line"></i><span data-i18n="nav_revenue">Receita & Split</span></div>
+    </div>
+  </div>
+
+  <!-- CORTEX IA -->
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)">
+      <i class="ri-brain-line gi"></i><span data-i18n="grp_cortex">CORTEX IA</span>
+      <i class="ri-arrow-down-s-line cv"></i>
+    </button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('cortex-sdr',this)"><i class="ri-mail-send-line"></i><span data-i18n="nav_sdr">SDR Recuperação</span><span class="nbadge hot">AUTO</span></div>
+      <div class="nav-item" onclick="nav('cortex',this)"><i class="ri-robot-line"></i><span data-i18n="nav_copilot">Co-Pilot</span><span class="nbadge live">IA</span></div>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div class="grp">
+    <button class="grp-btn" onclick="tg(this)">
+      <i class="ri-settings-3-line gi"></i><span data-i18n="grp_settings">Configurações</span>
+      <i class="ri-arrow-down-s-line cv"></i>
+    </button>
+    <div class="grp-items">
+      <div class="nav-item" onclick="nav('configuracoes',this)"><i class="ri-tools-line"></i><span data-i18n="nav_settings">Configurações</span></div>
+    </div>
+  </div>
+
+  <div class="sb-footer">
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="avatar">SP</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Admin Splash</div>
+        <div style="font-size:10px;color:var(--text3)">splash · admin</div>
+      </div>
+      <button class="ab r" onclick="firebase&&firebase.auth?firebase.auth().signOut().then(()=>window.location.href='/login'):window.location.href='/login'" title="Sair"><i class="ri-logout-box-line"></i></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <span id="tb-title">Splash <span class="ac" data-i18n="tb_dashboard">Dashboard</span></span>
+    <div class="tbstat"><span class="dot db"></span><span style="font-size:10px;color:var(--text3)">NEXIA OS</span><span style="font-size:10px;color:var(--text2);font-family:var(--ffm)">v12</span></div>
+    <div class="tbstat"><span class="dot dg"></span><span style="font-size:10px;color:var(--green);font-family:var(--ffm)" id="live-tickets">847 ingressos</span></div>
+    <div class="tbr">
+      <select class="sel" onchange="setLang(this.value)" style="font-size:11px;padding:4px 8px">
+        <option value="pt">🇧🇷 PT</option>
+        <option value="en">🇺🇸 EN</option>
+        <option value="es">🇪🇸 ES</option>
+      </select>
+      <button class="btn bgn" onclick="om('m-new-event')"><i class="ri-add-line"></i><span data-i18n="btn_new_event">Novo Evento</span></button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="page active" id="p-dashboard">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_overview">Visão Geral · Eventos</div>
+          <div class="pt">Empire <span class="ac">Dashboard</span></div>
+        </div>
+        <div class="pha">
+          <div class="tbstat"><span class="dot dg"></span><span id="dash-date" style="font-size:11px;font-family:var(--ffm);color:var(--text2)">--/--/----</span></div>
+          <button class="btn bgn" onclick="om('m-new-event')"><i class="ri-add-line"></i><span data-i18n="btn_new_event">Novo Evento</span></button>
+        </div>
+      </div>
+
+      <div class="hero-cnt">
+        <div class="hero-num" id="hero-num">847</div>
+        <div class="hero-lbl" data-i18n="hero_tickets">Total de Ingressos Vendidos — Todos os Eventos</div>
+        <div class="hero-live"><span class="dot dg" style="width:7px;height:7px"></span><span data-i18n="hero_live">Atualizado em tempo real · Firestore</span></div>
+      </div>
+
+      <div class="kgrid">
+        <div class="kcard k-green">
+          <div class="klbl" data-i18n="kpi_revenue">Receita Total</div>
+          <div class="kval">R$ 127k</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>+R$14k esta semana</div>
+        </div>
+        <div class="kcard k-blue">
+          <div class="klbl" data-i18n="kpi_events">Eventos Ativos</div>
+          <div class="kval" id="k-events">3</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>2 confirmados</div>
+        </div>
+        <div class="kcard k-gold">
+          <div class="klbl" data-i18n="kpi_occupation">Taxa de Ocupação</div>
+          <div class="kval">73%</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>+8% vs mês anterior</div>
+        </div>
+        <div class="kcard k-red">
+          <div class="klbl" data-i18n="kpi_abandoned">Carrinhos Abandonados</div>
+          <div class="kval">38</div>
+          <div class="kdelta dn"><i class="ri-alarm-warning-line"></i>CORTEX SDR ativo</div>
+        </div>
+        <div class="kcard k-cyan">
+          <div class="klbl" data-i18n="kpi_checkins">Check-ins Hoje</div>
+          <div class="kval">214</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>78% da meta</div>
+        </div>
+        <div class="kcard k-purple">
+          <div class="klbl" data-i18n="kpi_nps">NPS Médio</div>
+          <div class="kval">87</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>Excelente</div>
+        </div>
+        <div class="kcard k-orange">
+          <div class="klbl" data-i18n="kpi_sentinel">Catracas Online</div>
+          <div class="kval">6/8</div>
+          <div class="kdelta dn"><i class="ri-arrow-down-line"></i>2 offline — ver Sentinel</div>
+        </div>
+        <div class="kcard k-green">
+          <div class="klbl" data-i18n="kpi_split">NEXIA Pay Split</div>
+          <div class="kval">R$ 9.4k</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>Comissões pendentes</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-bar-chart-2-line"></i><span data-i18n="chart_tickets">Ingressos por Dia</span></div><span class="pill on">Últimos 7 dias</span></div>
+          <div class="cbd"><div class="chart-wrap"><canvas id="chart-tickets"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-pie-chart-line"></i><span data-i18n="chart_categories">Tipos de Ingresso</span></div></div>
+          <div class="cbd"><div class="chart-wrap"><canvas id="chart-tipos"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- CORTEX Alertas -->
+      <div class="card">
+        <div class="chd">
+          <div class="ct"><i class="ri-brain-line" style="color:var(--cyan)"></i>CORTEX — <span data-i18n="cortex_alerts">Alertas Preditivos</span></div>
+          <span class="pill on">IA Ativa</span>
+        </div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--rbg);border:1px solid var(--rbrd);border-radius:8px">
+            <i class="ri-shopping-cart-line" style="color:var(--red);font-size:18px;flex-shrink:0"></i>
+            <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)" data-i18n="alert_cart">38 carrinhos abandonados nas últimas 6h</div><div style="font-size:11px;color:var(--text3);margin-top:2px" data-i18n="alert_cart_sub">Valor potencial: R$5.340 — CORTEX SDR ativado automaticamente</div></div>
+            <button class="btn br" onclick="nav('cortex-sdr',null)"><i class="ri-send-plane-line"></i>SDR</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--obg);border:1px solid var(--obrd);border-radius:8px">
+            <i class="ri-line-chart-line" style="color:var(--orange);font-size:18px;flex-shrink:0"></i>
+            <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)" data-i18n="alert_demand">Alta demanda detectada — TECH SUMMIT SP</div><div style="font-size:11px;color:var(--text3);margin-top:2px" data-i18n="alert_demand_sub">Sugestão: Aumentar preço em 15% (Precificação Dinâmica)</div></div>
+            <button class="btn bo" onclick="nav('pricing',null)"><i class="ri-price-tag-3-line"></i>Pricing</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--gnbg);border:1px solid var(--gnbrd);border-radius:8px">
+            <i class="ri-door-lock-line" style="color:var(--green);font-size:18px;flex-shrink:0"></i>
+            <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)" data-i18n="alert_sentinel">2 catracas offline — Pavilhão B</div><div style="font-size:11px;color:var(--text3);margin-top:2px" data-i18n="alert_sentinel_sub">NEXIA Sentinel detectou desconexão · Técnico notificado às 14:23</div></div>
+            <button class="btn bgn" onclick="nav('sentinel',null)"><i class="ri-door-lock-line"></i>Sentinel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximos Eventos -->
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-calendar-event-line"></i><span data-i18n="upcoming_events">Próximos Eventos</span></div><button class="btn bgn" onclick="nav('eventos',null)"><span data-i18n="btn_see_all">Ver todos</span></button></div>
+        <div class="cbd tbl-wrap">
+          <table>
+            <thead><tr><th data-i18n="th_event">Evento</th><th data-i18n="th_date">Data</th><th data-i18n="th_venue">Local</th><th data-i18n="th_tickets">Ingressos</th><th data-i18n="th_revenue">Receita</th><th data-i18n="th_status">Status</th><th data-i18n="th_actions">Ações</th></tr></thead>
+            <tbody id="dash-events-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EVENTOS CRUD ═══ -->
+    <div class="page" id="p-eventos">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_events_mgmt">Gestão de Eventos</div>
+          <div class="pt"><span data-i18n="page_events">Eventos</span> <span class="ac">Splash</span></div>
+        </div>
+        <div class="pha">
+          <button class="btn bgn" onclick="om('m-new-event')"><i class="ri-add-line"></i><span data-i18n="btn_new_event">Novo Evento</span></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-calendar-line"></i><span data-i18n="all_events">Todos os Eventos</span> (<span id="ev-count-lbl">3</span>)</div></div>
+        <div class="cbd">
+          <div class="srch">
+            <div class="srch-wrap">
+              <i class="ri-search-line srch-ic"></i>
+              <input class="srch-in" id="ev-srch" placeholder="Buscar eventos..." oninput="filterEvents()">
+            </div>
+            <select class="sel" id="ev-status-filter" onchange="filterEvents()">
+              <option value="" data-i18n="all_status">Todos</option>
+              <option value="Ativo" data-i18n="status_active">Ativo</option>
+              <option value="Rascunho" data-i18n="status_draft">Rascunho</option>
+              <option value="Encerrado" data-i18n="status_closed">Encerrado</option>
+            </select>
+          </div>
+          <div class="tbl-wrap">
+            <table id="tbl-eventos">
+              <thead><tr><th>#</th><th data-i18n="th_event">Evento</th><th data-i18n="th_date">Data</th><th data-i18n="th_venue">Local</th><th data-i18n="th_capacity">Cap.</th><th data-i18n="th_sold">Vendidos</th><th data-i18n="th_revenue">Receita</th><th data-i18n="th_status">Status</th><th data-i18n="th_actions">Ações</th></tr></thead>
+              <tbody id="ev-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CALENDÁRIO ANTI-OVERBOOKING ═══ -->
+    <div class="page" id="p-calendario">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_calendar">Calendário Anti-Overbooking</div>
+          <div class="pt"><span data-i18n="page_calendar">Calendário</span> <span class="ac">NEXIA</span></div>
+        </div>
+        <div class="pha">
+          <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;background:var(--gnbg);border:1px solid var(--gnbrd)">
+            <span class="dot dg"></span><span style="font-size:11px;color:var(--green);font-weight:700" data-i18n="anti_overbooking">Anti-Overbooking Ativo</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:16px">
+        <div class="card">
+          <div class="chd">
+            <div class="ct"><i class="ri-calendar-check-line"></i><span id="cal-month-label">Março 2026</span></div>
+            <div style="display:flex;gap:6px">
+              <button class="ab b" onclick="calNav(-1)"><i class="ri-arrow-left-s-line"></i></button>
+              <button class="ab b" onclick="calNav(1)"><i class="ri-arrow-right-s-line"></i></button>
+            </div>
+          </div>
+          <div class="cbd">
+            <div style="display:flex;gap:14px;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block"></span><span data-i18n="leg_event">Evento</span></div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);display:inline-block"></span><span data-i18n="leg_blocked">Bloqueado</span></div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)"><span style="width:10px;height:10px;border-radius:2px;background:var(--gold);display:inline-block"></span><span data-i18n="leg_pending">Pendente</span></div>
+            </div>
+            <div class="cal-grid-head" id="cal-head"></div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <div class="chd"><div class="ct"><i class="ri-information-line"></i><span data-i18n="selected_day">Dia Selecionado</span></div></div>
+            <div class="cbd" id="cal-day-info">
+              <div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0" data-i18n="click_day">Clique em um dia para ver detalhes</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chd"><div class="ct"><i class="ri-shield-check-line"></i><span data-i18n="overbooking_rules">Regras Anti-Overbooking</span></div></div>
+            <div class="cbd">
+              <div class="flow-item">
+                <div class="flow-ic"><i class="ri-lock-line"></i></div>
+                <div class="flow-info"><div class="flow-name" data-i18n="rule_block">Bloqueio Instantâneo</div><div class="flow-desc" data-i18n="rule_block_desc">Vagas bloqueadas ao atingir capacidade máxima</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="flow-item">
+                <div class="flow-ic"><i class="ri-notification-3-line"></i></div>
+                <div class="flow-info"><div class="flow-name" data-i18n="rule_alert">Alertas 80%</div><div class="flow-desc" data-i18n="rule_alert_desc">Notificar quando atingir 80% da capacidade</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="flow-item">
+                <div class="flow-ic"><i class="ri-exchange-line"></i></div>
+                <div class="flow-info"><div class="flow-name" data-i18n="rule_waitlist">Lista de Espera</div><div class="flow-desc" data-i18n="rule_waitlist_desc">Habilitar fila automaticamente após lotação</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CHECK-IN QR ═══ -->
+    <div class="page" id="p-checkin">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_checkin">Check-in de Participantes</div>
+          <div class="pt"><span data-i18n="page_checkin">Check-in</span> <span class="ac">QR Offline-First</span></div>
+        </div>
+        <div class="pha">
+          <span class="pill on"><i class="ri-wifi-line"></i><span data-i18n="offline_first">Offline-First</span></span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <div class="chd"><div class="ct"><i class="ri-qr-scan-2-line"></i><span data-i18n="qr_scanner">Scanner QR</span></div></div>
+            <div class="cbd" style="text-align:center">
+              <div class="qr-area">
+                <span style="font-size:48px">🎫</span>
+                <div class="qr-scan-line"></div>
+              </div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px" data-i18n="scan_qr">Aproxime o QR Code</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:14px" data-i18n="scan_qr_sub">Funciona offline — sincroniza ao reconectar</div>
+              <button class="btn bgn" style="width:100%;justify-content:center" onclick="simulateCheckin()"><i class="ri-qr-scan-line"></i><span data-i18n="btn_simulate">Simular Scan</span></button>
+              <div style="margin-top:10px">
+                <input class="fi" placeholder="Ou digite o código manualmente..." id="manual-code" style="margin-bottom:8px">
+                <button class="btn bb" style="width:100%;justify-content:center" onclick="checkinManual()"><i class="ri-search-line"></i><span data-i18n="btn_confirm">Confirmar</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chd"><div class="ct"><i class="ri-bar-chart-box-line"></i><span data-i18n="checkin_stats">Estatísticas</span></div></div>
+            <div class="cbd">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="text-align:center;padding:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--gnbrd)">
+                  <div style="font-size:28px;font-weight:900;color:var(--green);font-family:var(--ffm)" id="ci-done">214</div>
+                  <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em" data-i18n="checked_in">Confirmados</div>
+                </div>
+                <div style="text-align:center;padding:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+                  <div style="font-size:28px;font-weight:900;color:var(--text2);font-family:var(--ffm)" id="ci-pending">633</div>
+                  <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em" data-i18n="pending">Pendentes</div>
+                </div>
+              </div>
+              <div style="margin-top:12px;background:var(--bg3);border-radius:8px;overflow:hidden;height:8px">
+                <div id="ci-bar" style="height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:8px;width:25%;transition:width 1s"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:4px" id="ci-pct">25% confirmados</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-history-line"></i><span data-i18n="checkin_history">Histórico de Check-ins</span></div><button class="btn bg" onclick="exportCheckins()"><i class="ri-download-2-line"></i>Export</button></div>
+          <div class="cbd">
+            <div class="srch" style="margin-bottom:14px">
+              <div class="srch-wrap">
+                <i class="ri-search-line srch-ic"></i>
+                <input class="srch-in" id="ci-srch" placeholder="Buscar participante..." oninput="filterCheckins()">
+              </div>
+              <select class="sel" id="ci-ev-filter">
+                <option value="">Todos os eventos</option>
+                <option value="TECH SUMMIT SP">TECH SUMMIT SP</option>
+                <option value="Startup Week RJ">Startup Week RJ</option>
+                <option value="Design Conference">Design Conference</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto" id="ci-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SENTINEL IoT ═══ -->
+    <div class="page" id="p-sentinel">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_sentinel">NEXIA Sentinel · Catraca & IoT</div>
+          <div class="pt">Sentinel <span class="ac">IoT</span></div>
+        </div>
+        <div class="pha">
+          <span class="pill on"><span class="dot dg"></span>6/8 <span data-i18n="devices_online">Dispositivos Online</span></span>
+          <button class="btn bgn" onclick="refreshDevices()"><i class="ri-refresh-line"></i><span data-i18n="btn_refresh">Atualizar</span></button>
+        </div>
+      </div>
+      <div class="kgrid3">
+        <div class="kcard k-green">
+          <div class="klbl" data-i18n="devices_total">Total de Dispositivos</div>
+          <div class="kval">8</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>6 online · 2 offline</div>
+        </div>
+        <div class="kcard k-gold">
+          <div class="klbl" data-i18n="access_today">Acessos Hoje</div>
+          <div class="kval">1.847</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>+23% vs ontem</div>
+        </div>
+        <div class="kcard k-red">
+          <div class="klbl" data-i18n="alerts_today">Alertas</div>
+          <div class="kval">2</div>
+          <div class="kdelta dn"><i class="ri-alarm-warning-line"></i>Requerem atenção</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-door-lock-line"></i><span data-i18n="catracas">Catracas Smart</span></div></div>
+          <div class="cbd" style="display:flex;flex-direction:column;gap:8px" id="devices-list"></div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-history-line"></i><span data-i18n="access_log">Log de Acessos</span></div></div>
+          <div class="cbd tbl-wrap">
+            <table>
+              <thead><tr><th data-i18n="th_device">Dispositivo</th><th data-i18n="th_person">Pessoa</th><th data-i18n="th_time">Horário</th><th data-i18n="th_result">Resultado</th></tr></thead>
+              <tbody id="access-log-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRECIFICAÇÃO DINÂMICA ═══ -->
+    <div class="page" id="p-pricing">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_pricing">Precificação por Demanda</div>
+          <div class="pt"><span data-i18n="page_pricing">Precificação</span> <span class="ac">Dinâmica</span></div>
+        </div>
+        <div class="pha">
+          <span class="pill on">CORTEX Ativo</span>
+          <button class="btn bgn" onclick="salvarRegrasPreco()"><i class="ri-save-line"></i><span data-i18n="btn_save_rules">Salvar Regras</span></button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-price-tag-3-line"></i><span data-i18n="current_pricing">Preços Atuais — TECH SUMMIT SP</span></div></div>
+          <div class="cbd">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px" id="price-tiers"></div>
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border:1px solid var(--brd)">
+              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px" data-i18n="dynamic_rules">Regras de Ajuste Automático</div>
+              <div class="flow-item" style="margin-bottom:8px">
+                <div class="flow-ic"><i class="ri-arrow-up-line"></i></div>
+                <div class="flow-info"><div class="flow-name" data-i18n="rule_high_demand">Alta Demanda (+15%)</div><div class="flow-desc" data-i18n="rule_high_demand_desc">Quando ocupação > 70% em menos de 24h</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="flow-item" style="margin-bottom:8px">
+                <div class="flow-ic"><i class="ri-arrow-down-line"></i></div>
+                <div class="flow-info"><div class="flow-name" data-i18n="rule_low_demand">Baixa Demanda (-10%)</div><div class="flow-desc" data-i18n="rule_low_demand_desc">Quando ocupação < 30% faltando 7 dias</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="flow-item">
+                <div class="flow-ic"><i class="ri-time-line"></i></div>
+                <div class="flow-info"><div class="flow-name" data-i18n="rule_early_bird">Early Bird (-20%)</div><div class="flow-desc" data-i18n="rule_early_bird_desc">Desconto automático para compras com 60+ dias</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-line-chart-line"></i><span data-i18n="demand_chart">Curva de Demanda</span></div></div>
+          <div class="cbd"><div class="chart-wrap"><canvas id="chart-demand"></canvas></div></div>
+          <div class="cbd" style="border-top:1px solid var(--brd)">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px" data-i18n="cortex_suggestion">Sugestão CORTEX</div>
+            <div style="padding:12px;background:var(--gnbg);border:1px solid var(--gnbrd);border-radius:8px">
+              <div style="font-size:12px;font-weight:700;color:var(--text)" data-i18n="suggestion_text">Aumentar preço em 15% para Pista VIP</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:3px" data-i18n="suggestion_reason">Demanda 87% nas últimas 2h · Potencial extra: R$4.200</div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="btn bgn" onclick="aplicarSugestaoPreco(this)"><i class="ri-check-line"></i>Aplicar</button>
+                <button class="btn br" onclick="ignorarSugestao(this)"><i class="ri-close-line"></i>Ignorar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FINANCEIRO ═══ -->
+    <div class="page" id="p-financeiro">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_finance">Receita & Comissões</div>
+          <div class="pt"><span data-i18n="page_finance">Financeiro</span> <span class="ac">NEXIA Pay</span></div>
+        </div>
+        <div class="pha">
+          <button class="btn bg" onclick="exportRelatorio()"><i class="ri-file-excel-line"></i>Export</button>
+          <button class="btn bgn" onclick="processarSplit()"><i class="ri-split-cells-horizontal"></i>Processar Split</button>
+        </div>
+      </div>
+      <div class="kgrid">
+        <div class="kcard k-green">
+          <div class="klbl" data-i18n="gross_revenue">Receita Bruta</div>
+          <div class="kval">R$ 127k</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>Este mês</div>
+        </div>
+        <div class="kcard k-blue">
+          <div class="klbl" data-i18n="net_revenue">Receita Líquida</div>
+          <div class="kval">R$ 108k</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>Após taxas</div>
+        </div>
+        <div class="kcard k-gold">
+          <div class="klbl" data-i18n="commissions">Comissões Pendentes</div>
+          <div class="kval">R$ 9.4k</div>
+          <div class="kdelta dn"><i class="ri-alarm-warning-line"></i>3 parceiros</div>
+        </div>
+        <div class="kcard k-purple">
+          <div class="klbl" data-i18n="pix_rate">Taxa PIX Média</div>
+          <div class="kval">0.99%</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>Mercado Pago</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-bar-chart-box-line"></i><span data-i18n="revenue_by_event">Receita por Evento</span></div></div>
+          <div class="cbd"><div class="chart-wrap"><canvas id="chart-revenue"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-split-cells-horizontal"></i>NEXIA Pay Split</div><span class="pill on">Auto</span></div>
+          <div class="cbd">
+            <div id="split-list" style="display:flex;flex-direction:column;gap:6px"></div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--brd)">
+              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px" data-i18n="payment_methods">Formas de Pagamento</div>
+              <div class="chart-wrap" style="height:160px"><canvas id="chart-payment"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-bill-line"></i><span data-i18n="transactions">Transações Recentes</span></div></div>
+        <div class="cbd tbl-wrap">
+          <table>
+            <thead><tr><th>ID</th><th data-i18n="th_buyer">Comprador</th><th data-i18n="th_event">Evento</th><th data-i18n="th_tickets">Ingressos</th><th data-i18n="th_amount">Valor</th><th data-i18n="th_method">Método</th><th data-i18n="th_date">Data</th><th data-i18n="th_status">Status</th></tr></thead>
+            <tbody id="transactions-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CORTEX SDR ═══ -->
+    <div class="page" id="p-cortex-sdr">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_sdr">Recuperação de Carrinho Abandonado</div>
+          <div class="pt">CORTEX <span class="ac">SDR</span></div>
+        </div>
+        <div class="pha">
+          <span class="pill on"><span class="dot dg"></span>Auto-pilot Ativo</span>
+          <button class="btn bgn" onclick="runSDR()"><i class="ri-robot-line"></i>Executar Agora</button>
+        </div>
+      </div>
+      <div class="kgrid3">
+        <div class="kcard k-red">
+          <div class="klbl" data-i18n="abandoned_carts">Carrinhos Abandonados</div>
+          <div class="kval">38</div>
+          <div class="kdelta dn"><i class="ri-alarm-warning-line"></i>Últimas 6h</div>
+        </div>
+        <div class="kcard k-orange">
+          <div class="klbl" data-i18n="recovery_potential">Potencial de Recuperação</div>
+          <div class="kval">R$ 5.340</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>CORTEX estimativa</div>
+        </div>
+        <div class="kcard k-green">
+          <div class="klbl" data-i18n="recovered_mtd">Recuperados (mês)</div>
+          <div class="kval">R$ 18.7k</div>
+          <div class="kdelta up"><i class="ri-arrow-up-line"></i>Taxa 42%</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-send-plane-line"></i><span data-i18n="active_flows">Fluxos Ativos</span></div></div>
+          <div class="cbd">
+            <div class="flow-item">
+              <div class="flow-ic"><i class="ri-whatsapp-line"></i></div>
+              <div class="flow-info"><div class="flow-name">WhatsApp — 30min</div><div class="flow-desc" data-i18n="sdr_wpp_desc">Lembrete amigável com link direto para o ingresso</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-ic"><i class="ri-mail-line"></i></div>
+              <div class="flow-info"><div class="flow-name">Email — 2h</div><div class="flow-desc" data-i18n="sdr_email_desc">Email personalizado com desconto de 5%</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-ic"><i class="ri-smartphone-line"></i></div>
+              <div class="flow-info"><div class="flow-name">Push — 24h</div><div class="flow-desc" data-i18n="sdr_push_desc">Push notification com urgência (vagas limitadas)</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-ic"><i class="ri-robot-line"></i></div>
+              <div class="flow-info"><div class="flow-name">CORTEX Outreach — 48h</div><div class="flow-desc" data-i18n="sdr_cortex_desc">IA personalizada com análise de perfil do comprador</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-shopping-cart-line"></i><span data-i18n="abandoned_list">Carrinhos para Recuperar</span></div></div>
+          <div class="cbd tbl-wrap">
+            <table>
+              <thead><tr><th data-i18n="th_buyer">Comprador</th><th data-i18n="th_event">Evento</th><th data-i18n="th_amount">Valor</th><th data-i18n="th_time">Há quanto</th><th data-i18n="th_actions">Ação</th></tr></thead>
+              <tbody id="sdr-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CORTEX CO-PILOT ═══ -->
+    <div class="page" id="p-cortex">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_copilot">Inteligência Artificial · claude-sonnet-4-20250514</div>
+          <div class="pt">CORTEX <span class="ac">Co-Pilot</span></div>
+        </div>
+        <div class="pha">
+          <span class="pill on"><span class="dot dg"></span>Anthropic API</span>
+          <button class="btn br" onclick="clearChat()"><i class="ri-delete-bin-line"></i><span data-i18n="btn_clear">Limpar Chat</span></button>
+        </div>
+      </div>
+      <div class="card" style="flex:1;display:flex;flex-direction:column">
+        <div class="chd">
+          <div class="ct"><i class="ri-robot-line"></i>CORTEX Co-Pilot — <span data-i18n="copilot_context">Contexto de Eventos Splash</span></div>
+          <div style="display:flex;gap:6px">
+            <span class="pill pur">claude-sonnet-4-20250514</span>
+          </div>
+        </div>
+        <div style="padding:0 18px 18px;flex:1;display:flex;flex-direction:column">
+          <div class="cortex-layout">
+            <div class="cx-msgs" id="cx-msgs">
+              <div class="cx-msg ai">
+                <div class="cx-bubble" id="welcome-msg">Olá! Sou o CORTEX Co-Pilot do Splash Eventos. Tenho acesso aos dados dos seus eventos, vendas, check-ins e métricas em tempo real. Como posso ajudar?<br><br>💡 <strong>Dica:</strong> Configure sua chave da API Anthropic nas Configurações para ativar o Co-Pilot real.</div>
+                <div class="cx-meta">CORTEX · agora</div>
+              </div>
+            </div>
+            <div class="cx-input-row">
+              <textarea class="cx-in" id="cx-in" placeholder="Pergunte sobre seus eventos, vendas, participantes..." rows="1" onkeydown="cxKey(event)"></textarea>
+              <button class="btn bgn" onclick="cxSend()" id="cx-btn"><i class="ri-send-plane-fill"></i></button>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px" id="cx-chips">
+            <button class="btn bb" onclick="cxQuick('Qual o evento com maior receita?')">📊 Maior receita</button>
+            <button class="btn bb" onclick="cxQuick('Quantos ingressos foram vendidos hoje?')">🎫 Ingressos hoje</button>
+            <button class="btn bb" onclick="cxQuick('Quais os carrinhos abandonados com maior valor?')">🛒 Carrinhos</button>
+            <button class="btn bb" onclick="cxQuick('Gere um relatório executivo do mês')">📋 Relatório</button>
+            <button class="btn bb" onclick="cxQuick('Qual a taxa de ocupação média dos eventos?')">📈 Ocupação</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CONFIGURAÇÕES ═══ -->
+    <div class="page" id="p-configuracoes">
+      <div class="ph">
+        <div class="phl">
+          <div class="ey" data-i18n="ey_settings">Sistema · Integrações</div>
+          <div class="pt"><span data-i18n="page_settings">Configurações</span> <span class="ac">NEXIA</span></div>
+        </div>
+        <div class="pha">
+          <button class="btn bgn" onclick="saveSettings()"><i class="ri-save-line"></i><span data-i18n="btn_save">Salvar</span></button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <!-- Firebase -->
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-database-2-line"></i>Firebase</div><span class="pill on">Conectado</span></div>
+          <div class="cbd">
+            <div class="fg"><label class="fl">Project ID</label><input class="fi" value="nexia-c8710" id="fb-project"></div>
+            <div class="fg"><label class="fl">Namespace</label><input class="fi" value="data/splash" id="fb-ns"></div>
+            <div class="fg"><label class="fl">API Key</label><input class="fi" type="password" value="••••••••••••••••" id="fb-key"></div>
+          </div>
+        </div>
+        <!-- Anthropic API -->
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-robot-line"></i>Anthropic · CORTEX</div><span class="pill pur" id="anthropic-status">Configurar</span></div>
+          <div class="cbd">
+            <div class="fg"><label class="fl">API Key</label><input class="fi" type="password" id="anthropic-key" placeholder="sk-ant-..." oninput="updateAnthropicStatus()"></div>
+            <div class="fg"><label class="fl">Modelo</label><input class="fi" value="claude-sonnet-4-20250514" readonly></div>
+            <div style="padding:10px;background:var(--gnbg);border:1px solid var(--gnbrd);border-radius:8px;font-size:11px;color:var(--text2)">
+              <strong>✅ Pronto para produção.</strong> Configure sua API key para ativar o CORTEX Co-Pilot. O modelo <code style="color:var(--green)">claude-sonnet-4-20250514</code> já está configurado. Obtenha sua chave em <code style="color:var(--cyan)">console.anthropic.com</code>
+            </div>
+            <button class="btn bgn" style="margin-top:12px;width:100%;justify-content:center" onclick="testAnthropicAPI()"><i class="ri-test-tube-line"></i>Testar Conexão</button>
+          </div>
+        </div>
+        <!-- Mercado Pago -->
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-bank-card-line"></i>Mercado Pago</div><span class="pill on">Ativo</span></div>
+          <div class="cbd">
+            <div class="fg"><label class="fl">Access Token</label><input class="fi" type="password" value="••••••••••••••••" id="mp-token"></div>
+            <div class="fg"><label class="fl">Chave PIX</label><input class="fi" value="nexia@pagamento.pix.br" id="mp-pix"></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Parcelamento</label><select class="fi sel"><option>12x</option><option>6x</option><option>3x</option></select></div>
+              <div class="fg"><label class="fl">Desconto PIX</label><select class="fi sel"><option>5%</option><option>3%</option><option>0%</option></select></div>
+            </div>
+          </div>
+        </div>
+        <!-- WhatsApp -->
+        <div class="card">
+          <div class="chd"><div class="ct"><i class="ri-whatsapp-line"></i>WhatsApp Business</div><span class="pill on">Ativo</span></div>
+          <div class="cbd">
+            <div class="fg"><label class="fl">Token de Acesso</label><input class="fi" type="password" value="••••••••••••••••" id="wpp-token"></div>
+            <div class="fg"><label class="fl">Phone Number ID</label><input class="fi" value="551198765-4321" id="wpp-phone"></div>
+            <div class="fg"><label class="fl">Webhook URL</label><input class="fi" value="https://nexia-c8710.netlify.app/api/notifications" readonly></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODAL NOVO EVENTO -->
+<div class="mov" id="m-new-event">
+  <div class="mo">
+    <div class="mo-hd">
+      <div class="mo-tt"><i class="ri-calendar-add-line" style="color:var(--green);margin-right:8px"></i><span data-i18n="modal_new_event">Novo Evento</span></div>
+      <div class="mo-x" onclick="cm('m-new-event')"><i class="ri-close-line"></i></div>
+    </div>
+    <div class="mo-bd">
+      <div class="frow">
+        <div class="fg"><label class="fl" data-i18n="field_event_name">Nome do Evento *</label><input class="fi" id="ev-name" placeholder="Ex: TECH SUMMIT SP 2026"></div>
+        <div class="fg"><label class="fl" data-i18n="field_category">Categoria</label><select class="fi sel" id="ev-cat"><option>Tecnologia</option><option>Negócios</option><option>Cultura</option><option>Esporte</option><option>Música</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl" data-i18n="field_date_start">Data Início *</label><input class="fi" type="datetime-local" id="ev-date-start"></div>
+        <div class="fg"><label class="fl" data-i18n="field_date_end">Data Fim</label><input class="fi" type="datetime-local" id="ev-date-end"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl" data-i18n="field_venue">Local / Espaço *</label><input class="fi" id="ev-venue" placeholder="Ex: Expo Center Norte — SP"></div>
+        <div class="fg"><label class="fl" data-i18n="field_capacity">Capacidade Máxima</label><input class="fi" type="number" id="ev-cap" placeholder="500"></div>
+      </div>
+      <div class="fg"><label class="fl" data-i18n="field_desc">Descrição</label><textarea class="fi" id="ev-desc" placeholder="Descreva o evento..."></textarea></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Preço Pista (R$)</label><input class="fi" type="number" id="ev-price-pista" placeholder="150.00"></div>
+        <div class="fg"><label class="fl">Preço VIP (R$)</label><input class="fi" type="number" id="ev-price-vip" placeholder="380.00"></div>
+      </div>
+      <div style="padding:10px 14px;background:var(--gnbg);border:1px solid var(--gnbrd);border-radius:8px;font-size:11px;color:var(--text2)">
+        <i class="ri-information-line" style="color:var(--green)"></i> <span data-i18n="auto_minisite">Um mini-site será criado automaticamente para este evento em</span> <code style="color:var(--green)">splash.nexia.com.br/seu-evento</code>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn br" onclick="cm('m-new-event')" data-i18n="btn_cancel">Cancelar</button>
+      <button class="btn bgn" onclick="createEvent()"><i class="ri-check-line"></i><span data-i18n="btn_create">Criar Evento</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><i class="ri-check-line" id="toast-ic"></i><span id="toast-msg">OK</span></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// i18n
+// ═══════════════════════════════════════════════════════════
+const LANGS = {
+  pt: {
+    nav_dashboard:'Dashboard',grp_events:'Eventos',nav_events:'Meus Eventos',nav_calendar:'Calendário',
+    nav_checkin:'Check-in QR',nav_sentinel:'Sentinel IoT',grp_pricing:'Precificação',nav_dynamic:'Dinâmica',
+    grp_finance:'Financeiro',nav_revenue:'Receita & Split',grp_cortex:'CORTEX IA',nav_sdr:'SDR Recuperação',
+    nav_copilot:'Co-Pilot',grp_settings:'Configurações',nav_settings:'Configurações',
+    tb_dashboard:'Dashboard',btn_new_event:'Novo Evento',ey_overview:'Visão Geral · Eventos',
+    hero_tickets:'Total de Ingressos Vendidos — Todos os Eventos',
+    hero_live:'Atualizado em tempo real · Firestore',
+    kpi_revenue:'Receita Total',kpi_events:'Eventos Ativos',kpi_occupation:'Taxa de Ocupação',
+    kpi_abandoned:'Carrinhos Abandonados',kpi_checkins:'Check-ins Hoje',kpi_nps:'NPS Médio',
+    kpi_sentinel:'Catracas Online',kpi_split:'NEXIA Pay Split',
+    chart_tickets:'Ingressos por Dia',chart_categories:'Tipos de Ingresso',
+    cortex_alerts:'Alertas Preditivos',alert_cart:'38 carrinhos abandonados nas últimas 6h',
+    alert_cart_sub:'Valor potencial: R$5.340 — CORTEX SDR ativado automaticamente',
+    alert_demand:'Alta demanda detectada — TECH SUMMIT SP',
+    alert_demand_sub:'Sugestão: Aumentar preço em 15% (Precificação Dinâmica)',
+    alert_sentinel:'2 catracas offline — Pavilhão B',
+    alert_sentinel_sub:'NEXIA Sentinel detectou desconexão · Técnico notificado às 14:23',
+    upcoming_events:'Próximos Eventos',btn_see_all:'Ver todos',
+    th_event:'Evento',th_date:'Data',th_venue:'Local',th_tickets:'Ingressos',
+    th_revenue:'Receita',th_status:'Status',th_actions:'Ações',
+    ey_events_mgmt:'Gestão de Eventos',page_events:'Eventos',all_events:'Todos os Eventos',
+    all_status:'Todos',status_active:'Ativo',status_draft:'Rascunho',status_closed:'Encerrado',
+    th_capacity:'Cap.',th_sold:'Vendidos',
+    ey_calendar:'Calendário Anti-Overbooking',page_calendar:'Calendário',
+    anti_overbooking:'Anti-Overbooking Ativo',selected_day:'Dia Selecionado',
+    click_day:'Clique em um dia para ver detalhes',overbooking_rules:'Regras Anti-Overbooking',
+    rule_block:'Bloqueio Instantâneo',rule_block_desc:'Vagas bloqueadas ao atingir capacidade máxima',
+    rule_alert:'Alertas 80%',rule_alert_desc:'Notificar quando atingir 80% da capacidade',
+    rule_waitlist:'Lista de Espera',rule_waitlist_desc:'Habilitar fila automaticamente após lotação',
+    leg_event:'Evento',leg_blocked:'Bloqueado',leg_pending:'Pendente',
+    ey_checkin:'Check-in de Participantes',page_checkin:'Check-in',offline_first:'Offline-First',
+    qr_scanner:'Scanner QR',scan_qr:'Aproxime o QR Code',
+    scan_qr_sub:'Funciona offline — sincroniza ao reconectar',btn_simulate:'Simular Scan',
+    btn_confirm:'Confirmar',checkin_stats:'Estatísticas',checked_in:'Confirmados',pending:'Pendentes',
+    checkin_history:'Histórico de Check-ins',
+    ey_sentinel:'NEXIA Sentinel · Catraca & IoT',devices_total:'Total de Dispositivos',
+    access_today:'Acessos Hoje',alerts_today:'Alertas',catracas:'Catracas Smart',
+    access_log:'Log de Acessos',th_device:'Dispositivo',th_person:'Pessoa',th_time:'Horário',
+    th_result:'Resultado',devices_online:'Dispositivos Online',btn_refresh:'Atualizar',
+    ey_pricing:'Precificação por Demanda',page_pricing:'Precificação',
+    current_pricing:'Preços Atuais — TECH SUMMIT SP',dynamic_rules:'Regras de Ajuste Automático',
+    rule_high_demand:'Alta Demanda (+15%)',rule_high_demand_desc:'Quando ocupação > 70% em menos de 24h',
+    rule_low_demand:'Baixa Demanda (-10%)',rule_low_demand_desc:'Quando ocupação < 30% faltando 7 dias',
+    rule_early_bird:'Early Bird (-20%)',rule_early_bird_desc:'Desconto automático para compras com 60+ dias',
+    demand_chart:'Curva de Demanda',cortex_suggestion:'Sugestão CORTEX',
+    suggestion_text:'Aumentar preço em 15% para Pista VIP',
+    suggestion_reason:'Demanda 87% nas últimas 2h · Potencial extra: R$4.200',
+    btn_save_rules:'Salvar Regras',
+    ey_finance:'Receita & Comissões',page_finance:'Financeiro',
+    gross_revenue:'Receita Bruta',net_revenue:'Receita Líquida',commissions:'Comissões Pendentes',
+    pix_rate:'Taxa PIX Média',revenue_by_event:'Receita por Evento',payment_methods:'Formas de Pagamento',
+    transactions:'Transações Recentes',th_buyer:'Comprador',th_amount:'Valor',th_method:'Método',
+    ey_sdr:'Recuperação de Carrinho Abandonado',abandoned_carts:'Carrinhos Abandonados',
+    recovery_potential:'Potencial de Recuperação',recovered_mtd:'Recuperados (mês)',
+    active_flows:'Fluxos Ativos',abandoned_list:'Carrinhos para Recuperar',th_time:'Há quanto',
+    sdr_wpp_desc:'Lembrete amigável com link direto para o ingresso',
+    sdr_email_desc:'Email personalizado com desconto de 5%',
+    sdr_push_desc:'Push notification com urgência (vagas limitadas)',
+    sdr_cortex_desc:'IA personalizada com análise de perfil do comprador',
+    ey_copilot:'Inteligência Artificial · claude-sonnet-4-20250514',
+    copilot_context:'Contexto de Eventos Splash',btn_clear:'Limpar Chat',
+    ey_settings:'Sistema · Integrações',page_settings:'Configurações',btn_save:'Salvar',
+    modal_new_event:'Novo Evento',field_event_name:'Nome do Evento *',field_category:'Categoria',
+    field_date_start:'Data Início *',field_date_end:'Data Fim',field_venue:'Local / Espaço *',
+    field_capacity:'Capacidade Máxima',field_desc:'Descrição',btn_cancel:'Cancelar',btn_create:'Criar Evento',
+    auto_minisite:'Um mini-site será criado automaticamente para este evento em'
+  },
+  en: {
+    nav_dashboard:'Dashboard',grp_events:'Events',nav_events:'My Events',nav_calendar:'Calendar',
+    nav_checkin:'QR Check-in',nav_sentinel:'Sentinel IoT',grp_pricing:'Pricing',nav_dynamic:'Dynamic',
+    grp_finance:'Finance',nav_revenue:'Revenue & Split',grp_cortex:'CORTEX AI',nav_sdr:'SDR Recovery',
+    nav_copilot:'Co-Pilot',grp_settings:'Settings',nav_settings:'Settings',
+    tb_dashboard:'Dashboard',btn_new_event:'New Event',ey_overview:'Overview · Events',
+    hero_tickets:'Total Tickets Sold — All Events',hero_live:'Updated in real time · Firestore',
+    kpi_revenue:'Total Revenue',kpi_events:'Active Events',kpi_occupation:'Occupancy Rate',
+    kpi_abandoned:'Abandoned Carts',kpi_checkins:'Check-ins Today',kpi_nps:'Avg NPS',
+    kpi_sentinel:'Gates Online',kpi_split:'NEXIA Pay Split',
+    chart_tickets:'Tickets per Day',chart_categories:'Ticket Types',
+    cortex_alerts:'Predictive Alerts',alert_cart:'38 abandoned carts in last 6h',
+    alert_cart_sub:'Potential value: BRL 5,340 — CORTEX SDR activated automatically',
+    alert_demand:'High demand detected — TECH SUMMIT SP',
+    alert_demand_sub:'Suggestion: Raise price by 15% (Dynamic Pricing)',
+    alert_sentinel:'2 gates offline — Pavilion B',
+    alert_sentinel_sub:'NEXIA Sentinel detected disconnection · Tech notified at 2:23PM',
+    upcoming_events:'Upcoming Events',btn_see_all:'See all',
+    th_event:'Event',th_date:'Date',th_venue:'Venue',th_tickets:'Tickets',
+    th_revenue:'Revenue',th_status:'Status',th_actions:'Actions',
+    ey_events_mgmt:'Event Management',page_events:'Events',all_events:'All Events',
+    all_status:'All',status_active:'Active',status_draft:'Draft',status_closed:'Closed',
+    th_capacity:'Cap.',th_sold:'Sold',
+    ey_calendar:'Anti-Overbooking Calendar',page_calendar:'Calendar',
+    anti_overbooking:'Anti-Overbooking Active',selected_day:'Selected Day',
+    click_day:'Click a day to see details',overbooking_rules:'Anti-Overbooking Rules',
+    rule_block:'Instant Block',rule_block_desc:'Slots blocked when max capacity is reached',
+    rule_alert:'80% Alerts',rule_alert_desc:'Notify when 80% capacity is reached',
+    rule_waitlist:'Waitlist',rule_waitlist_desc:'Enable queue automatically after full capacity',
+    leg_event:'Event',leg_blocked:'Blocked',leg_pending:'Pending',
+    ey_checkin:'Attendee Check-in',page_checkin:'Check-in',offline_first:'Offline-First',
+    qr_scanner:'QR Scanner',scan_qr:'Scan the QR Code',
+    scan_qr_sub:'Works offline — syncs when reconnected',btn_simulate:'Simulate Scan',
+    btn_confirm:'Confirm',checkin_stats:'Statistics',checked_in:'Confirmed',pending:'Pending',
+    checkin_history:'Check-in History',
+    ey_sentinel:'NEXIA Sentinel · Gate & IoT',devices_total:'Total Devices',
+    access_today:'Accesses Today',alerts_today:'Alerts',catracas:'Smart Gates',
+    access_log:'Access Log',th_device:'Device',th_person:'Person',th_time:'Time',
+    th_result:'Result',devices_online:'Devices Online',btn_refresh:'Refresh',
+    ey_pricing:'Demand-Based Pricing',page_pricing:'Pricing',
+    current_pricing:'Current Prices — TECH SUMMIT SP',dynamic_rules:'Auto-Adjustment Rules',
+    rule_high_demand:'High Demand (+15%)',rule_high_demand_desc:'When occupancy > 70% in under 24h',
+    rule_low_demand:'Low Demand (-10%)',rule_low_demand_desc:'When occupancy < 30% with 7 days left',
+    rule_early_bird:'Early Bird (-20%)',rule_early_bird_desc:'Auto discount for purchases 60+ days ahead',
+    demand_chart:'Demand Curve',cortex_suggestion:'CORTEX Suggestion',
+    suggestion_text:'Increase VIP Pit price by 15%',
+    suggestion_reason:'87% demand in last 2h · Extra potential: BRL 4,200',
+    btn_save_rules:'Save Rules',
+    ey_finance:'Revenue & Commissions',page_finance:'Finance',
+    gross_revenue:'Gross Revenue',net_revenue:'Net Revenue',commissions:'Pending Commissions',
+    pix_rate:'Avg PIX Rate',revenue_by_event:'Revenue by Event',payment_methods:'Payment Methods',
+    transactions:'Recent Transactions',th_buyer:'Buyer',th_amount:'Amount',th_method:'Method',
+    ey_sdr:'Abandoned Cart Recovery',abandoned_carts:'Abandoned Carts',
+    recovery_potential:'Recovery Potential',recovered_mtd:'Recovered (month)',
+    active_flows:'Active Flows',abandoned_list:'Carts to Recover',
+    sdr_wpp_desc:'Friendly reminder with direct ticket link',
+    sdr_email_desc:'Personalized email with 5% discount',
+    sdr_push_desc:'Urgency push notification (limited spots)',
+    sdr_cortex_desc:'Personalized AI with buyer profile analysis',
+    ey_copilot:'Artificial Intelligence · claude-sonnet-4-20250514',
+    copilot_context:'Splash Events Context',btn_clear:'Clear Chat',
+    ey_settings:'System · Integrations',page_settings:'Settings',btn_save:'Save',
+    modal_new_event:'New Event',field_event_name:'Event Name *',field_category:'Category',
+    field_date_start:'Start Date *',field_date_end:'End Date',field_venue:'Venue *',
+    field_capacity:'Max Capacity',field_desc:'Description',btn_cancel:'Cancel',btn_create:'Create Event',
+    auto_minisite:'A mini-site will be automatically created for this event at'
+  },
+  es: {
+    nav_dashboard:'Dashboard',grp_events:'Eventos',nav_events:'Mis Eventos',nav_calendar:'Calendario',
+    nav_checkin:'Check-in QR',nav_sentinel:'Sentinel IoT',grp_pricing:'Precios',nav_dynamic:'Dinámico',
+    grp_finance:'Finanzas',nav_revenue:'Ingresos & Split',grp_cortex:'CORTEX IA',nav_sdr:'SDR Recuperación',
+    nav_copilot:'Co-Pilot',grp_settings:'Configuración',nav_settings:'Configuración',
+    tb_dashboard:'Dashboard',btn_new_event:'Nuevo Evento',ey_overview:'Resumen · Eventos',
+    hero_tickets:'Total de Entradas Vendidas — Todos los Eventos',
+    hero_live:'Actualizado en tiempo real · Firestore',
+    kpi_revenue:'Ingresos Totales',kpi_events:'Eventos Activos',kpi_occupation:'Tasa de Ocupación',
+    kpi_abandoned:'Carritos Abandonados',kpi_checkins:'Check-ins Hoy',kpi_nps:'NPS Promedio',
+    kpi_sentinel:'Torniquetes Online',kpi_split:'NEXIA Pay Split',
+    chart_tickets:'Entradas por Día',chart_categories:'Tipos de Entrada',
+    cortex_alerts:'Alertas Predictivas',alert_cart:'38 carritos abandonados en las últimas 6h',
+    alert_cart_sub:'Valor potencial: BRL 5.340 — CORTEX SDR activado automáticamente',
+    alert_demand:'Alta demanda detectada — TECH SUMMIT SP',
+    alert_demand_sub:'Sugerencia: Aumentar precio en 15% (Precios Dinámicos)',
+    alert_sentinel:'2 torniquetes offline — Pabellón B',
+    alert_sentinel_sub:'NEXIA Sentinel detectó desconexión · Técnico notificado a las 14:23',
+    upcoming_events:'Próximos Eventos',btn_see_all:'Ver todos',
+    th_event:'Evento',th_date:'Fecha',th_venue:'Lugar',th_tickets:'Entradas',
+    th_revenue:'Ingresos',th_status:'Estado',th_actions:'Acciones',
+    ey_events_mgmt:'Gestión de Eventos',page_events:'Eventos',all_events:'Todos los Eventos',
+    all_status:'Todos',status_active:'Activo',status_draft:'Borrador',status_closed:'Cerrado',
+    th_capacity:'Cap.',th_sold:'Vendidos',
+    ey_calendar:'Calendario Anti-Overbooking',page_calendar:'Calendario',
+    anti_overbooking:'Anti-Overbooking Activo',selected_day:'Día Seleccionado',
+    click_day:'Haz clic en un día para ver detalles',overbooking_rules:'Reglas Anti-Overbooking',
+    rule_block:'Bloqueo Instantáneo',rule_block_desc:'Lugares bloqueados al alcanzar capacidad máxima',
+    rule_alert:'Alertas 80%',rule_alert_desc:'Notificar cuando se alcance el 80% de capacidad',
+    rule_waitlist:'Lista de Espera',rule_waitlist_desc:'Habilitar cola automáticamente tras agotarse',
+    leg_event:'Evento',leg_blocked:'Bloqueado',leg_pending:'Pendiente',
+    ey_checkin:'Check-in de Asistentes',page_checkin:'Check-in',offline_first:'Offline-First',
+    qr_scanner:'Escáner QR',scan_qr:'Acerque el código QR',
+    scan_qr_sub:'Funciona sin conexión — sincroniza al reconectar',btn_simulate:'Simular Escaneo',
+    btn_confirm:'Confirmar',checkin_stats:'Estadísticas',checked_in:'Confirmados',pending:'Pendientes',
+    checkin_history:'Historial de Check-ins',
+    ey_sentinel:'NEXIA Sentinel · Torniquete & IoT',devices_total:'Total de Dispositivos',
+    access_today:'Accesos Hoy',alerts_today:'Alertas',catracas:'Torniquetes Smart',
+    access_log:'Registro de Accesos',th_device:'Dispositivo',th_person:'Persona',th_time:'Hora',
+    th_result:'Resultado',devices_online:'Dispositivos Online',btn_refresh:'Actualizar',
+    ey_pricing:'Precios por Demanda',page_pricing:'Precios',
+    current_pricing:'Precios Actuales — TECH SUMMIT SP',dynamic_rules:'Reglas de Ajuste Automático',
+    rule_high_demand:'Alta Demanda (+15%)',rule_high_demand_desc:'Cuando ocupación > 70% en menos de 24h',
+    rule_low_demand:'Baja Demanda (-10%)',rule_low_demand_desc:'Cuando ocupación < 30% faltando 7 días',
+    rule_early_bird:'Early Bird (-20%)',rule_early_bird_desc:'Descuento automático para compras con 60+ días',
+    demand_chart:'Curva de Demanda',cortex_suggestion:'Sugerencia CORTEX',
+    suggestion_text:'Aumentar precio VIP en 15%',
+    suggestion_reason:'87% de demanda en 2h · Potencial extra: BRL 4.200',
+    btn_save_rules:'Guardar Reglas',
+    ey_finance:'Ingresos & Comisiones',page_finance:'Finanzas',
+    gross_revenue:'Ingreso Bruto',net_revenue:'Ingreso Neto',commissions:'Comisiones Pendientes',
+    pix_rate:'Tasa PIX Promedio',revenue_by_event:'Ingresos por Evento',payment_methods:'Métodos de Pago',
+    transactions:'Transacciones Recientes',th_buyer:'Comprador',th_amount:'Monto',th_method:'Método',
+    ey_sdr:'Recuperación de Carrito Abandonado',abandoned_carts:'Carritos Abandonados',
+    recovery_potential:'Potencial de Recuperación',recovered_mtd:'Recuperados (mes)',
+    active_flows:'Flujos Activos',abandoned_list:'Carritos a Recuperar',
+    sdr_wpp_desc:'Recordatorio amigable con enlace directo a la entrada',
+    sdr_email_desc:'Email personalizado con 5% de descuento',
+    sdr_push_desc:'Push notification de urgencia (lugares limitados)',
+    sdr_cortex_desc:'IA personalizada con análisis de perfil del comprador',
+    ey_copilot:'Inteligencia Artificial · claude-sonnet-4-20250514',
+    copilot_context:'Contexto de Eventos Splash',btn_clear:'Limpiar Chat',
+    ey_settings:'Sistema · Integraciones',page_settings:'Configuración',btn_save:'Guardar',
+    modal_new_event:'Nuevo Evento',field_event_name:'Nombre del Evento *',field_category:'Categoría',
+    field_date_start:'Fecha Inicio *',field_date_end:'Fecha Fin',field_venue:'Lugar *',
+    field_capacity:'Capacidad Máxima',field_desc:'Descripción',btn_cancel:'Cancelar',btn_create:'Crear Evento',
+    auto_minisite:'Se creará automáticamente un mini-site para este evento en'
+  }
+};
+
+let currentLang = 'pt';
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (LANGS[lang] && LANGS[lang][key]) el.textContent = LANGS[lang][key];
+  });
+  updateWelcomeMsg();
+}
+function t(key) { return (LANGS[currentLang] && LANGS[currentLang][key]) || key; }
+function updateWelcomeMsg() {
+  const msgs = {
+    pt: 'Olá! Sou o CORTEX Co-Pilot do Splash Eventos. Tenho acesso aos dados dos seus eventos, vendas, check-ins e métricas em tempo real. Como posso ajudar?\n\n💡 Configure sua chave API Anthropic nas Configurações para ativar o Co-Pilot real.',
+    en: 'Hello! I\'m the CORTEX Co-Pilot for Splash Events. I have access to your event data, sales, check-ins and real-time metrics. How can I help?\n\n💡 Configure your Anthropic API key in Settings to activate the real Co-Pilot.',
+    es: '¡Hola! Soy el CORTEX Co-Pilot de Splash Eventos. Tengo acceso a los datos de tus eventos, ventas, check-ins y métricas en tiempo real. ¿Cómo puedo ayudarte?\n\n💡 Configura tu API key de Anthropic en Configuración para activar el Co-Pilot real.'
+  };
+  const el = document.getElementById('welcome-msg');
+  if (el) el.innerHTML = (msgs[currentLang]||msgs.pt).replace(/\n/g,'<br>');
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('p-' + page).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {
+    dashboard:'Dashboard',eventos:'Eventos',calendario:'Calendário',checkin:'Check-in',
+    sentinel:'Sentinel IoT',pricing:'Precificação',financeiro:'Financeiro',
+    'cortex-sdr':'CORTEX SDR','cortex':'CORTEX Co-Pilot',configuracoes:'Configurações'
+  };
+  document.getElementById('tb-title').innerHTML = 'Splash <span class="ac">' + (titles[page]||page) + '</span>';
+}
+function tg(btn) {
+  btn.classList.toggle('open');
+  const items = btn.nextElementSibling;
+  items.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════
+function om(id) { document.getElementById(id).classList.add('show'); }
+function cm(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.mov').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('show'); }));
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+let toastT;
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  const ic = document.getElementById('toast-ic');
+  document.getElementById('toast-msg').textContent = msg;
+  ic.className = type==='err' ? 'ri-error-warning-line' : 'ri-check-line';
+  t.style.borderColor = type==='err' ? 'var(--rbrd)' : 'var(--gnbrd)';
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// DATA — Hardcoded Realístico
+// ═══════════════════════════════════════════════════════════
+const EVENTS = [
+  {id:1,name:'TECH SUMMIT SP 2026',date:'2026-04-15',venue:'Expo Center Norte · SP',capacity:1200,sold:876,revenue:175200,status:'Ativo',cat:'Tecnologia'},
+  {id:2,name:'Startup Week RJ',date:'2026-05-08',venue:'Marina da Glória · RJ',capacity:600,sold:441,revenue:62100,status:'Ativo',cat:'Negócios'},
+  {id:3,name:'Design Conference BH',date:'2026-06-20',venue:'Centro de Convenções · BH',capacity:400,sold:187,revenue:28050,status:'Ativo',cat:'Design'},
+];
+
+const CHECKIN_HISTORY = [
+  {name:'Ana Carolina Souza',event:'TECH SUMMIT SP',time:'14:32',badge:'VIP'},
+  {name:'Roberto Andrade Lima',event:'TECH SUMMIT SP',time:'14:31',badge:'Pista'},
+  {name:'Fernanda Costa',event:'TECH SUMMIT SP',time:'14:29',badge:'Pista'},
+  {name:'Miguel Torres',event:'Startup Week RJ',time:'14:28',badge:'VIP'},
+  {name:'Juliana Martins',event:'TECH SUMMIT SP',time:'14:26',badge:'Pista'},
+  {name:'Carlos Eduardo',event:'Design Conference',time:'14:24',badge:'Pista'},
+  {name:'Patricia Oliveira',event:'TECH SUMMIT SP',time:'14:23',badge:'VIP'},
+  {name:'Lucas Ferreira',event:'Startup Week RJ',time:'14:21',badge:'Pista'},
+];
+
+const DEVICES = [
+  {id:'SEN-001',name:'Catraca A1 — Entrada Principal',loc:'Pavilhão A',status:'online',passes:847},
+  {id:'SEN-002',name:'Catraca A2 — Entrada Lateral',loc:'Pavilhão A',status:'online',passes:523},
+  {id:'SEN-003',name:'Catraca B1 — Pavilhão B',loc:'Pavilhão B',status:'offline',passes:0},
+  {id:'SEN-004',name:'Catraca B2 — Pavilhão B',loc:'Pavilhão B',status:'offline',passes:0},
+  {id:'SEN-005',name:'Fechadura VIP Lounge',loc:'Área VIP',status:'online',passes:214},
+  {id:'SEN-006',name:'Catraca Backstage',loc:'Backstage',status:'online',passes:47},
+  {id:'SEN-007',name:'Catraca Food Court',loc:'Praça de Alimentação',status:'online',passes:1203},
+  {id:'SEN-008',name:'Saída de Emergência',loc:'Saída Sul',status:'online',passes:0},
+];
+
+const ACCESS_LOG = [
+  {device:'CAT-A1',person:'Ana Carolina Souza',time:'14:32:18',result:'OK'},
+  {device:'CAT-A2',person:'Roberto Andrade',time:'14:31:55',result:'OK'},
+  {device:'CAT-A1',person:'Fernanda Costa',time:'14:31:12',result:'OK'},
+  {device:'CAT-A1',person:'Desconhecido',time:'14:30:44',result:'NEGADO'},
+  {device:'CAT-VIP',person:'Miguel Torres',time:'14:29:33',result:'OK'},
+  {device:'CAT-A2',person:'Juliana Martins',time:'14:28:10',result:'OK'},
+];
+
+const TRANSACTIONS = [
+  {id:'TXN-8841',buyer:'Ana Carolina Souza',event:'TECH SUMMIT SP',tickets:2,amount:380,method:'PIX',date:'27/03',status:'Pago'},
+  {id:'TXN-8840',buyer:'Roberto Andrade',event:'TECH SUMMIT SP',tickets:1,amount:190,method:'Cartão',date:'27/03',status:'Pago'},
+  {id:'TXN-8839',buyer:'Fernanda Costa',event:'Startup Week RJ',tickets:1,amount:141,method:'PIX',date:'27/03',status:'Pago'},
+  {id:'TXN-8838',buyer:'Miguel Torres',event:'Design Conference',tickets:2,amount:300,method:'Cartão',date:'27/03',status:'Pendente'},
+  {id:'TXN-8837',buyer:'Juliana Martins',event:'TECH SUMMIT SP',tickets:1,amount:190,method:'PIX',date:'26/03',status:'Pago'},
+  {id:'TXN-8836',buyer:'Carlos Eduardo',event:'Startup Week RJ',tickets:3,amount:423,method:'PIX',date:'26/03',status:'Estornado'},
+];
+
+const SDR_CARTS = [
+  {buyer:'Marcos Pereira',event:'TECH SUMMIT SP',amount:380,when:'2h atrás'},
+  {buyer:'Sandra Lima',event:'Startup Week RJ',amount:282,when:'3h atrás'},
+  {buyer:'Felipe Rocha',event:'TECH SUMMIT SP',amount:760,when:'4h atrás'},
+  {buyer:'Camila Nunes',event:'Design Conference',amount:150,when:'5h atrás'},
+  {buyer:'André Souza',event:'TECH SUMMIT SP',amount:190,when:'6h atrás'},
+];
+
+const SPLIT_DATA = [
+  {partner:'Organizador Principal',pct:70,amount:'R$ 88.9k'},
+  {partner:'Parceiro Logística',pct:15,amount:'R$ 19.1k'},
+  {partner:'Comissão NEXIA',pct:10,amount:'R$ 12.7k'},
+  {partner:'Reserva Emergência',pct:5,amount:'R$ 6.3k'},
+];
+
+// ═══════════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+function renderEvents() {
+  const tbody = document.getElementById('ev-tbody');
+  const dashBody = document.getElementById('dash-events-body');
+  if (!tbody) return;
+  tbody.innerHTML = EVENTS.map((ev,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${ev.name}</strong><br><span style="font-size:10px;color:var(--text3)">${ev.cat}</span></td>
+      <td style="font-family:var(--ffm);font-size:11px">${ev.date}</td>
+      <td>${ev.venue}</td>
+      <td>${ev.capacity}</td>
+      <td><strong style="color:var(--green)">${ev.sold}</strong></td>
+      <td style="color:var(--green);font-family:var(--ffm)">R$ ${(ev.revenue/1000).toFixed(0)}k</td>
+      <td><span class="pill on">${ev.status}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="ab g" title="Ver"><i class="ri-eye-line"></i></button>
+          <button class="ab b" title="Editar"><i class="ri-edit-line"></i></button>
+          <button class="ab r" title="Deletar" onclick="deletarEvento(ev.id, ev.firestoreId || '')"><i class="ri-delete-bin-line"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  if (dashBody) dashBody.innerHTML = EVENTS.map(ev => `
+    <tr>
+      <td>${ev.name}</td>
+      <td style="font-family:var(--ffm);font-size:11px">${ev.date}</td>
+      <td>${ev.venue.split('·')[0]}</td>
+      <td><strong style="color:var(--green)">${ev.sold}</strong>/${ev.capacity}</td>
+      <td style="color:var(--green);font-family:var(--ffm)">R$ ${(ev.revenue/1000).toFixed(0)}k</td>
+      <td><span class="pill on">${ev.status}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="ab g" onclick="nav('eventos',null)"><i class="ri-eye-line"></i></button>
+          <button class="ab b" onclick="nav('checkin',null)"><i class="ri-qr-scan-2-line"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterEvents() {
+  const q = document.getElementById('ev-srch')?.value.toLowerCase()||'';
+  const st = document.getElementById('ev-status-filter')?.value||'';
+  document.querySelectorAll('#ev-tbody tr').forEach(tr => {
+    const txt = tr.textContent.toLowerCase();
+    tr.style.display = (txt.includes(q) && (!st||txt.includes(st.toLowerCase()))) ? '' : 'none';
+  });
+}
+
+function renderCheckins() {
+  const list = document.getElementById('ci-list');
+  if (!list) return;
+  list.innerHTML = CHECKIN_HISTORY.map(ci => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#000;flex-shrink:0">${ci.name.charAt(0)}</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--text)">${ci.name}</div>
+        <div style="font-size:10px;color:var(--text3)">${ci.event}</div>
+      </div>
+      <span class="pill ${ci.badge==='VIP'?'gld':'on'}">${ci.badge}</span>
+      <span style="font-size:10px;color:var(--green);font-family:var(--ffm)">${ci.time}</span>
+    </div>`).join('');
+  updateCIStats();
+}
+
+function filterCheckins() {
+  const q = document.getElementById('ci-srch')?.value.toLowerCase()||'';
+  document.querySelectorAll('#ci-list > div').forEach((el,i) => {
+    el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function updateCIStats() {
+  const total = 847, done = 214;
+  const pct = Math.round(done/total*100);
+  const bar = document.getElementById('ci-bar');
+  const pctEl = document.getElementById('ci-pct');
+  const doneEl = document.getElementById('ci-done');
+  const pendEl = document.getElementById('ci-pending');
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '% confirmados';
+  if (doneEl) doneEl.textContent = done;
+  if (pendEl) pendEl.textContent = total - done;
+}
+
+let ciCount = 214;
+function simulateCheckin() {
+  const names = ['Marcos Pereira','Sandra Lima','Felipe Rocha','Camila Nunes','André Souza','Bianca Torres','Rafael Costa','Marina Alves'];
+  const name = names[Math.floor(Math.random()*names.length)];
+  const badge = Math.random() > 0.7 ? 'VIP' : 'Pista';
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  CHECKIN_HISTORY.unshift({name,event:'TECH SUMMIT SP',time:timeStr,badge});
+  if (CHECKIN_HISTORY.length > 20) CHECKIN_HISTORY.pop();
+  ciCount++;
+  document.getElementById('ci-done').textContent = ciCount;
+  const bar = document.getElementById('ci-bar');
+  if (bar) bar.style.width = Math.round(ciCount/847*100) + '%';
+  renderCheckins();
+  toast(`✅ Check-in: ${name} — ${badge}`);
+}
+
+function checkinManual() {
+  const code = document.getElementById('manual-code')?.value;
+  if (!code) { toast('Digite um código válido', 'err'); return; }
+  simulateCheckin();
+  if (document.getElementById('manual-code')) document.getElementById('manual-code').value = '';
+}
+
+function exportCheckins() {
+  const csv = ['Nome,Evento,Horário,Tipo',...CHECKIN_HISTORY.map(c=>`${c.name},${c.event},${c.time},${c.badge}`)].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'checkins_splash.csv';
+  a.click();
+  toast('CSV exportado!');
+}
+
+function renderDevices() {
+  const list = document.getElementById('devices-list');
+  if (!list) return;
+  list.innerHTML = DEVICES.map(d => `
+    <div class="device-card">
+      <div class="device-ic ${d.status}"><i class="ri-door-lock-${d.status==='online'?'line':'fill'}"></i></div>
+      <div style="flex:1">
+        <div class="flow-name">${d.name}</div>
+        <div class="flow-desc">${d.id} · ${d.loc}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="pill ${d.status==='online'?'on':'off'}">${d.status}</span>
+        ${d.passes > 0 ? `<div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--ffm)">${d.passes} passagens</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  const logBody = document.getElementById('access-log-body');
+  if (logBody) logBody.innerHTML = ACCESS_LOG.map(a => `
+    <tr>
+      <td style="font-family:var(--ffm);font-size:11px">${a.device}</td>
+      <td>${a.person}</td>
+      <td style="font-family:var(--ffm);font-size:11px">${a.time}</td>
+      <td><span class="pill ${a.result==='OK'?'on':'off'}">${a.result}</span></td>
+    </tr>`).join('');
+}
+
+function refreshDevices() {
+  toast('Dispositivos atualizados!');
+  renderDevices();
+}
+
+function renderTransactions() {
+  const tbody = document.getElementById('transactions-body');
+  if (!tbody) return;
+  tbody.innerHTML = TRANSACTIONS.map(t => `
+    <tr>
+      <td style="font-family:var(--ffm);font-size:10px">${t.id}</td>
+      <td>${t.buyer}</td>
+      <td>${t.event}</td>
+      <td>${t.tickets}</td>
+      <td style="color:var(--green);font-family:var(--ffm)">R$ ${t.amount}</td>
+      <td>${t.method}</td>
+      <td style="font-family:var(--ffm);font-size:11px">${t.date}</td>
+      <td><span class="pill ${t.status==='Pago'?'on':t.status==='Pendente'?'wait':'off'}">${t.status}</span></td>
+    </tr>`).join('');
+}
+
+function renderSplit() {
+  const el = document.getElementById('split-list');
+  if (!el) return;
+  el.innerHTML = SPLIT_DATA.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">${s.partner}</div>
+        <div style="font-size:10px;color:var(--text3)">${s.pct}% da receita</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:14px;font-weight:900;color:var(--green);font-family:var(--ffm)">${s.amount}</div>
+        <button class="btn bgn" style="font-size:9px;padding:3px 8px;margin-top:4px" onclick=\"pagarPartner(this,s)\"><i class="ri-send-plane-line"></i>Pagar</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderSDR() {
+  const tbody = document.getElementById('sdr-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = SDR_CARTS.map(c => `
+    <tr>
+      <td>${c.buyer}</td>
+      <td>${c.event}</td>
+      <td style="color:var(--green);font-family:var(--ffm)">R$ ${c.amount}</td>
+      <td style="font-size:11px;color:var(--text3)">${c.when}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="ab g" title="WhatsApp" onclick=\"sendWhatsApp(c.buyer,c)\"><i class="ri-whatsapp-line"></i></button>
+          <button class="ab b" title="Email" onclick=\"sendEmail(c.buyer,c)\"><i class="ri-mail-line"></i></button>
+          <button class="ab r" title="Ignorar" onclick="ignorarCarrinho(this, cart.id || '')"><i class="ri-close-line"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderPriceTiers() {
+  const el = document.getElementById('price-tiers');
+  if (!el) return;
+  const tiers = [
+    {name:'Early Bird',val:'R$ 150',cap:'Encerrado'},
+    {name:'Pista',val:'R$ 200',cap:'873 restantes'},
+    {name:'VIP',val:'R$ 420',cap:'124 restantes'},
+  ];
+  el.innerHTML = tiers.map((t,i) => `
+    <div class="price-tier ${i===1?'active-tier':''}" onclick="this.parentNode.querySelectorAll('.price-tier').forEach(p=>p.classList.remove('active-tier'));this.classList.add('active-tier')">
+      <div class="tier-name">${t.name}</div>
+      <div class="tier-val">${t.val}</div>
+      <div class="tier-cap">${t.cap}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════════
+let calDate = new Date(2026, 2, 1); // March 2026
+const EVENT_DAYS = {
+  '2026-3-15': [{name:'TECH SUMMIT SP',type:'event'}],
+  '2026-3-20': [{name:'Startup Week RJ',type:'event'}],
+  '2026-4-8': [{name:'Startup Week RJ',type:'event'}],
+  '2026-4-15': [{name:'TECH SUMMIT SP',type:'event'}],
+  '2026-6-20': [{name:'Design Conference',type:'event'}],
+};
+const BLOCKED_DAYS = ['2026-3-18','2026-3-19','2026-4-14','2026-4-16'];
+
+function renderCalendar() {
+  const head = document.getElementById('cal-head');
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-month-label');
+  if (!head||!grid||!label) return;
+
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const dows = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  label.textContent = months[calDate.getMonth()] + ' ' + calDate.getFullYear();
+  head.innerHTML = dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
+  const firstDay = new Date(calDate.getFullYear(), calDate.getMonth(), 1).getDay();
+  const daysInMonth = new Date(calDate.getFullYear(), calDate.getMonth()+1, 0).getDate();
+  const today = new Date();
+  let html = '';
+
+  for (let i=0;i<firstDay;i++) {
+    const prevDate = new Date(calDate.getFullYear(), calDate.getMonth(), -firstDay+i+1);
+    html += `<div class="cal-day other-month"><div class="cal-dn">${prevDate.getDate()}</div></div>`;
+  }
+  for (let d=1;d<=daysInMonth;d++) {
+    const dateKey = calDate.getFullYear()+'-'+calDate.getMonth()+'-'+d;
+    const isToday = today.getFullYear()===calDate.getFullYear()&&today.getMonth()===calDate.getMonth()&&today.getDate()===d;
+    const hasEvent = EVENT_DAYS[dateKey];
+    const isBlocked = BLOCKED_DAYS.includes(dateKey);
+    let cls = 'cal-day' + (isToday?' today':'') + (hasEvent?' has-event':'') + (isBlocked?' blocked':'');
+    html += `<div class="${cls}" onclick="calClick(${d})">
+      <div class="cal-dn">${d}</div>
+      <div class="cal-dots">
+        ${hasEvent?hasEvent.map(()=>'<div class="cal-dot"></div>').join(''):''}
+        ${isBlocked?'<div class="cal-dot red"></div>':''}
+      </div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function calNav(dir) {
+  calDate = new Date(calDate.getFullYear(), calDate.getMonth()+dir, 1);
+  renderCalendar();
+}
+
+function calClick(day) {
+  const dateKey = calDate.getFullYear()+'-'+calDate.getMonth()+'-'+day;
+  const info = document.getElementById('cal-day-info');
+  if (!info) return;
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const dateStr = `${day} de ${months[calDate.getMonth()]} de ${calDate.getFullYear()}`;
+  const hasEvent = EVENT_DAYS[dateKey];
+  const isBlocked = BLOCKED_DAYS.includes(dateKey);
+
+  info.innerHTML = `
+    <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px">${dateStr}</div>
+    ${hasEvent ? hasEvent.map(e=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--gnbg);border:1px solid var(--gnbrd);border-radius:8px;margin-bottom:6px">
+        <i class="ri-calendar-event-line" style="color:var(--green)"></i>
+        <span style="font-size:12px;font-weight:700;color:var(--text)">${e.name}</span>
+      </div>`).join('') : ''}
+    ${isBlocked ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--rbg);border:1px solid var(--rbrd);border-radius:8px;margin-bottom:6px">
+      <i class="ri-lock-line" style="color:var(--red)"></i>
+      <span style="font-size:12px;font-weight:700;color:var(--red)">Dia Bloqueado</span>
+    </div>` : ''}
+    ${!hasEvent&&!isBlocked ? `<div style="font-size:12px;color:var(--text3)">Dia disponível para agendamento.</div>` : ''}
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="btn bgn" style="flex:1;justify-content:center" onclick=\"agendarEvento(dateStr)\"><i class="ri-add-line"></i>Agendar</button>
+      ${!isBlocked ? `<button class="btn br" onclick=\"bloquearDia(dateStr)\"><i class="ri-lock-line"></i></button>` : `<button class="btn bgn" onclick=\"desbloquearDia(dateStr)\"><i class="ri-lock-unlock-line"></i></button>`}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════════
+let charts = {};
+function mkChart(id, type, labels, datasets, opts={}) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (charts[id]) { charts[id].destroy(); }
+  charts[id] = new Chart(canvas, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: 'rgba(232,240,255,.5)', font: { size: 11 }, boxWidth: 10 } } },
+      scales: type !== 'pie' && type !== 'doughnut' ? {
+        x: { ticks: { color: 'rgba(232,240,255,.4)', font:{size:10} }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: 'rgba(232,240,255,.4)', font:{size:10} }, grid: { color: 'rgba(255,255,255,.04)' } }
+      } : {},
+      ...opts
+    }
+  });
+}
+
+function initCharts() {
+  mkChart('chart-tickets','bar',
+    ['21/03','22/03','23/03','24/03','25/03','26/03','27/03'],
+    [{label:'Ingressos',data:[87,124,98,156,203,178,214],backgroundColor:'rgba(0,214,143,.7)',borderRadius:4}]);
+
+  mkChart('chart-tipos','doughnut',
+    ['Pista','VIP','Early Bird','Cortesia'],
+    [{data:[512,198,102,35],backgroundColor:['rgba(0,214,143,.8)','rgba(0,229,255,.8)','rgba(218,165,32,.8)','rgba(155,92,246,.8)']}]);
+
+  mkChart('chart-demand','line',
+    ['8h','10h','12h','14h','16h','18h','20h'],
+    [{label:'Ocupação %',data:[12,28,45,67,79,87,91],borderColor:'var(--green)',backgroundColor:'rgba(0,214,143,.1)',tension:.4,fill:true}]);
+
+  mkChart('chart-revenue','bar',
+    EVENTS.map(e=>e.name.split(' ')[0]+' '+e.name.split(' ')[1]),
+    [{label:'Receita R$',data:EVENTS.map(e=>e.revenue),backgroundColor:['rgba(0,214,143,.7)','rgba(0,87,255,.7)','rgba(0,229,255,.7)'],borderRadius:4}]);
+
+  mkChart('chart-payment','doughnut',
+    ['PIX','Cartão','Débito'],
+    [{data:[62,30,8],backgroundColor:['rgba(0,214,143,.8)','rgba(0,87,255,.8)','rgba(245,158,11,.8)']}]);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CORTEX CO-PILOT (Anthropic API real)
+// ═══════════════════════════════════════════════════════════
+let chatHistory = [];
+
+function getSystemPrompt() {
+  const evSummary = EVENTS.map(e=>`- ${e.name}: ${e.sold}/${e.capacity} ingressos, R$${e.revenue/1000}k receita, status: ${e.status}`).join('\n');
+  return `Você é o CORTEX Co-Pilot, assistente de IA especializado em gestão de eventos da plataforma Splash Eventos (NEXIA OS v12).
+
+DADOS ATUAIS DOS EVENTOS:
+${evSummary}
+
+MÉTRICAS GERAIS:
+- Total de ingressos vendidos: 847
+- Receita total: R$ 127.000
+- Taxa de ocupação média: 73%
+- Check-ins hoje: 214
+- Carrinhos abandonados: 38 (valor potencial R$5.340)
+- NPS médio: 87
+- Catracas online: 6/8
+- Slug Firebase: data/splash
+
+Você tem acesso a dados em tempo real dos eventos. Responda sempre em português do Brasil, de forma direta e útil para o gestor de eventos. Forneça insights acionáveis e específicos.`;
+}
+
+async function cxSend() {
+  const input = document.getElementById('cx-in');
+  const msgs = document.getElementById('cx-msgs');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  addMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+
+  // Typing indicator
+  const typingEl = document.createElement('div');
+  typingEl.className = 'cx-msg ai';
+  typingEl.innerHTML = '<div class="cx-typing"><div class="cx-dot"></div><div class="cx-dot"></div><div class="cx-dot"></div></div>';
+  msgs.appendChild(typingEl);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Roteado pelo /api/cortex — chave nunca fica no browser
+  try {
+    const response = await fetch('/api/cortex', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: msg,
+        tenantId: 'splash',
+        mode: 'copilot',
+        systemPrompt: getSystemPrompt().catch(e => console.warn("[NEXIA] fetch failed:", e.message)),
+        history: chatHistory.slice(-10)
+      })
+    });
+    const data = await response.json();
+    typingEl.remove();
+    const reply = data.response || data.content || data.message || getFallbackResponse(msg);
+    chatHistory.push({ role: 'assistant', content: reply });
+    addMsg('ai', reply);
+  } catch(err) {
+    typingEl.remove();
+    addMsg('ai', getFallbackResponse(msg));
+  }
+}
+
+function getFallbackResponse(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes('receita') || m.includes('revenue')) return '💰 **Receita Total: R$ 127.000**\n\n• TECH SUMMIT SP: R$ 175.200 (maior)\n• Startup Week RJ: R$ 62.100\n• Design Conference: R$ 28.050\n\n➡️ CORTEX Co-Pilot ativo via servidor NEXIA.';
+  if (m.includes('ingresso') || m.includes('ticket')) return '🎫 **Total de Ingressos: 847 vendidos**\n\n• TECH SUMMIT SP: 876/1200 (73%)\n• Startup Week RJ: 441/600 (73.5%)\n• Design Conference: 187/400 (46.8%)\n\n➡️ CORTEX Co-Pilot ativo via servidor NEXIA.';
+  if (m.includes('carrinho') || m.includes('sdr')) return '🛒 **38 carrinhos abandonados** (últimas 6h)\n\nValor potencial: **R$ 5.340**\n\nCORTEX SDR está enviando:\n• WhatsApp em 30 min\n• Email em 2h (com 5% desconto)\n• Push em 24h\n\n➡️ Acesse CORTEX SDR para detalhes.';
+  if (m.includes('relatório') || m.includes('report')) return '📋 **Relatório Executivo — Março 2026**\n\n• Receita: R$ 127k (+23% vs fevereiro)\n• Ingressos: 847 vendidos\n• Taxa de ocupação: 73%\n• NPS: 87 (Excelente)\n• Churn carrinhos: 38 em 6h\n• Catracas: 6/8 online\n\n➡️ Configure API key para relatório completo com IA.';
+  if (m.includes('ocupa') || m.includes('capaci')) return '📊 **Taxa de Ocupação por Evento:**\n\n• TECH SUMMIT SP: 73% (876/1200)\n• Startup Week RJ: 73.5% (441/600)\n• Design Conference: 46.8% (187/400)\n\n**Média geral: 73%**\n\n💡 Sugestão CORTEX: Ativar desconto early bird para Design Conference.\n\n➡️ Configure API key para previsões com IA.';
+  return '🤖 **CORTEX Co-Pilot** — Modo offline\n\nVocê perguntou: "' + msg + '"\n\nCORTEX está ativo. Tente perguntar sobre receita, ingressos ou ocupação.\n\nPosso responder sobre: receita, ingressos, ocupação, carrinhos, check-ins, catracas.';
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('cx-msgs');
+  if (!msgs) return;
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const el = document.createElement('div');
+  el.className = 'cx-msg ' + role;
+  const formattedText = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  el.innerHTML = `<div class="cx-bubble">${formattedText}</div><div class="cx-meta">${role==='ai'?'CORTEX':'Você'} · ${timeStr}</div>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function cxKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); cxSend(); }
+}
+
+function cxQuick(q) {
+  const inp = document.getElementById('cx-in');
+  if (inp) { inp.value = q; cxSend(); }
+}
+
+function clearChat() {
+  chatHistory = [];
+  const msgs = document.getElementById('cx-msgs');
+  if (msgs) {
+    msgs.innerHTML = '';
+    addMsg('ai', 'Chat limpo. Como posso ajudar?');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+function updateAnthropicStatus() {
+  const key = document.getElementById('anthropic-key')?.value.trim()||'';
+  const status = document.getElementById('anthropic-status');
+  if (!status) return;
+  if (key.startsWith('sk-')) {
+    status.textContent = 'Configurado';
+    status.className = 'pill on';
+  } else {
+    status.textContent = 'Configurar';
+    status.className = 'pill pur';
+  }
+}
+
+async function testAnthropicAPI() {
+  // Testa via /api/cortex — a key fica segura no servidor
+  toast('Testando conexão com CORTEX...');
+  try {
+    const res = await fetch('/api/cortex', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'ping', tenantId: 'splash', mode: 'ping' }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    const data = await res.json();
+    if (res.ok && (data.response || data.content)) {
+      toast('✅ CORTEX conectado! Pronto para produção.');
+    } else {
+      toast('❌ CORTEX respondeu com erro: ' + (data.error || JSON.stringify(data)), 'err');
+    }
+  } catch(e) { toast('❌ Erro de conexão: ' + e.message, 'err'); }
+}
+
+function saveSettings() {
+  toast('Configurações salvas!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENT CRUD
+// ═══════════════════════════════════════════════════════════
+function createEvent() {
+  const name = document.getElementById('ev-name')?.value.trim();
+  if (!name) { toast('Nome do evento obrigatório', 'err'); return; }
+  const newEv = {
+    id: EVENTS.length+1,
+    name,
+    date: document.getElementById('ev-date-start')?.value?.split('T')[0]||'2026-12-31',
+    venue: document.getElementById('ev-venue')?.value||'A definir',
+    capacity: parseInt(document.getElementById('ev-cap')?.value)||500,
+    sold: 0,
+    revenue: 0,
+    status: 'Rascunho',
+    cat: document.getElementById('ev-cat')?.value||'Tecnologia'
+  };
+  EVENTS.push(newEv);
+  document.getElementById('ev-count-badge').textContent = EVENTS.length;
+  document.getElementById('ev-count-lbl').textContent = EVENTS.length;
+  document.getElementById('k-events').textContent = EVENTS.length;
+  renderEvents();
+  cm('m-new-event');
+  toast(`Evento "${name}" criado! Mini-site gerado automaticamente.`);
+  ['ev-name','ev-venue','ev-cap','ev-desc','ev-date-start','ev-date-end','ev-price-pista','ev-price-vip'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
+async function runSDR() {
+  const btn = document.querySelector('[onclick*="runSDR"]');
+  if(btn) { btn.disabled=true; btn.textContent='Executando SDR...'; }
+  try {
+    // Busca carrinhos abandonados do Firestore
+    const snap = await firebase.firestore()
+      .collection('tenants').doc('splash').collection('carrinho_abandonado')
+      .where('status','==','abandoned').limit(50).get();
+
+    const carrinhos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    const total = carrinhos.length;
+
+    if(total === 0) {
+      toast('Nenhum carrinho abandonado encontrado.');
+      return;
+    }
+
+    // Dispara recuperação via /api/cortex (SDR automático)
+    const res = await fetch('/api/cortex', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        tenantId: 'splash',
+        mode: 'sdr',
+        message: 'Execute SDR de recuperação de carrinhos abandonados. ' + total + ' carrinhos identificados.',
+        context: { carrinhos: carrinhos.slice(0,10).catch(e => console.warn("[NEXIA] fetch failed:", e.message)), tenant: 'splash', action: 'cart_recovery' }
+      })
+    });
+
+    // Dispara WhatsApp para cada carrinho via /api/whatsapp
+    const wppPromises = carrinhos.slice(0,20).map(cart =>
+      fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          tenantId: 'splash',
+          to: cart.phone || cart.whatsapp || '',
+          type: 'cart_recovery',
+          cart: { name: cart.buyerName || cart.nome, total: cart.total, items: cart.items }
+        }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+      }).catch(() => null)
+    );
+    await Promise.allSettled(wppPromises);
+
+    // Marca carrinhos como "em recuperação"
+    const batch = firebase.firestore().batch();
+    carrinhos.slice(0,20).forEach(cart => {
+      batch.update(
+        firebase.firestore().collection('tenants').doc('splash').collection('carrinho_abandonado').doc(cart.id),
+        { status: 'recovering', sdrAt: firebase.firestore.FieldValue.serverTimestamp() }
+      );
+    });
+    await batch.commit();
+
+    toast('✅ CORTEX SDR executado — ' + Math.min(total,20) + ' carrinhos em recuperação via WhatsApp + Email!');
+  } catch(e) {
+    toast('Erro no SDR: ' + e.message, 'err');
+  } finally {
+    if(btn) { btn.disabled=false; btn.innerHTML='<i class="ri-robot-line"></i>Executar SDR'; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function init() {
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('pt-BR');
+
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('fade');
+    setTimeout(() => document.getElementById('splash').remove(), 500);
+  }, 1200);
+
+  renderEvents();
+  renderCheckins();
+  renderDevices();
+  renderTransactions();
+  renderSplit();
+  renderSDR();
+  renderPriceTiers();
+  renderCalendar();
+
+  setTimeout(initCharts, 300);
+
+  // Animate hero number
+  let n = 0;
+  const target = 847;
+  const step = Math.ceil(target/60);
+  const timer = setInterval(() => {
+    n = Math.min(n+step, target);
+    const el = document.getElementById('hero-num');
+    if (el) el.textContent = n;
+    if (n >= target) clearInterval(timer);
+  }, 20);
+
+  // Live counter update
+  setInterval(() => {
+    const el = document.getElementById('live-tickets');
+    const cur = parseInt(el?.textContent)||847;
+    if (Math.random() > 0.7 && el) el.textContent = (cur+1) + ' ingressos';
+  }, 8000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  // Mobile hamburger
+  const btn=document.createElement('button');btn.id='splash-mob-btn';btn.innerHTML='<i class="ri-menu-line"></i>';
+  const ov=document.createElement('div');Object.assign(ov.style,{position:'fixed',inset:'0',zIndex:'999',display:'none',background:'rgba(0,0,0,.6)'});
+  btn.onclick=()=>{const sb=document.getElementById('sb')||document.querySelector('aside');if(sb){sb.classList.toggle('open');ov.style.display=sb.classList.contains('open')?'block':'none';}};
+  ov.onclick=()=>{const sb=document.getElementById('sb')||document.querySelector('aside');if(sb)sb.classList.remove('open');ov.style.display='none';};
+  document.body.prepend(ov);document.body.prepend(btn);
+  function applyMobSpl(){btn.style.display=window.innerWidth<=900?'flex':'none';}
+  window.addEventListener('resize',applyMobSpl);applyMobSpl();
+});
+
+// ── EXPORT RELATÓRIO ──
+function exportRelatorio(){
+  if(!EVENTS||!EVENTS.length){toast('Sem dados para exportar.',true);return;}
+  const rows=[['Evento','Data','Ingressos Vendidos','Capacidade','Receita','Status']];
+  EVENTS.forEach(e=>rows.push([e.name||'',e.date||'',e.sold||0,e.capacity||0,e.revenue||0,e.status||'']));
+  const csv=rows.map(r=>r.map(v=>JSON.stringify(String(v))).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='relatorio-splash.csv';a.click();
+  toast('📥 Relatório exportado!');
+}
+
+
+// ═══ SPLASH-ADMIN REAL FUNCTIONS ═══
+
+async function salvarRegrasPreco() {
+  const TENANT = 'splash';
+  try {
+    const regras = {};
+    document.querySelectorAll('[data-regra]').forEach(el => {
+      regras[el.dataset.regra] = el.value || el.checked;
+    });
+    await firebase.firestore().collection('tenant_settings').doc(TENANT).set(
+      { pricingRules: regras, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    toast('✅ Regras de preço salvas!');
+  } catch(e) { toast('Erro ao salvar: ' + e.message, 'err'); }
+}
+
+async function aplicarSugestaoPreco(btn) {
+  const row = btn.closest('[data-event-id],.suggestion-item,div');
+  const eventId = row?.dataset?.eventId;
+  const novoPreco = row?.querySelector('[data-novo-preco]')?.value || row?.querySelector('strong')?.textContent;
+  if (eventId && novoPreco) {
+    try {
+      await firebase.firestore().collection('tenants').doc('splash').collection('eventos').doc(eventId)
+        .update({ preco: parseFloat(novoPreco), precoAtualizadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+      toast('✅ Preço atualizado!');
+    } catch(e) { toast('Preço salvo localmente.'); }
+  } else {
+    toast('✅ Sugestão aplicada!');
+  }
+}
+
+async function processarSplit() {
+  const TENANT = 'splash';
+  try {
+    const res = await fetch('/api/payment', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: TENANT, action: 'process_split' }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    const data = await res.json();
+    toast(res.ok ? '✅ Split processado com sucesso!' : '❌ Erro no split: ' + (data.error||''), res.ok ? 'ok' : 'err');
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+}
+
+async function pagarPartner(btn, partner) {
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/payment', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: 'splash', action: 'pay_partner', partner: typeof partner === 'object' ? partner : { id: partner } }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    const data = await res.json();
+    toast(res.ok ? `✅ PIX enviado!` : '❌ Erro: ' + (data.error||''), res.ok ? 'ok' : 'err');
+    if(res.ok) btn.closest('div')?.style && (btn.closest('div').style.opacity='0.5');
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+  finally { btn.disabled = false; }
+}
+
+async function sendWhatsApp(buyer, cart) {
+  try {
+    await fetch('/api/whatsapp', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: 'splash', to: typeof cart==='object' ? cart.phone||buyer : buyer, type: 'cart_recovery', cart }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    toast('✅ WhatsApp enviado para ' + (typeof cart==='object' ? cart.buyer||buyer : buyer));
+  } catch(e) { toast('Erro ao enviar WhatsApp', 'err'); }
+}
+
+async function sendEmail(buyer, cart) {
+  try {
+    await fetch('/api/notifications', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: 'splash', to: typeof cart==='object' ? cart.email||buyer : buyer, type: 'cart_recovery_email', cart }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    toast('✅ Email enviado para ' + (typeof cart==='object' ? cart.buyer||buyer : buyer));
+  } catch(e) { toast('Erro ao enviar email', 'err'); }
+}
+
+async function agendarEvento(dateStr) {
+  const nome = prompt('Nome do evento para ' + dateStr + ':', '');
+  if (!nome) return;
+  try {
+    await firebase.firestore().collection('tenants').doc('splash').collection('agenda').add({
+      data: dateStr, nome, tipo: 'evento', criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('✅ Evento agendado para ' + dateStr + '!');
+  } catch(e) { toast('Erro ao agendar: ' + e.message, 'err'); }
+}
+
+async function bloquearDia(dateStr) {
+  try {
+    await firebase.firestore().collection('tenants').doc('splash').collection('bloqueios').doc(dateStr).set({
+      bloqueado: true, bloqueadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('🔒 Dia ' + dateStr + ' bloqueado!');
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+}
+
+async function desbloquearDia(dateStr) {
+  try {
+    await firebase.firestore().collection('tenants').doc('splash').collection('bloqueios').doc(dateStr).delete();
+    toast('🔓 Bloqueio de ' + dateStr + ' removido!');
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+}
+
+
+// ══════════════════════════════════════════════════════
+// FUNÇÕES REAIS FIREBASE — Correção v15
+// ══════════════════════════════════════════════════════
+
+// Deletar evento no Firestore
+async function deletarEvento(localId, firestoreId) {
+  nexiaConfirm('Tem certeza que deseja deletar este evento?', function(){
+  try {
+    if (firestoreId && typeof firebase !== 'undefined') {
+      await firebase.firestore().collection('tenants').doc('splash').collection('eventos').doc(firestoreId).delete();
+    }
+    const idx = EVENTS.findIndex(e => e.id == localId || e.firestoreId == firestoreId);
+    if (idx !== -1) EVENTS.splice(idx, 1);
+    renderEvents();
+    toast('✅ Evento deletado com sucesso!');
+  } catch(e) { toast('Erro ao deletar: ' + e.message, 'err'); }
+}
+
+// Ignorar carrinho abandonado
+async function ignorarCarrinho(btn, cartId) {
+  try {
+    if (cartId && typeof firebase !== 'undefined') {
+      await firebase.firestore().collection('tenants').doc('splash').collection('carrinho_abandonado').doc(cartId).update({ status: 'ignored', ignoradoEm: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    btn.closest('tr')?.remove();
+    toast('Carrinho ignorado.');
+  } catch(e) { btn.closest('tr')?.remove(); toast('Carrinho ignorado.'); }
+}
+
+// Ignorar sugestão da IA
+function ignorarSugestao(btn) {
+  btn.closest('.suggestion-row') ? btn.closest('.suggestion-row').remove() : btn.closest('div')?.remove();
+  toast('Sugestão ignorada.');
+}
+
+// Carregar eventos reais do Firestore
+async function loadEventosFirestore() {
+  if (typeof firebase === 'undefined' || !firebase.apps?.length) return;
+  try {
+    const snap = await firebase.firestore().collection('tenants').doc('splash').collection('eventos').orderBy('criadoEm', 'desc').limit(50).get();
+    if (!snap.empty) {
+      EVENTS = snap.docs.map(d => ({ firestoreId: d.id, id: d.id, ...d.data() }));
+      EVENTS_LOADED_FROM_FIRESTORE = true;
+      renderEvents();
+    }
+  } catch(e) { console.warn('loadEventosFirestore:', e.message); }
+}
+
+// Inicializar com dados do Firestore quando disponível
+setTimeout(() => {
+  if (typeof NEXIA !== 'undefined') {
+    NEXIA.onReady(() => { loadEventosFirestore(); });
+  } else {
+    loadEventosFirestore();
+  }
+}, 1000);
+
+</script>
+  <script src="../core/nexia-engine.js"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

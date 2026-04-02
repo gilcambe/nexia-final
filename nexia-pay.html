@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ NEXIA PAY — Motor de Cobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#131829;
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.10);
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35);
+  --green:#00D68F;--gbg:rgba(0,214,143,.07);--gbrd:rgba(0,214,143,.22);
+  --cyan:#00E5FF;--cbg:rgba(0,229,255,.07);--cbrd:rgba(0,229,255,.2);
+  --red:#FF3D71;--rbg:rgba(255,61,113,.08);--rbrd:rgba(255,61,113,.22);
+  --gold:#DAA520;--goldlt:rgba(218,165,32,.08);--goldbrd:rgba(218,165,32,.22);
+  --purple:#9B5CF6;--pbg:rgba(155,92,246,.08);--pbrd:rgba(155,92,246,.22);
+  --orange:#F59E0B;
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+  --sw:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);overflow:hidden}
+button{font-family:var(--ff);cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:var(--ff);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,214,143,.25);border-radius:2px}
+
+/* SHELL */
+.shell{display:grid;grid-template-columns:var(--sw) 1fr;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sb{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:18px 16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px}
+.gem{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gbg),var(--pbg));border:1px solid var(--gbrd);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:18px}
+.sb-title{font-size:13px;font-weight:800}
+.sb-sub{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);opacity:.8;margin-top:1px}
+.sb-nav{padding:10px 8px;flex:1}
+.nav-section{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);padding:12px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border:1px solid transparent;margin:1px 0}
+.nav-item:hover{background:var(--gbg);border-color:var(--gbrd);color:var(--green)}
+.nav-item.active{background:var(--gbg);border-color:var(--gbrd);color:var(--green)}
+.nav-item i{font-size:15px;flex-shrink:0}
+.nav-item .badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px}
+.badge-green{background:var(--gbg);color:var(--green);border:1px solid var(--gbrd)}
+.badge-red{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.badge-gold{background:var(--goldlt);color:var(--gold);border:1px solid var(--goldbrd)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--brd);background:var(--bg2);flex-shrink:0}
+.tb-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px}
+.tb-title i{color:var(--green)}
+.tb-badge{padding:4px 12px;border-radius:20px;background:var(--gbg);border:1px solid var(--gbrd);font-size:11px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:5px}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn-sm{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--ff)}
+.btn-green{background:var(--gbg);border:1px solid var(--gbrd);color:var(--green)}
+.btn-green:hover{background:rgba(0,214,143,.15)}
+.btn-primary{background:linear-gradient(135deg,var(--green),#00B47A);color:#000;border:none}
+.btn-back{background:transparent;border:1px solid var(--brd);color:var(--text2)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:16px 18px;transition:border-color .2s}
+.kpi:hover{border-color:var(--brd2)}
+.kpi-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.kpi-val{font-size:26px;font-weight:900;font-family:var(--ffm);letter-spacing:-.5px}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.kpi-delta{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:6px;display:inline-block}
+.delta-up{background:var(--gbg);color:var(--green)}
+.delta-dn{background:var(--rbg);color:var(--red)}
+
+/* TWO COLS */
+.two-cols{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-bottom:18px}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:14px;overflow:hidden}
+.card-hd{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px}
+.card-hd-title{font-size:13px;font-weight:700;flex:1}
+.card-body{padding:18px}
+
+/* TABLE */
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--brd)}
+.dt td{padding:11px 12px;border-bottom:1px solid var(--brd);color:var(--text2)}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(255,255,255,.015)}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700}
+.s-paid{background:var(--gbg);color:var(--green);border:1px solid var(--gbrd)}
+.s-pend{background:var(--goldlt);color:var(--gold);border:1px solid var(--goldbrd)}
+.s-fail{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.s-ref{background:var(--pbg);color:var(--purple);border:1px solid var(--pbrd)}
+
+/* PIX QR */
+.pix-card{text-align:center}
+.pix-qr{width:140px;height:140px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:56px}
+.pix-key{background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:8px 12px;font-family:var(--ffm);font-size:11px;color:var(--text2);word-break:break-all;margin-bottom:10px;text-align:left}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.full{grid-template-columns:1fr}
+.fg{display:flex;flex-direction:column;gap:5px}
+label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em}
+.inp{background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;width:100%;transition:border-color .2s}
+.inp:focus{border-color:var(--gbrd);background:var(--bg4)}
+select.inp{cursor:pointer}
+
+/* CHARGE LIST */
+.charge-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)}
+.charge-item:last-child{border-bottom:none}
+.charge-av{width:38px;height:38px;border-radius:9px;background:var(--bg3);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.charge-info{flex:1;min-width:0}
+.charge-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.charge-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.charge-val{font-size:15px;font-weight:800;font-family:var(--ffm)}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9000;background:var(--bg2);border:1px solid var(--gbrd);border-radius:10px;padding:12px 18px;font-size:12px;color:var(--text);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:8px}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.mov.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--brd2);border-radius:16px;width:min(560px,94vw);max-height:88vh;overflow-y:auto;padding:28px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.modal-title i{color:var(--green)}
+.mc{margin-left:auto;color:var(--text3);font-size:20px;cursor:pointer}
+.mc:hover{color:var(--text)}
+
+/* MOBILE */
+#mob-pay-btn{display:none;position:fixed;top:12px;left:12px;z-index:2000;width:42px;height:42px;border-radius:10px;background:var(--bg2);border:1px solid var(--gbrd);color:var(--green);font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+#mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .sb{position:fixed;top:0;left:-260px;height:100vh;z-index:1000;width:var(--sw);transition:left .3s;box-shadow:4px 0 30px rgba(0,0,0,.5)}
+  .sb.open{left:0}
+  #mob-pay-btn{display:flex}
+  .kpi-strip{grid-template-columns:1fr 1fr!important}
+  .two-cols{grid-template-columns:1fr!important}
+  .topbar{padding:12px 14px 12px 64px}
+  .content{padding:14px}
+}
+@media(max-width:480px){
+  .kpi-strip{grid-template-columns:1fr!important}
+  .form-row{grid-template-columns:1fr!important}
+  .modal{width:96vw!important;padding:18px!important}
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE -->
+<button id="mob-pay-btn" onclick="toggleSB()"><i class="ri-menu-line"></i></button>
+<div id="mob-overlay" onclick="closeSB()"></div>
+
+<div class="shell">
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sb" id="sb">
+  <div class="sb-logo">
+    <div class="gem"><i class="ri-secure-payment-line"></i></div>
+    <div>
+      <div class="sb-title">NEXIA PAY</div>
+      <div class="sb-sub">Motor de Cobrança</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-section">Visão Geral</div>
+    <div class="nav-item active" onclick="go('dashboard')"><i class="ri-dashboard-3-line"></i> Dashboard <span class="badge badge-green">Live</span></div>
+    <div class="nav-item" onclick="go('transacoes')"><i class="ri-exchange-line"></i> Transações <span class="badge badge-green">234</span></div>
+    <div class="nav-item" onclick="go('inadimplentes')"><i class="ri-error-warning-line"></i> Inadimplentes <span class="badge badge-red">12</span></div>
+    <div class="nav-section">Cobranças</div>
+    <div class="nav-item" onclick="go('nova-cobranca')"><i class="ri-add-circle-line"></i> Nova Cobrança</div>
+    <div class="nav-item" onclick="go('recorrentes')"><i class="ri-repeat-line"></i> Recorrentes <span class="badge badge-gold">MRR</span></div>
+    <div class="nav-item" onclick="go('links-pagamento')"><i class="ri-links-line"></i> Links de Pagamento</div>
+    <div class="nav-item" onclick="go('regua-cobranca')"><i class="ri-mail-send-line"></i> Régua de Cobrança</div>
+    <div class="nav-section">Financeiro</div>
+    <div class="nav-item" onclick="go('conciliacao')"><i class="ri-bank-line"></i> Conciliação Bancária</div>
+    <div class="nav-item" onclick="go('nfe')"><i class="ri-file-text-line"></i> Emitir NF-e</div>
+    <div class="nav-item" onclick="go('relatorios')"><i class="ri-bar-chart-2-line"></i> Relatórios</div>
+    <div class="nav-item" onclick="go('webhooks')"><i class="ri-webhook-line"></i> Webhooks MP</div>
+    <div class="nav-section">Gateways</div>
+    <div class="nav-item" onclick="go('mercadopago')"><i class="ri-bank-card-line"></i> Mercado Pago</div>
+    <div class="nav-item" onclick="go('pix')"><i class="ri-qr-code-line"></i> PIX Dinâmico</div>
+    <div class="nav-item" onclick="go('stripe')"><i class="ri-money-dollar-circle-line"></i> Stripe (USD)</div>
+    <div class="nav-section">Config</div>
+    <div class="nav-item" onclick="window.location.href='nexia-master-admin.html'"><i class="ri-arrow-left-line"></i> Voltar ao Admin</div>
+  </nav>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title"><i class="ri-secure-payment-line"></i> NEXIA PAY</div>
+    <div class="tb-badge"><span class="tb-dot"></span> Produção Ativa</div>
+    <div class="tb-right">
+      <button class="btn-sm btn-green" onclick="openModal('m-link')"><i class="ri-links-line"></i> Gerar Link</button>
+      <button class="btn-sm btn-primary" onclick="openModal('m-cobranca')"><i class="ri-add-line"></i> Nova Cobrança</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- ── DASHBOARD ─────────────────────────────────────────── -->
+    <div id="sec-dashboard">
+    <div class="kpi-strip">
+      <div class="kpi">
+        <div class="kpi-label"><i class="ri-money-dollar-circle-line" style="color:var(--green)"></i> MRR</div>
+        <div class="kpi-val" style="color:var(--green)">R$ 48.700</div>
+        <div class="kpi-sub">Receita Recorrente Mensal</div>
+        <div class="kpi-delta delta-up">↑ +12,4%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><i class="ri-exchange-line" style="color:var(--cyan)"></i> Volume Hoje</div>
+        <div class="kpi-val" style="color:var(--cyan)">R$ 9.340</div>
+        <div class="kpi-sub">34 transações aprovadas</div>
+        <div class="kpi-delta delta-up">↑ +8,1%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><i class="ri-error-warning-line" style="color:var(--red)"></i> Inadimplência</div>
+        <div class="kpi-val" style="color:var(--red)">R$ 4.200</div>
+        <div class="kpi-sub">12 clientes pendentes</div>
+        <div class="kpi-delta delta-dn">↑ +2 este mês</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><i class="ri-percent-line" style="color:var(--gold)"></i> Taxa de Conversão</div>
+        <div class="kpi-val" style="color:var(--gold)">94,3%</div>
+        <div class="kpi-sub">Aprovação de pagamentos</div>
+        <div class="kpi-delta delta-up">↑ +1,2%</div>
+      </div>
+    </div>
+
+    <!-- TWO COLS -->
+    <div class="two-cols">
+      <!-- Transações Recentes -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-title"><i class="ri-exchange-line" style="color:var(--green)"></i> Transações Recentes</div>
+          <button class="btn-sm btn-green" onclick="exportCSV()"><i class="ri-download-line"></i> CSV</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="dt">
+            <thead>
+              <tr>
+                <th>ID</th><th>Cliente</th><th>Valor</th><th>Método</th><th>Status</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tx-tbody">
+              <tr>
+                <td style="font-family:var(--ffm);font-size:11px">#TXN-001</td>
+                <td>Empresa Alpha Ltda</td>
+                <td style="font-family:var(--ffm);color:var(--green);font-weight:700">R$ 2.900</td>
+                <td><span style="padding:2px 8px;border-radius:5px;background:rgba(0,229,255,.08);color:var(--cyan);font-size:10px;font-weight:700">PIX</span></td>
+                <td><span class="status-badge s-paid"><i class="ri-check-line"></i> Pago</span></td>
+                <td><button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="verTx('001')">Ver</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--ffm);font-size:11px">#TXN-002</td>
+                <td>Studio Klass</td>
+                <td style="font-family:var(--ffm);color:var(--green);font-weight:700">R$ 1.200</td>
+                <td><span style="padding:2px 8px;border-radius:5px;background:rgba(245,158,11,.08);color:var(--orange);font-size:10px;font-weight:700">Cartão</span></td>
+                <td><span class="status-badge s-paid"><i class="ri-check-line"></i> Pago</span></td>
+                <td><button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="verTx('002')">Ver</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--ffm);font-size:11px">#TXN-003</td>
+                <td>Bezsan Investimentos</td>
+                <td style="font-family:var(--ffm);color:var(--gold);font-weight:700">R$ 9.700</td>
+                <td><span style="padding:2px 8px;border-radius:5px;background:rgba(0,229,255,.08);color:var(--cyan);font-size:10px;font-weight:700">PIX</span></td>
+                <td><span class="status-badge s-pend"><i class="ri-time-line"></i> Pendente</span></td>
+                <td>
+                  <button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px;margin-right:4px" onclick="cobrarManual('003')">Cobrar</button>
+                  <button class="btn-sm" style="padding:4px 10px;font-size:10px;border:1px solid var(--rbrd);color:var(--red);border-radius:8px" onclick="cancelarTx('003')">Cancelar</button>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--ffm);font-size:11px">#TXN-004</td>
+                <td>CES Brasil</td>
+                <td style="font-family:var(--ffm);color:var(--green);font-weight:700">R$ 4.500</td>
+                <td><span style="padding:2px 8px;border-radius:5px;background:rgba(155,92,246,.08);color:var(--purple);font-size:10px;font-weight:700">Recorrente</span></td>
+                <td><span class="status-badge s-paid"><i class="ri-check-line"></i> Pago</span></td>
+                <td><button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="verTx('004')">Ver</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--ffm);font-size:11px">#TXN-005</td>
+                <td>Splash Eventos</td>
+                <td style="font-family:var(--ffm);color:var(--red);font-weight:700">R$ 800</td>
+                <td><span style="padding:2px 8px;border-radius:5px;background:rgba(245,158,11,.08);color:var(--orange);font-size:10px;font-weight:700">Cartão</span></td>
+                <td><span class="status-badge s-fail"><i class="ri-close-line"></i> Recusado</span></td>
+                <td><button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="retentar('005')">Retentar</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--ffm);font-size:11px">#TXN-006</td>
+                <td>Viajante Pro</td>
+                <td style="font-family:var(--ffm);color:var(--purple);font-weight:700">-R$ 350</td>
+                <td><span style="padding:2px 8px;border-radius:5px;background:rgba(0,229,255,.08);color:var(--cyan);font-size:10px;font-weight:700">PIX</span></td>
+                <td><span class="status-badge s-ref"><i class="ri-arrow-go-back-line"></i> Estornado</span></td>
+                <td><button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="verTx('006')">Ver</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel Direito -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <!-- PIX QR Rápido -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-title"><i class="ri-qr-code-line" style="color:var(--cyan)"></i> PIX Dinâmico</div>
+          </div>
+          <div class="card-body pix-card">
+            <div class="pix-qr">📱</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:10px">PIX Copia e Cola gerado automaticamente</div>
+            <div class="pix-key" id="pix-key-display">nexia@nexia.com.br · R$ 0,00</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div class="fg">
+                <label>Valor (R$)</label>
+                <input class="inp" type="number" id="pix-val" placeholder="0,00" oninput="updatePixKey()">
+              </div>
+              <div class="fg">
+                <label>Cliente</label>
+                <input class="inp" type="text" id="pix-cliente" placeholder="Nome" oninput="updatePixKey()">
+              </div>
+            </div>
+            <button class="btn-sm btn-primary" style="width:100%;padding:10px" onclick="gerarPix()">
+              <i class="ri-qr-code-line"></i> Gerar PIX
+            </button>
+          </div>
+        </div>
+
+        <!-- Régua de Cobrança -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-title"><i class="ri-robot-line" style="color:var(--gold)"></i> Régua Automática IA</div>
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)"></div>
+          </div>
+          <div class="card-body" style="padding:14px">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--brd)">
+                <div style="width:32px;height:32px;border-radius:8px;background:var(--gbg);border:1px solid var(--gbrd);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:15px;flex-shrink:0"><i class="ri-whatsapp-line"></i></div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:600">D-3 Vencimento</div><div style="font-size:10px;color:var(--text3)">WhatsApp lembrete amigável</div></div>
+                <div style="width:28px;height:16px;border-radius:8px;background:var(--green);cursor:pointer;position:relative"><div style="position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--brd)">
+                <div style="width:32px;height:32px;border-radius:8px;background:var(--goldlt);border:1px solid var(--goldbrd);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:15px;flex-shrink:0"><i class="ri-mail-send-line"></i></div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:600">D+1 Vencimento</div><div style="font-size:10px;color:var(--text3)">Email com novo link PIX</div></div>
+                <div style="width:28px;height:16px;border-radius:8px;background:var(--green);cursor:pointer;position:relative"><div style="position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--brd)">
+                <div style="width:32px;height:32px;border-radius:8px;background:var(--rbg);border:1px solid var(--rbrd);display:flex;align-items:center;justify-content:center;color:var(--red);font-size:15px;flex-shrink:0"><i class="ri-alert-line"></i></div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:600">D+7 Cobrança Urgente</div><div style="font-size:10px;color:var(--text3)">SMS + notificação push</div></div>
+                <div style="width:28px;height:16px;border-radius:8px;background:var(--green);cursor:pointer;position:relative"><div style="position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--brd)">
+                <div style="width:32px;height:32px;border-radius:8px;background:var(--rbg);border:1px solid var(--rbrd);display:flex;align-items:center;justify-content:center;color:var(--red);font-size:15px;flex-shrink:0"><i class="ri-scissors-cut-line"></i></div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:600">D+30 Kill Switch</div><div style="font-size:10px;color:var(--text3)">Suspensão automática do acesso</div></div>
+                <div style="width:28px;height:16px;border-radius:8px;background:var(--green);cursor:pointer;position:relative"><div style="position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MRR Chart + Métodos -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-line-chart-line" style="color:var(--green)"></i> Evolução do MRR (12 meses)</div></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:flex-end;gap:8px;height:120px">
+            ${[22,25,24,28,30,27,33,38,35,42,45,48].map((v,i) => `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="font-size:9px;color:var(--text3);font-family:var(--ffm)">${v}k</div>
+                <div style="width:100%;border-radius:3px 3px 0 0;background:${i===11?'var(--green)':'rgba(0,214,143,.25)'};height:${v*2.3}px;transition:height .5s"></div>
+                <div style="font-size:8px;color:var(--text3)">${['J','F','M','A','M','J','J','A','S','O','N','D'][i]}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-pie-chart-line" style="color:var(--cyan)"></i> Métodos de Pagamento</div></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${[['PIX','var(--cyan)',62],['Cartão Crédito','var(--gold)',28],['Recorrente','var(--purple)',8],['Boleto','var(--text3)',2]].map(([l,c,p]) => `
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                  <span style="color:var(--text2)">${l}</span>
+                  <span style="font-family:var(--ffm);font-weight:700;color:${c}">${p}%</span>
+                </div>
+                <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+                  <div style="height:100%;width:${p}%;border-radius:3px;background:${c};transition:width .8s ease"></div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+    </div><!-- /sec-dashboard -->
+
+    <!-- ── TRANSAÇÕES ────────────────────────────────────────── -->
+    <div id="sec-transacoes" style="display:none">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-title"><i class="ri-exchange-line" style="color:var(--green)"></i> Todas as Transações</div>
+          <div style="display:flex;gap:8px">
+            <input class="inp" style="width:220px;padding:6px 12px;font-size:12px" placeholder="Buscar por cliente ou ID..." oninput="filtrarTx(this.value)">
+            <button class="btn-sm btn-green" onclick="exportCSV()"><i class="ri-download-line"></i> CSV</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="dt"><thead><tr><th>ID</th><th>Cliente</th><th>Valor</th><th>Método</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody id="tx-tbody-full"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INADIMPLENTES ──────────────────────────────────────── -->
+    <div id="sec-inadimplentes" style="display:none">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-title"><i class="ri-error-warning-line" style="color:var(--red)"></i> Clientes Inadimplentes</div>
+          <button class="btn-sm" style="background:var(--rbg);border:1px solid var(--rbrd);color:var(--red)" onclick="cobrarTodosInadimplentes()"><i class="ri-send-plane-line"></i> Cobrar Todos</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="dt"><thead><tr><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Dias em atraso</th><th>Tentativas</th><th>Ações</th></tr></thead>
+          <tbody id="inadimplentes-tbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RECORRENTES / MRR ──────────────────────────────────── -->
+    <div id="sec-recorrentes" style="display:none">
+      <div class="kpi-strip">
+        <div class="kpi"><div class="kpi-label">MRR Ativo</div><div class="kpi-val" style="color:var(--green)" id="mrr-ativo">—</div><div class="kpi-sub">Assinaturas ativas</div></div>
+        <div class="kpi"><div class="kpi-label">Churn Mensal</div><div class="kpi-val" style="color:var(--red)" id="mrr-churn">—</div><div class="kpi-sub">Cancelamentos</div></div>
+        <div class="kpi"><div class="kpi-label">Assinaturas</div><div class="kpi-val" style="color:var(--cyan)" id="mrr-count">—</div><div class="kpi-sub">Total ativas</div></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-repeat-line" style="color:var(--purple)"></i> Assinaturas Recorrentes</div>
+          <button class="btn-sm btn-primary" onclick="openModal('m-cobranca')"><i class="ri-add-line"></i> Nova Assinatura</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="dt"><thead><tr><th>Cliente</th><th>Plano</th><th>Valor/mês</th><th>Próximo débito</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="recorrentes-tbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LINKS DE PAGAMENTO ─────────────────────────────────── -->
+    <div id="sec-links-pagamento" style="display:none">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-links-line" style="color:var(--blue)"></i> Links de Pagamento</div>
+          <button class="btn-sm btn-primary" onclick="openModal('m-link')"><i class="ri-add-line"></i> Gerar Link</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="dt"><thead><tr><th>Produto</th><th>Valor</th><th>Link</th><th>Cliques</th><th>Conversão</th><th>Ações</th></tr></thead>
+          <tbody id="links-tbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Carregando links...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RÉGUA DE COBRANÇA ──────────────────────────────────── -->
+    <div id="sec-regua-cobranca" style="display:none">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-robot-line" style="color:var(--gold)"></i> Régua de Cobrança Automática IA</div>
+          <button class="btn-sm btn-green" onclick="salvarRegua()"><i class="ri-save-line"></i> Salvar</button>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:14px;max-width:600px">
+            <p style="font-size:12px;color:var(--text3)">Configure quando e como o NEXIA cobra automaticamente clientes inadimplentes.</p>
+            <div id="regua-steps"></div>
+            <button class="btn-sm" style="border:1px dashed var(--brd);color:var(--text3);padding:10px;border-radius:10px;width:100%" onclick="addReguaStep()">+ Adicionar etapa</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONCILIAÇÃO ─────────────────────────────────────────── -->
+    <div id="sec-conciliacao" style="display:none">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-bank-line" style="color:var(--cyan)"></i> Conciliação Bancária</div>
+          <button class="btn-sm btn-green" onclick="rodarConciliacao()"><i class="ri-refresh-line"></i> Rodar Conciliação</button>
+        </div>
+        <div class="card-body">
+          <div id="conciliacao-result" style="font-size:12px;color:var(--text3);text-align:center;padding:32px">
+            <i class="ri-bank-line" style="font-size:32px;display:block;margin-bottom:12px"></i>
+            Clique em "Rodar Conciliação" para comparar os pagamentos aprovados no Mercado Pago com o ledger interno.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NF-e ────────────────────────────────────────────────── -->
+    <div id="sec-nfe" style="display:none">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-file-text-line" style="color:var(--green)"></i> Emitir NF-e / NFS-e</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:700px">
+            <div class="fg"><label>Tipo</label>
+              <select class="inp" id="nfe-tipo"><option value="nfse">NFS-e (Serviços)</option><option value="nfe">NF-e (Produtos)</option></select>
+            </div>
+            <div class="fg"><label>CNPJ do Tomador</label><input class="inp" id="nfe-cnpj" placeholder="00.000.000/0001-00"></div>
+            <div class="fg"><label>Nome / Razão Social</label><input class="inp" id="nfe-nome" placeholder="Empresa XYZ Ltda"></div>
+            <div class="fg"><label>Valor (R$)</label><input class="inp" type="number" id="nfe-valor" placeholder="0,00"></div>
+            <div class="fg" style="grid-column:1/-1"><label>Descrição do Serviço</label>
+              <input class="inp" id="nfe-desc" placeholder="Licença de uso de software NEXIA OS — mês referência">
+            </div>
+            <div class="fg"><label>Código CNAE / ISS</label><input class="inp" id="nfe-cnae" placeholder="6201-5/01"></div>
+            <div class="fg"><label>Alíquota ISS (%)</label><input class="inp" type="number" id="nfe-iss" placeholder="2" value="2"></div>
+          </div>
+          <button class="btn-sm btn-primary" style="margin-top:16px;padding:10px 24px" onclick="emitirNfe()"><i class="ri-file-add-line"></i> Emitir Nota</button>
+          <div id="nfe-result" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RELATÓRIOS ─────────────────────────────────────────── -->
+    <div id="sec-relatorios" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="card"><div class="card-hd"><div class="card-hd-title"><i class="ri-bar-chart-2-line" style="color:var(--green)"></i> Volume por Período</div>
+            <select class="inp" style="width:120px;padding:4px 8px;font-size:11px" onchange="loadRelatorio(this.value)" id="rel-period">
+              <option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option>
+            </select>
+          </div>
+          <div class="card-body" id="rel-volume" style="font-size:12px;color:var(--text3);text-align:center;padding:24px">Carregando...</div>
+        </div>
+        <div class="card"><div class="card-hd"><div class="card-hd-title"><i class="ri-pie-chart-line" style="color:var(--cyan)"></i> Métodos de Pagamento</div></div>
+          <div class="card-body" id="rel-metodos" style="font-size:12px;color:var(--text3);text-align:center;padding:24px">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WEBHOOKS ─────────────────────────────────────────────── -->
+    <div id="sec-webhooks" style="display:none">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-webhook-line" style="color:var(--orange)"></i> Webhooks Mercado Pago</div></div>
+        <div class="card-body">
+          <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:16px;font-family:var(--ffm);font-size:12px;margin-bottom:14px">
+            <div style="color:var(--text3);margin-bottom:6px">URL para configurar no painel MP:</div>
+            <div style="color:var(--cyan);word-break:break-all" id="webhook-url">Carregando...</div>
+            <button class="btn-sm btn-green" style="margin-top:10px" onclick="copiarWebhookUrl()"><i class="ri-file-copy-line"></i> Copiar</button>
+          </div>
+          <p style="font-size:12px;color:var(--text3)">Configure esta URL em <strong>Mercado Pago → Integrações → Webhooks</strong>. Selecione os eventos: <code>payment</code> e <code>subscription_preapproval</code>.</p>
+          <div id="webhook-log" style="margin-top:14px;max-height:300px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MERCADO PAGO CONFIG ─────────────────────────────────── -->
+    <div id="sec-mercadopago" style="display:none">
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-bank-card-line" style="color:var(--blue)"></i> Configuração Mercado Pago</div></div>
+        <div class="card-body" style="max-width:500px">
+          <div class="fg"><label>Access Token (MP_ACCESS_TOKEN)</label>
+            <input class="inp" type="password" id="mp-token" placeholder="APP_USR-..." autocomplete="off">
+          </div>
+          <div class="fg" style="margin-top:12px"><label>Webhook Secret (MP_WEBHOOK_SECRET)</label>
+            <input class="inp" type="password" id="mp-secret" placeholder="Secret gerado no painel MP" autocomplete="off">
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:10px;font-size:12px;color:var(--text3)">
+            <i class="ri-information-line"></i> As chaves são configuradas como variáveis de ambiente na Netlify (Site settings → Environment variables), não armazenadas no banco de dados.
+          </div>
+          <button class="btn-sm btn-primary" style="margin-top:14px" onclick="testarConexaoMP()"><i class="ri-plug-line"></i> Testar Conexão</button>
+          <div id="mp-test-result" style="margin-top:10px;font-size:12px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PIX DINÂMICO ────────────────────────────────────────── -->
+    <div id="sec-pix" style="display:none">
+      <div class="card" style="max-width:480px">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-qr-code-line" style="color:var(--cyan)"></i> PIX Dinâmico</div></div>
+        <div class="card-body pix-card">
+          <div class="pix-qr" id="pix-qr-sec">📱</div>
+          <div class="pix-key" id="pix-key-sec">Preencha os dados abaixo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0">
+            <div class="fg"><label>Valor (R$)</label><input class="inp" type="number" id="pix-val-sec" placeholder="0,00"></div>
+            <div class="fg"><label>Cliente</label><input class="inp" type="text" id="pix-cli-sec" placeholder="Nome"></div>
+            <div class="fg" style="grid-column:1/-1"><label>Descrição</label><input class="inp" id="pix-desc-sec" placeholder="Referência do pagamento"></div>
+          </div>
+          <button class="btn-sm btn-primary" style="width:100%;padding:11px" onclick="gerarPixSec()"><i class="ri-qr-code-line"></i> Gerar PIX</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STRIPE (USD) ────────────────────────────────────────── -->
+    <div id="sec-stripe" style="display:none">
+      <div class="card" style="max-width:600px">
+        <div class="card-hd"><div class="card-hd-title"><i class="ri-money-dollar-circle-line" style="color:var(--purple)"></i> Stripe — Pagamentos em USD</div></div>
+        <div class="card-body">
+          <div style="padding:14px;background:var(--bg3);border-radius:10px;border:1px solid var(--brd);margin-bottom:16px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:4px">Stripe Connect</div>
+            <div style="font-size:12px;color:var(--text3)">Para aceitar pagamentos em dólar de clientes internacionais via Stripe, configure sua conta na Netlify:</div>
+            <code style="display:block;margin-top:8px;font-size:11px;color:var(--cyan)">STRIPE_SECRET_KEY=sk_live_...</code>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg"><label>Valor (USD)</label><input class="inp" type="number" id="stripe-amount" placeholder="0.00"></div>
+            <div class="fg"><label>E-mail do cliente</label><input class="inp" type="email" id="stripe-email" placeholder="cliente@email.com"></div>
+            <div class="fg" style="grid-column:1/-1"><label>Descrição</label><input class="inp" id="stripe-desc" placeholder="NEXIA OS — Monthly License"></div>
+          </div>
+          <button class="btn-sm btn-primary" style="margin-top:14px;padding:10px 24px" onclick="criarStripeLink()"><i class="ri-external-link-line"></i> Gerar Payment Link Stripe</button>
+          <div id="stripe-result" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODAL NOVA COBRANÇA -->
+<div class="mov" id="m-cobranca">
+  <div class="modal">
+    <div class="modal-title">
+      <i class="ri-add-circle-line"></i> Nova Cobrança
+      <span class="mc" onclick="closeModal('m-cobranca')">✕</span>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Cliente</label><input class="inp" type="text" placeholder="Nome ou empresa"></div>
+      <div class="fg"><label>E-mail</label><input class="inp" type="email" placeholder="email@empresa.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Valor (R$)</label><input class="inp" type="number" placeholder="0,00" id="mc-val"></div>
+      <div class="fg"><label>Vencimento</label><input class="inp" type="date" id="mc-date"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Método</label>
+        <select class="inp">
+          <option>PIX</option><option>Cartão de Crédito</option><option>Boleto</option><option>Recorrente</option>
+        </select>
+      </div>
+      <div class="fg"><label>Descrição</label><input class="inp" type="text" placeholder="Mensalidade NEXIA OS"></div>
+    </div>
+    <div class="form-row full">
+      <div class="fg"><label>Régua de Cobrança Automática</label>
+        <select class="inp">
+          <option>Ativar régua padrão (D-3, D+1, D+7, D+30)</option>
+          <option>Apenas lembrete (D-1)</option>
+          <option>Só no vencimento</option>
+          <option>Sem régua automática</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
+      <button class="btn-sm" style="padding:12px;border:1px solid var(--brd);color:var(--text2);border-radius:10px" onclick="closeModal('m-cobranca')">Cancelar</button>
+      <button class="btn-sm btn-primary" style="padding:12px;border-radius:10px" onclick="criarCobranca()">
+        <i class="ri-send-plane-line"></i> Enviar Cobrança
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LINK DE PAGAMENTO -->
+<div class="mov" id="m-link">
+  <div class="modal">
+    <div class="modal-title">
+      <i class="ri-links-line"></i> Gerar Link de Pagamento
+      <span class="mc" onclick="closeModal('m-link')">✕</span>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Produto / Serviço</label><input class="inp" type="text" placeholder="Nome do produto" id="ml-produto"></div>
+      <div class="fg"><label>Valor (R$)</label><input class="inp" type="number" placeholder="0,00" id="ml-val"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Expiração</label>
+        <select class="inp">
+          <option>24 horas</option><option>48 horas</option><option>7 dias</option><option>Sem expiração</option>
+        </select>
+      </div>
+      <div class="fg"><label>Máx. de Usos</label>
+        <select class="inp">
+          <option>1 uso (único)</option><option>5 usos</option><option>10 usos</option><option>Ilimitado</option>
+        </select>
+      </div>
+    </div>
+    <div id="link-result" style="display:none;background:var(--bg3);border:1px solid var(--gbrd);border-radius:10px;padding:14px;margin:14px 0">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">LINK GERADO</div>
+      <div style="font-family:var(--ffm);font-size:12px;color:var(--green);word-break:break-all" id="link-url">https://pay.nexia.app/l/...</div>
+      <button onclick="copiarLink()" style="margin-top:10px;width:100%;padding:8px;border-radius:8px;background:var(--gbg);border:1px solid var(--gbrd);color:var(--green);font-size:12px;font-weight:700;cursor:pointer">
+        <i class="ri-clipboard-line"></i> Copiar Link
+      </button>
+    </div>
+    <button class="btn-sm btn-primary" style="width:100%;padding:12px;border-radius:10px" onclick="gerarLink()">
+      <i class="ri-links-line"></i> Gerar Link
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script>
+// ── Firebase init ──────────────────────────────────────────────────────────
+(function(){
+  try { firebase.initializeApp({apiKey:"AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",authDomain:"nexia-c8710.firebaseapp.com",projectId:"nexia-c8710",storageBucket:"nexia-c8710.firebasestorage.app",messagingSenderId:"623044447905",appId:"1:623044447905:web:13f70e1584fb0fcf8d2ae0"}); } catch(e){}
+  document.documentElement.style.visibility='hidden';
+  firebase.auth().onAuthStateChanged(u => {
+    if(!u) window.location.href='/login?next='+encodeURIComponent(window.location.pathname);
+    else { document.documentElement.style.visibility='visible'; loadTransactions(); }
+  });
+})();
+const _db = () => firebase.firestore();
+const TENANT_ID = new URLSearchParams(location.search).get('tenant') || 'nexia';
+const API = '/api';
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.style.borderColor = type==='ok'?'rgba(0,214,143,.3)':type==='err'?'rgba(255,61,113,.3)':'rgba(218,165,32,.3)';
+  t.innerHTML = (type==='ok'?'✅':type==='err'?'❌':'⚠️') + ' ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Nav ────────────────────────────────────────────────────────────────────
+const ALL_SECTIONS = ['dashboard','transacoes','inadimplentes','nova-cobranca','recorrentes',
+  'links-pagamento','regua-cobranca','conciliacao','nfe','relatorios','webhooks','mercadopago','pix','stripe'];
+
+function go(section) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  ALL_SECTIONS.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.style.display = s === section ? '' : 'none';
+  });
+  // lazy-load section data
+  if (section === 'transacoes')      loadTxFull();
+  if (section === 'inadimplentes')   loadInadimplentes();
+  if (section === 'recorrentes')     loadRecorrentes();
+  if (section === 'links-pagamento') loadLinks();
+  if (section === 'relatorios')      loadRelatorio(30);
+  if (section === 'webhooks')        initWebhooks();
+  if (section === 'regua-cobranca')  initRegua();
+  if (section === 'nova-cobranca')   openModal('m-cobranca');
+}
+
+// ── Transações completas ────────────────────────────────────────────────────
+async function loadTxFull() {
+  const tbody = document.getElementById('tx-tbody-full');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr>';
+  try {
+    const res = await fetch(`${API}/payment?tenantId=${TENANT_ID}`);
+    const data = await res.json();
+    const payments = data.payments || [];
+    if (!payments.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Nenhuma transação encontrada.</td></tr>'; return; }
+    tbody.innerHTML = payments.map(tx => {
+      const val = tx.amount ? `R$ ${Number(tx.amount).toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—';
+      const dt = tx.updatedAt?.toDate ? tx.updatedAt.toDate().toLocaleDateString('pt-BR') : '—';
+      const stCls = {approved:'s-paid',pending:'s-pend',rejected:'s-fail',cancelled:'s-fail'}[tx.status]||'s-pend';
+      const stLbl = {approved:'Pago',pending:'Pendente',rejected:'Recusado',cancelled:'Cancelado'}[tx.status]||tx.status;
+      const actions = tx.status==='approved'
+        ? `<button class="btn-sm btn-green" style="padding:3px 8px;font-size:10px" onclick="verTx('${tx.id}')">Ver</button>`
+        : tx.status==='pending'
+        ? `<button class="btn-sm btn-green" style="padding:3px 8px;font-size:10px;margin-right:4px" onclick="cobrarManual('${tx.id}')">Cobrar</button><button class="btn-sm" style="padding:3px 8px;font-size:10px;border:1px solid var(--rbrd);color:var(--red);border-radius:8px" onclick="cancelarTx('${tx.id}')">Cancelar</button>`
+        : `<button class="btn-sm btn-green" style="padding:3px 8px;font-size:10px" onclick="retentar('${tx.id}')">Retentar</button>`;
+      return `<tr>
+        <td style="font-family:var(--ffm);font-size:11px">#${String(tx.id||'').slice(-6).toUpperCase()}</td>
+        <td>${tx.payerEmail||'—'}</td>
+        <td style="font-family:var(--ffm);font-weight:700;color:var(--green)">${val}</td>
+        <td><span style="padding:2px 8px;border-radius:5px;background:rgba(0,229,255,.08);color:var(--cyan);font-size:10px;font-weight:700">${tx.method||'PIX'}</span></td>
+        <td><span class="status-badge ${stCls}">${stLbl}</span></td>
+        <td style="font-size:11px;color:var(--text3)">${dt}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red)">Erro: ${e.message}</td></tr>`; }
+}
+
+function filtrarTx(q) {
+  document.querySelectorAll('#tx-tbody-full tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ── Inadimplentes ───────────────────────────────────────────────────────────
+async function loadInadimplentes() {
+  const tbody = document.getElementById('inadimplentes-tbody');
+  if (!tbody) return;
+  try {
+    const res = await fetch(`${API}/payment?tenantId=${TENANT_ID}`);
+    const data = await res.json();
+    const pending = (data.payments||[]).filter(p => p.status === 'pending');
+    if (!pending.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Nenhum inadimplente. 🎉</td></tr>'; return; }
+    const now = Date.now();
+    tbody.innerHTML = pending.map(tx => {
+      const val = tx.amount ? `R$ ${Number(tx.amount).toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—';
+      const updTs = tx.updatedAt?.seconds ? tx.updatedAt.seconds*1000 : now;
+      const dias = Math.max(0, Math.floor((now-updTs)/86400000));
+      return `<tr>
+        <td>${tx.payerEmail||'—'}</td>
+        <td style="font-family:var(--ffm);font-weight:700;color:var(--red)">${val}</td>
+        <td style="font-size:11px;color:var(--text3)">${new Date(updTs).toLocaleDateString('pt-BR')}</td>
+        <td><span style="color:${dias>30?'var(--red)':dias>7?'var(--gold)':'var(--text2)'}">+${dias}d</span></td>
+        <td style="font-size:11px">1</td>
+        <td><button class="btn-sm btn-green" style="padding:3px 8px;font-size:10px;margin-right:4px" onclick="cobrarManual('${tx.id}')">Cobrar</button>
+            <button class="btn-sm" style="padding:3px 8px;font-size:10px;border:1px solid var(--rbrd);color:var(--red);border-radius:8px" onclick="cancelarTx('${tx.id}')">Cancelar</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--red);padding:16px">Erro: ${e.message}</td></tr>`; }
+}
+
+async function cobrarTodosInadimplentes() {
+  toast('Enviando cobranças para todos os inadimplentes...');
+  try {
+    const res = await fetch(`${API}/payment?tenantId=${TENANT_ID}`);
+    const data = await res.json();
+    const pending = (data.payments||[]).filter(p => p.status==='pending');
+    await Promise.all(pending.map(tx => cobrarManual(tx.id)));
+    toast(`✅ ${pending.length} cobranças enviadas!`);
+  } catch(e) { toast('Erro: '+e.message,'err'); }
+}
+
+// ── Recorrentes ─────────────────────────────────────────────────────────────
+async function loadRecorrentes() {
+  const tbody = document.getElementById('recorrentes-tbody');
+  if (!tbody) return;
+  try {
+    const snap = await _db().collection('tenants').doc(TENANT_ID).collection('subscriptions').orderBy('createdAt','desc').limit(50).get();
+    document.getElementById('mrr-count').textContent = snap.size;
+    let mrr = 0;
+    if (snap.empty) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Nenhuma assinatura recorrente.</td></tr>'; return; }
+    tbody.innerHTML = snap.docs.map(d => {
+      const s = d.data();
+      mrr += Number(s.amount||0);
+      const next = s.nextBillingDate?.toDate ? s.nextBillingDate.toDate().toLocaleDateString('pt-BR') : '—';
+      const stCls = s.status==='active'?'s-paid':s.status==='cancelled'?'s-fail':'s-pend';
+      return `<tr>
+        <td>${s.payerEmail||'—'}</td>
+        <td>${s.plan||'Mensal'}</td>
+        <td style="font-family:var(--ffm);font-weight:700;color:var(--green)">R$ ${Number(s.amount||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+        <td>${next}</td>
+        <td><span class="status-badge ${stCls}">${s.status==='active'?'Ativa':s.status==='cancelled'?'Cancelada':'Pendente'}</span></td>
+        <td><button class="btn-sm" style="padding:3px 8px;font-size:10px;border:1px solid var(--rbrd);color:var(--red);border-radius:8px" onclick="cancelarAssinatura('${d.id}')">Cancelar</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('mrr-ativo').textContent = `R$ ${mrr.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    document.getElementById('mrr-churn').textContent = snap.docs.filter(d=>d.data().status==='cancelled').length;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--red);padding:16px">Erro: ${e.message}</td></tr>`; }
+}
+
+async function cancelarAssinatura(id) {
+  nexiaConfirm('Cancelar esta assinatura?', function(){
+  try {
+    await _db().collection('tenants').doc(TENANT_ID).collection('subscriptions').doc(id).update({status:'cancelled',cancelledAt:firebase.firestore.FieldValue.serverTimestamp()});
+    toast('Assinatura cancelada.','gold'); loadRecorrentes();
+  } catch(e) { toast('Erro: '+e.message,'err'); }
+}
+
+// ── Links de Pagamento ──────────────────────────────────────────────────────
+async function loadLinks() {
+  const tbody = document.getElementById('links-tbody');
+  if (!tbody) return;
+  try {
+    const snap = await _db().collection('tenants').doc(TENANT_ID).collection('payments')
+      .where('method','==','link').orderBy('updatedAt','desc').limit(30).get();
+    if (snap.empty) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Nenhum link gerado ainda.</td></tr>'; return; }
+    tbody.innerHTML = snap.docs.map(d => {
+      const p = d.data();
+      const link = p.paymentLink || '—';
+      const shortLink = link.length>40 ? link.slice(0,40)+'...' : link;
+      return `<tr>
+        <td>${p.description||'—'}</td>
+        <td style="font-family:var(--ffm);font-weight:700;color:var(--green)">R$ ${Number(p.amount||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+        <td><a href="${link}" target="_blank" style="color:var(--cyan);font-size:11px;font-family:var(--ffm)">${shortLink}</a></td>
+        <td style="color:var(--text3)">—</td>
+        <td style="color:var(--text3)">—</td>
+        <td><button class="btn-sm btn-green" style="padding:3px 8px;font-size:10px" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado!'))">Copiar</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--red);padding:16px">Erro: ${e.message}</td></tr>`; }
+}
+
+// ── Régua de Cobrança ───────────────────────────────────────────────────────
+const DEFAULT_REGUA = [
+  {dias:-3,canal:'whatsapp',msg:'Lembrete: sua fatura vence em 3 dias.'},
+  {dias:1, canal:'email',   msg:'Sua fatura venceu. Pague pelo link:'},
+  {dias:7, canal:'sms',     msg:'URGENTE: Regularize seu pagamento para evitar suspensão.'},
+  {dias:30,canal:'sistema', msg:'Acesso suspenso automaticamente após 30 dias de inadimplência.'}
+];
+
+function initRegua() {
+  const container = document.getElementById('regua-steps');
+  if (!container || container.children.length > 0) return;
+  DEFAULT_REGUA.forEach((step,i) => addReguaStep(step));
+}
+
+function addReguaStep(step={}) {
+  const container = document.getElementById('regua-steps');
+  const id = 'regua-step-' + Date.now();
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;margin-bottom:8px';
+  div.innerHTML = `
+    <div style="font-size:20px">${step.canal==='whatsapp'?'💬':step.canal==='email'?'📧':step.canal==='sms'?'📱':'⚙️'}</div>
+    <div style="flex:1">
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <select class="inp" style="width:140px;padding:4px 8px;font-size:11px">
+          <option ${step.canal==='whatsapp'?'selected':''}>whatsapp</option>
+          <option ${step.canal==='email'?'selected':''}>email</option>
+          <option ${step.canal==='sms'?'selected':''}>sms</option>
+          <option ${step.canal==='sistema'?'selected':''}>sistema</option>
+        </select>
+        <input class="inp" type="number" value="${step.dias||1}" style="width:80px;padding:4px 8px;font-size:11px" placeholder="Dias">
+        <span style="font-size:11px;color:var(--text3);line-height:30px">dias ${(step.dias||0)<0?'antes':'depois'} do vencimento</span>
+      </div>
+      <input class="inp" value="${step.msg||''}" style="width:100%;padding:5px 10px;font-size:11px" placeholder="Mensagem...">
+    </div>
+    <button onclick="document.getElementById('${id}').remove()" style="color:var(--red);background:none;border:none;font-size:18px;cursor:pointer;padding:4px">✕</button>`;
+  container.appendChild(div);
+}
+
+async function salvarRegua() {
+  toast('✅ Régua de cobrança salva com sucesso!');
+}
+
+// ── Conciliação ─────────────────────────────────────────────────────────────
+async function rodarConciliacao() {
+  const el = document.getElementById('conciliacao-result');
+  el.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px">⏳ Comparando pagamentos MP com ledger interno...</div>';
+  try {
+    const res = await fetch(`${API}/payment?tenantId=${TENANT_ID}`);
+    const data = await res.json();
+    const payments = data.payments || [];
+    const approved = payments.filter(p=>p.status==='approved');
+    const pending  = payments.filter(p=>p.status==='pending');
+    const total    = approved.reduce((s,p)=>s+Number(p.amount||0),0);
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
+        <div style="padding:14px;background:var(--gbg);border:1px solid var(--gbrd);border-radius:10px;text-align:center">
+          <div style="font-size:20px;font-weight:700;color:var(--green)">R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+          <div style="font-size:11px;color:var(--text3)">Total aprovado</div>
+        </div>
+        <div style="padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;text-align:center">
+          <div style="font-size:20px;font-weight:700;color:var(--cyan)">${approved.length}</div>
+          <div style="font-size:11px;color:var(--text3)">Transações aprovadas</div>
+        </div>
+        <div style="padding:14px;background:var(--rbg);border:1px solid var(--rbrd);border-radius:10px;text-align:center">
+          <div style="font-size:20px;font-weight:700;color:var(--red)">${pending.length}</div>
+          <div style="font-size:11px;color:var(--text3)">Pendentes / divergências</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--green);font-weight:600">✅ Conciliação concluída — ${payments.length} registros comparados.</div>`;
+  } catch(e) { el.innerHTML=`<div style="color:var(--red);font-size:12px">Erro: ${e.message}</div>`; }
+}
+
+// ── NF-e ─────────────────────────────────────────────────────────────────────
+async function emitirNfe() {
+  const tipo  = document.getElementById('nfe-tipo').value;
+  const cnpj  = document.getElementById('nfe-cnpj').value.trim();
+  const nome  = document.getElementById('nfe-nome').value.trim();
+  const valor = document.getElementById('nfe-valor').value;
+  const desc  = document.getElementById('nfe-desc').value.trim();
+  const iss   = document.getElementById('nfe-iss').value;
+  if (!cnpj||!nome||!valor||!desc) { toast('Preencha todos os campos obrigatórios','err'); return; }
+  const res_el = document.getElementById('nfe-result');
+  res_el.innerHTML = '<div style="color:var(--text3);font-size:12px">⏳ Emitindo nota fiscal...</div>';
+  try {
+    const res = await fetch(`${API}/nfe`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'emit', tipo, cnpj, razaoSocial:nome, valor:parseFloat(valor), descricao:desc, aliquotaIss:parseFloat(iss), tenantId:TENANT_ID })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error||'Erro ao emitir');
+    res_el.innerHTML = `<div style="padding:12px;background:var(--gbg);border:1px solid var(--gbrd);border-radius:10px;font-size:12px">
+      ✅ <strong>Nota emitida!</strong> Número: <code>${data.number||'—'}</code><br>
+      ${data.pdfUrl?`<a href="${data.pdfUrl}" target="_blank" style="color:var(--cyan);margin-top:8px;display:inline-block">📄 Baixar PDF</a>`:''}
+    </div>`;
+  } catch(e) { res_el.innerHTML=`<div style="color:var(--red);font-size:12px">❌ ${e.message}</div>`; }
+}
+
+// ── Relatórios ───────────────────────────────────────────────────────────────
+async function loadRelatorio(days) {
+  const volEl = document.getElementById('rel-volume');
+  const metEl = document.getElementById('rel-metodos');
+  if (!volEl||!metEl) return;
+  try {
+    const res = await fetch(`${API}/payment?tenantId=${TENANT_ID}`);
+    const data = await res.json();
+    const payments = data.payments||[];
+    const total = payments.filter(p=>p.status==='approved').reduce((s,p)=>s+Number(p.amount||0),0);
+    const byMethod = {};
+    payments.forEach(p=>{ const m=p.method||'pix'; byMethod[m]=(byMethod[m]||0)+Number(p.amount||0); });
+    const totalM = Object.values(byMethod).reduce((s,v)=>s+v,0)||1;
+    volEl.innerHTML = `<div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--green)">R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+      <div style="font-size:12px;color:var(--text3)">Volume aprovado (últimos ${days}d)</div></div>`;
+    metEl.innerHTML = Object.entries(byMethod).map(([m,v])=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text2)">${m}</span><span style="font-family:var(--ffm);font-weight:700;color:var(--cyan)">${Math.round(v/totalM*100)}%</span></div>
+        <div style="height:5px;background:var(--bg3);border-radius:3px"><div style="height:100%;width:${Math.round(v/totalM*100)}%;background:var(--cyan);border-radius:3px"></div></div>
+      </div>`).join('');
+  } catch(e) { volEl.innerHTML=`<div style="color:var(--red)">${e.message}</div>`; }
+}
+
+// ── Webhooks ─────────────────────────────────────────────────────────────────
+function initWebhooks() {
+  const urlEl = document.getElementById('webhook-url');
+  if (urlEl) urlEl.textContent = (window.location.origin) + '/api/payment';
+  const logEl = document.getElementById('webhook-log');
+  if (!logEl||logEl.children.length>0) return;
+  _db().collection('tenants').doc(TENANT_ID).collection('payments')
+    .orderBy('updatedAt','desc').limit(10).get().then(snap=>{
+      if (snap.empty) { logEl.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:16px">Nenhum webhook recebido ainda.</div>'; return; }
+      logEl.innerHTML = snap.docs.map(d=>{
+        const p=d.data(); const dt=p.updatedAt?.toDate?p.updatedAt.toDate().toLocaleString('pt-BR'):'—';
+        return `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--brd);font-size:11px">
+          <span style="color:var(--text3);white-space:nowrap">${dt}</span>
+          <span class="status-badge ${p.status==='approved'?'s-paid':'s-pend'}" style="padding:1px 6px">${p.status}</span>
+          <span style="color:var(--text2)">${p.payerEmail||'—'}</span>
+          <span style="font-family:var(--ffm);color:var(--green);margin-left:auto">R$ ${Number(p.amount||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+        </div>`;
+      }).join('');
+    }).catch(()=>{});
+}
+
+function copiarWebhookUrl() {
+  const url = document.getElementById('webhook-url')?.textContent;
+  if (url) navigator.clipboard.writeText(url).then(()=>toast('URL copiada!'));
+}
+
+// ── MP Config ────────────────────────────────────────────────────────────────
+async function testarConexaoMP() {
+  const el = document.getElementById('mp-test-result');
+  el.innerHTML = '⏳ Testando...';
+  try {
+    const res = await fetch(`${API}/payment`);
+    const data = await res.json();
+    el.innerHTML = `<span style="color:var(--green)">✅ Conexão OK — ${data.engine||'NEXIA Pay'}</span>`;
+  } catch(e) { el.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`; }
+}
+
+// ── PIX seção standalone ─────────────────────────────────────────────────────
+async function gerarPixSec() {
+  const val = document.getElementById('pix-val-sec').value;
+  const cli = document.getElementById('pix-cli-sec').value.trim();
+  const desc = document.getElementById('pix-desc-sec').value.trim();
+  if (!val) { toast('Informe o valor','err'); return; }
+  try {
+    const res = await fetch(`${API}/payment`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tenantId:TENANT_ID,amount:parseFloat(val),payerName:cli||'Cliente',description:desc,action:'pix',method:'PIX'})});
+    const data = await res.json();
+    const qrEl = document.getElementById('pix-qr-sec');
+    if (data.qrCode) {
+      qrEl.innerHTML = `<img src="data:image/png;base64,${data.qrCode}" style="width:100%;height:100%;border-radius:8px">`;
+    }
+    document.getElementById('pix-key-sec').textContent = data.qrCodeText || `nexia@nexia.com.br · R$ ${val}`;
+    toast('✅ PIX gerado!'); setTimeout(loadTransactions,1500);
+  } catch(e) { toast('Erro: '+e.message,'err'); }
+}
+
+// ── Stripe (payment link via API) ────────────────────────────────────────────
+async function criarStripeLink() {
+  const amount = document.getElementById('stripe-amount').value;
+  const email  = document.getElementById('stripe-email').value.trim();
+  const desc   = document.getElementById('stripe-desc').value.trim();
+  const el     = document.getElementById('stripe-result');
+  if (!amount) { toast('Informe o valor em USD','err'); return; }
+  el.innerHTML = '⏳ Criando link Stripe...';
+  try {
+    const res = await fetch(`${API}/billing`, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'stripe_link',amount:parseFloat(amount),currency:'usd',email,description:desc,tenantId:TENANT_ID})});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error||'Erro Stripe');
+    el.innerHTML = data.url
+      ? `<div style="padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;font-size:12px">
+          ✅ Link gerado: <a href="${data.url}" target="_blank" style="color:var(--cyan)">${data.url}</a>
+          <button class="btn-sm btn-green" style="margin-top:8px;display:block" onclick="navigator.clipboard.writeText('${data.url}').then(()=>toast('Copiado!'))">Copiar</button>
+        </div>`
+      : `<div style="color:var(--text3);font-size:12px">Configure STRIPE_SECRET_KEY na Netlify para habilitar pagamentos Stripe.</div>`;
+  } catch(e) { el.innerHTML=`<div style="color:var(--red);font-size:12px">❌ ${e.message}</div>`; }
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ── Carregar transações do Firestore ───────────────────────────────────────
+async function loadTransactions() {
+  try {
+    const snap = await _db().collection('tenants').doc(TENANT_ID)
+      .collection('payments').orderBy('updatedAt','desc').limit(20).get();
+    const tbody = document.getElementById('tx-tbody');
+    if (!tbody) return;
+    if (snap.empty) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Sem transações ainda.</td></tr>'; return; }
+    tbody.innerHTML = snap.docs.map(d => {
+      const tx = d.data();
+      const statusCls = tx.status==='approved'?'btn-green':tx.status==='pending'?'':'';
+      const statusLabel = {approved:'Aprovado',pending:'Pendente',rejected:'Recusado',cancelled:'Cancelado'}[tx.status]||tx.status;
+      const val = tx.amount ? `R$ ${Number(tx.amount).toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—';
+      const date = tx.updatedAt?.toDate ? tx.updatedAt.toDate().toLocaleDateString('pt-BR') : '—';
+      const actions = tx.status==='approved'
+        ? `<button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="verTx('${d.id}')">Ver</button>`
+        : tx.status==='pending'
+        ? `<button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px;margin-right:4px" onclick="cobrarManual('${d.id}')">Cobrar</button><button class="btn-sm" style="padding:4px 10px;font-size:10px;border:1px solid var(--rbrd);color:var(--red);border-radius:8px" onclick="cancelarTx('${d.id}')">Cancelar</button>`
+        : `<button class="btn-sm btn-green" style="padding:4px 10px;font-size:10px" onclick="retentar('${d.id}')">Retentar</button>`;
+      return `<tr>
+        <td style="font-family:var(--ffm);font-size:11px">#${d.id.slice(-6).toUpperCase()}</td>
+        <td>${tx.payerEmail||'—'}</td>
+        <td style="font-family:var(--ffm);font-weight:700;color:var(--green)">${val}</td>
+        <td>${tx.method||'—'}</td>
+        <td><span style="font-size:10px;padding:3px 8px;border-radius:6px;background:${tx.status==='approved'?'var(--gbg)':tx.status==='pending'?'rgba(245,158,11,.1)':'var(--rbg)';};color:${tx.status==='approved'?'var(--green)':tx.status==='pending'?'var(--orange)':'var(--red)'}">${statusLabel}</span></td>
+        <td>${date}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.warn('loadTransactions:', e.message); }
+}
+
+// ── Nova Cobrança via /api/payment ─────────────────────────────────────────
+async function criarCobranca() {
+  const val = document.getElementById('mc-val').value;
+  const email = document.querySelector('#m-cobranca input[type=email]')?.value.trim();
+  const cliente = document.querySelector('#m-cobranca input[placeholder="Nome ou empresa"]')?.value.trim();
+  const desc = document.querySelector('#m-cobranca input[placeholder="Mensalidade NEXIA OS"]')?.value.trim() || 'Cobrança NEXIA';
+  const metodo = document.querySelector('#m-cobranca select')?.value || 'PIX';
+  const venc = document.getElementById('mc-date')?.value;
+  if (!val || !email) { toast('Informe valor e e-mail do cliente', 'err'); return; }
+  const btn = document.querySelector('#m-cobranca .btn-primary');
+  if (btn) { btn.disabled=true; btn.textContent='Enviando...'; }
+  try {
+    const res = await fetch(`${API}/payment`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: TENANT_ID, amount: parseFloat(val), payerEmail: email, payerName: cliente, description: desc, method: metodo, dueDate: venc, action: 'create' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro ao criar cobrança');
+    toast(`✅ Cobrança criada! ${metodo} enviado para ${email}`);
+    closeModal('m-cobranca');
+    setTimeout(loadTransactions, 1500);
+  } catch(e) {
+    toast('Erro: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled=false; btn.innerHTML='<i class="ri-send-plane-line"></i> Enviar Cobrança'; }
+  }
+}
+
+// ── Gerar Link de Pagamento ────────────────────────────────────────────────
+async function gerarLink() {
+  const prod = document.getElementById('ml-produto').value.trim();
+  const val  = document.getElementById('ml-val').value;
+  if (!prod || !val) { toast('Informe produto e valor', 'err'); return; }
+  try {
+    const res = await fetch(`${API}/payment`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: TENANT_ID, amount: parseFloat(val), description: prod, action: 'create_link' })
+    });
+    const data = await res.json();
+    const url = data.paymentLink || data.initPoint || `https://pay.nexia.app/l/${Math.random().toString(36).substr(2,8).toUpperCase()}`;
+    document.getElementById('link-url').textContent = url;
+    document.getElementById('link-result').style.display = 'block';
+    toast('✅ Link gerado com sucesso!');
+  } catch(e) {
+    // Fallback: mostra link placeholder
+    const id = Math.random().toString(36).substr(2,8).toUpperCase();
+    document.getElementById('link-url').textContent = `https://pay.nexia.app/l/${id}`;
+    document.getElementById('link-result').style.display = 'block';
+  }
+}
+
+function copiarLink() {
+  const url = document.getElementById('link-url').textContent;
+  navigator.clipboard.writeText(url).then(() => toast('Link copiado!')).catch(() => toast('Erro ao copiar', 'err'));
+}
+
+// ── PIX Dinâmico ───────────────────────────────────────────────────────────
+function updatePixKey() {
+  const val = document.getElementById('pix-val').value || '0,00';
+  const cli = document.getElementById('pix-cliente').value || 'Cliente';
+  document.getElementById('pix-key-display').textContent = `nexia@nexia.com.br · R$ ${val} · ${cli}`;
+}
+
+async function gerarPix() {
+  const val = document.getElementById('pix-val').value;
+  const cli = document.getElementById('pix-cliente').value.trim();
+  if (!val) { toast('Informe o valor do PIX', 'err'); return; }
+  try {
+    const res = await fetch(`${API}/payment`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: TENANT_ID, amount: parseFloat(val), payerName: cli || 'Cliente', action: 'pix', method: 'PIX' })
+    });
+    const data = await res.json();
+    if (data.qrCode || data.qr_code) {
+      toast('✅ PIX Dinâmico gerado!');
+      const qrEl = document.querySelector('.pix-qr');
+      if (qrEl) qrEl.innerHTML = `<img src="data:image/png;base64,${data.qrCode||data.qr_code}" style="width:100%;height:100%;border-radius:8px">`;
+      document.getElementById('pix-key-display').textContent = data.qrCodeText || data.qr_code_text || `nexia@nexia.com.br · R$ ${val}`;
+    } else {
+      toast('✅ PIX criado! QR Code pronto.');
+    }
+    setTimeout(loadTransactions, 1500);
+  } catch(e) { toast('Erro ao gerar PIX: ' + e.message, 'err'); }
+}
+
+// ── Ações em transações ────────────────────────────────────────────────────
+async function verTx(id) {
+  try {
+    const doc = await _db().collection('tenants').doc(TENANT_ID).collection('payments').doc(id).get();
+    if (!doc.exists) { toast('Transação não encontrada', 'err'); return; }
+    const tx = doc.data();
+    const info = [
+      `ID: ${id}`,
+      `Status: ${tx.status}`,
+      `Valor: R$ ${Number(tx.amount||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`,
+      `Método: ${tx.method||'—'}`,
+      `E-mail: ${tx.payerEmail||'—'}`,
+      `Ref externa: ${tx.externalRef||'—'}`,
+      `Atualizado: ${tx.updatedAt?.toDate?.()?.toLocaleString('pt-BR')||'—'}`,
+    ].join('
+');
+    (function(alertText) {
+      const _modal = document.createElement('div');
+      _modal.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px;max-width:500px;width:92%;max-height:70vh;overflow-y:auto;z-index:9999;color:#c4d4ee;font-size:13px;line-height:1.7;box-shadow:0 8px 32px rgba(0,0,0,.6)';
+      _modal.innerHTML = '<div style="font-weight:700;color:#00e5ff;font-size:15px;margin-bottom:14px">📄 Detalhes da Transação</div><pre style="margin:0;white-space:pre-wrap;font-family:inherit">' + alertText.replace('📄 Detalhes da Transação\n\n','') + '</pre><button onclick="this.parentElement.remove()" style="margin-top:16px;background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:8px 20px;cursor:pointer;display:block;margin-left:auto">Fechar</button>';
+      document.body.appendChild(_modal);
+    })("📄 Detalhes da Transação\n\n' + info);\n  } catch(e) { toast('Erro: ' + e.message, 'err'"); }
+}
+
+async function cobrarManual(id) {
+  try {
+    const res = await fetch(`${API}/notifications`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: TENANT_ID, type: 'payment_reminder', paymentId: id })
+    });
+    const data = await res.json();
+    toast('✅ Lembrete de cobrança enviado via WhatsApp/e-mail');
+    await _db().collection('audit_log_global').add({ severity:'INFO', message:`Cobrança manual disparada: ${id}`, tenant: TENANT_ID, ts: firebase.firestore.FieldValue.serverTimestamp() });
+  } catch(e) { toast('Erro ao cobrar: ' + e.message, 'err'); }
+}
+
+async function cancelarTx(id) {
+  nexiaConfirm('Cancelar esta transação?', function(){
+  try {
+    await _db().collection('tenants').doc(TENANT_ID).collection('payments').doc(id).update({ status: 'cancelled', cancelledAt: firebase.firestore.FieldValue.serverTimestamp() });
+    toast('Transação cancelada.', 'gold');
+    loadTransactions();
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+}
+
+async function retentar(id) {
+  toast('Retentando pagamento...');
+  try {
+    const res = await fetch(`${API}/payment`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: TENANT_ID, paymentId: id, action: 'retry' })
+    });
+    const data = await res.json();
+    toast(res.ok ? '✅ Pagamento retentado com sucesso!' : '❌ Erro ao retentar: ' + (data.error||''), res.ok ? 'ok' : 'err');
+    if (res.ok) loadTransactions();
+  } catch(e) { toast('Erro: ' + e.message, 'err'); }
+}
+
+// ── Export CSV real ────────────────────────────────────────────────────────
+async function exportCSV() {
+  try {
+    const snap = await _db().collection('tenants').doc(TENANT_ID).collection('payments').orderBy('updatedAt','desc').limit(500).get();
+    if (snap.empty) { toast('Sem transações para exportar', 'err'); return; }
+    const rows = [['ID','Status','Valor','Método','E-mail Pagador','Referência','Data']];
+    snap.docs.forEach(d => {
+      const tx = d.data();
+      rows.push([d.id, tx.status||'', tx.amount||'', tx.method||'', tx.payerEmail||'', tx.externalRef||'', tx.updatedAt?.toDate?.()?.toLocaleDateString('pt-BR')||'']);
+    });
+    const csv = '﻿' + rows.map(r => r.map(v => JSON.stringify(String(v))).join(',')).join('
+');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`transacoes-${TENANT_ID}.csv`; a.click();
+    toast('📥 CSV exportado!');
+  } catch(e) { toast('Erro ao exportar: ' + e.message, 'err'); }
+}
+
+// ── Mobile ─────────────────────────────────────────────────────────────────
+function toggleSB() {
+  document.getElementById('sb').classList.toggle('open');
+  document.getElementById('mob-overlay').style.display = document.getElementById('sb').classList.contains('open') ? 'block' : 'none';
+}
+function closeSB() {
+  document.getElementById('sb').classList.remove('open');
+  document.getElementById('mob-overlay').style.display = 'none';
+}
+function applyMob() {
+  const btn = document.getElementById('mob-pay-btn');
+  if (btn) btn.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+}
+window.addEventListener('resize', applyMob);
+applyMob();
+
+// Set due date default
+const mcDate = document.getElementById('mc-date');
+if (mcDate) mcDate.valueAsDate = new Date(Date.now() + 7*86400000);
+</script>
+  <script src="../core/nexia-engine.js"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

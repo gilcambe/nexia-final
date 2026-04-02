@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXIA — Meu Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;
+  --blue:#0057FF;--cyan:#00E5FF;--green:#00D68F;--red:#FF3D71;--purple:#9B5CF6;--gold:#DAA520;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace
+}
+body{background:var(--bg);color:var(--text);font-family:var(--ff);min-height:100vh}
+.topbar{height:58px;background:rgba(7,9,14,.95);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;display:flex;align-items:center;padding:0 1.5rem;gap:1rem}
+.topbar-logo{font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-sector{background:rgba(0,87,255,.12);border:1px solid rgba(0,87,255,.25);color:#7DB5FF;font-size:.72rem;font-weight:700;padding:.25rem .7rem;border-radius:12px;font-family:var(--ffm)}
+.topbar-right{display:flex;gap:.7rem;align-items:center;margin-left:auto}
+.topbar-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:.35rem .9rem;border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:600;transition:.2s;text-decoration:none}
+.topbar-btn:hover,.topbar-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+.main{padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.welcome{background:linear-gradient(135deg,rgba(0,87,255,.12),rgba(0,229,255,.06));border:1px solid rgba(0,87,255,.2);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.2rem}
+.welcome-icon{font-size:2.5rem}
+.welcome-text h2{font-size:1.2rem;font-weight:700;margin-bottom:.3rem}
+.welcome-text p{color:var(--text2);font-size:.85rem;line-height:1.5}
+.welcome-cta{margin-left:auto;flex-shrink:0}
+.cta-btn{background:var(--blue);color:#fff;border:none;padding:.6rem 1.3rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.85rem;white-space:nowrap;text-decoration:none;display:inline-block}
+
+/* Priority section */
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.section-title{font-size:.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--ffm)}
+.section-link{font-size:.78rem;color:var(--blue);text-decoration:none;font-weight:600}
+.section-link:hover{text-decoration:underline}
+
+/* Module grid */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem}
+.module-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem;cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));opacity:0;transition:.2s}
+.module-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.module-card:hover::before{opacity:1}
+.module-card.priority{border-color:rgba(0,214,143,.25);background:linear-gradient(135deg,rgba(0,214,143,.04),var(--bg2))}
+.module-card.priority::before{background:linear-gradient(90deg,var(--green),var(--cyan));opacity:1}
+.mod-top{display:flex;align-items:flex-start;gap:.8rem;margin-bottom:.7rem}
+.mod-icon{font-size:1.5rem;width:40px;height:40px;background:rgba(0,87,255,.1);border:1px solid rgba(0,87,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mod-icon.priority-icon{background:rgba(0,214,143,.1);border-color:rgba(0,214,143,.25)}
+.mod-title{font-weight:700;font-size:.9rem;margin-bottom:.2rem}
+.mod-cat{font-size:.68rem;color:var(--text3);font-family:var(--ffm);text-transform:uppercase;letter-spacing:1px}
+.mod-desc{color:var(--text2);font-size:.8rem;line-height:1.5;margin-bottom:.8rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mod-footer{display:flex;align-items:center;justify-content:space-between}
+.priority-badge{background:rgba(0,214,143,.12);color:var(--green);border:1px solid rgba(0,214,143,.3);font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;font-family:var(--ffm)}
+.open-btn{background:var(--blue);color:#fff;border:none;padding:.35rem .8rem;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:600;transition:.2s}
+.open-btn:hover{background:#0043cc}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.stat-num{font-size:1.6rem;font-weight:800;color:var(--blue)}
+.stat-label{font-size:.72rem;color:var(--text3);margin-top:.2rem}
+.stat-delta{font-size:.72rem;color:var(--green);margin-top:.1rem}
+
+/* AI explanation card */
+.ai-card{background:var(--bg2);border:1px solid rgba(155,92,246,.25);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;display:flex;gap:1rem}
+.ai-icon{font-size:1.5rem;flex-shrink:0}
+.ai-text{font-size:.85rem;color:var(--text2);line-height:1.6}
+.ai-text strong{color:var(--text)}
+
+/* Loading */
+.loading{text-align:center;padding:4rem;color:var(--text3)}
+.spinner{display:inline-block;width:24px;height:24px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-right:.5rem;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Onboarding prompt */
+.onboarding-prompt{background:var(--bg2);border:2px dashed rgba(0,87,255,.3);border-radius:14px;padding:3rem;text-align:center;margin-bottom:1.5rem}
+.onboarding-prompt h3{font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
+.onboarding-prompt p{color:var(--text2);font-size:.88rem;margin-bottom:1.5rem}
+
+@media(max-width:700px){.main{padding:1rem}.stats-row{grid-template-columns:repeat(2,1fr)}.welcome{flex-direction:column}.welcome-cta{margin-left:0}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">⚡ NEXIA OS</div>
+  <div class="topbar-sector" id="sector-badge" style="display:none"></div>
+  <div class="topbar-right">
+    <a class="topbar-btn" href="./nexia-store.html">🛍️ Store</a>
+    <a class="topbar-btn" href="./architect.html">🧠 Arquiteto</a>
+    <a class="topbar-btn" href="./cortex-app.html">💬 CORTEX</a>
+    <a class="topbar-btn primary" href="./nexia-master-admin.html">Admin →</a>
+  </div>
+</div>
+
+<main class="main" id="main-content">
+  <div class="loading"><div class="spinner"></div> Carregando seu painel...</div>
+</main>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: window.FIREBASE_API_KEY || '__FIREBASE_API_KEY__',
+  authDomain: window.FIREBASE_AUTH_DOMAIN || '__FIREBASE_AUTH_DOMAIN__',
+  projectId: window.FIREBASE_PROJECT_ID || '__FIREBASE_PROJECT_ID__'
+};
+
+// ── Module catalog (subset for dashboard links) ─────────────────
+const MODULE_CATALOG = {
+  'cortex-copilot':  { icon:'🧠', name:'CORTEX Co-Pilot', cat:'cortex', url:'./cortex-app.html', desc:'IA conversacional com contexto do tenant' },
+  'cortex-sdr':      { icon:'📞', name:'CORTEX SDR', cat:'cortex', url:'./cortex-app.html', desc:'Recuperação de carrinho abandonado com IA' },
+  'cortex-due':      { icon:'⚖️', name:'Due Diligence', cat:'cortex', url:'./cortex-app.html', desc:'Análise automática de contratos em PDF' },
+  'cortex-sniper':   { icon:'🎯', name:'CORTEX Sniper', cat:'cortex', url:'./cortex-app.html', desc:'Lance automático em leilões' },
+  'cortex-heatmap':  { icon:'🌡️', name:'Heatmap', cat:'cortex', url:'./cortex-app.html', desc:'Fluxo de pessoas por Wi-Fi' },
+  'cortex-analytics':{ icon:'📊', name:'Analytics', cat:'analytics', url:'./cortex-app.html', desc:'Dashboard em tempo real' },
+  'cortex-vision':   { icon:'👁️', name:'CORTEX Vision', cat:'cortex', url:'./cortex-app.html', desc:'OCR e análise de documentos' },
+  'nexia-flow':      { icon:'⚡', name:'NEXIA Flow', cat:'automacao', url:'./flow.html', desc:'Automações low-code com gatilhos e ações' },
+  'nexia-broadcast': { icon:'📢', name:'Broadcast', cat:'automacao', url:'./cortex-app.html', desc:'Disparos em massa multi-canal' },
+  'checkin-qr':      { icon:'📲', name:'Check-in QR', cat:'automacao', url:'./cortex-app.html', desc:'Scanner QR offline-first para eventos' },
+  'mini-site':       { icon:'🌐', name:'Mini-Site', cat:'automacao', url:'./cortex-app.html', desc:'Gera mini-site por evento automaticamente' },
+  'catraca-iot':     { icon:'🔐', name:'Sentinel IoT', cat:'automacao', url:'./cortex-app.html', desc:'Fechaduras e catracas inteligentes' },
+  'nexia-forms':     { icon:'📝', name:'NEXIA Forms', cat:'automacao', url:'./flow.html', desc:'Formulários inteligentes com CRM' },
+  'nexia-contracts': { icon:'📃', name:'Contratos', cat:'automacao', url:'./cortex-app.html', desc:'Contratos PDF com assinatura digital' },
+  'nexia-scheduler': { icon:'📅', name:'Scheduler', cat:'automacao', url:'./cortex-app.html', desc:'Agendamento online anti-colisão' },
+  'nexia-loyalty':   { icon:'⭐', name:'Fidelidade', cat:'automacao', url:'./cortex-app.html', desc:'Pontos e cashback para clientes' },
+  'nexia-inbox':     { icon:'📬', name:'Inbox Unificada', cat:'comunicacao', url:'./cortex-app.html', desc:'WhatsApp, Email, Instagram em um painel' },
+  'whatsapp-api':    { icon:'💬', name:'WhatsApp API', cat:'comunicacao', url:'./cortex-app.html', desc:'Integração oficial Meta Business API' },
+  'pabx-cloud':      { icon:'☎️', name:'PABX Cloud', cat:'comunicacao', url:'./pabx-softphone.html', desc:'Softphone WebRTC no browser' },
+  'nexia-shield':    { icon:'🛡️', name:'NEXIA Shield', cat:'seguranca', url:'./cortex-app.html', desc:'Segurança com detecção de anomalias' },
+  'lgpd-compliance': { icon:'📋', name:'LGPD', cat:'seguranca', url:'./cortex-app.html', desc:'Conformidade LGPD com audit trail' },
+  '2fa-module':      { icon:'🔑', name:'2FA Avançado', cat:'seguranca', url:'./cortex-app.html', desc:'TOTP, WebAuthn e SMS/Email' },
+  'nexia-pay-split': { icon:'💸', name:'Pay Split', cat:'financeiro', url:'./nexia-pay.html', desc:'Divisão automática de comissões' },
+  'precificacao-dinamica':{ icon:'📈', name:'Precificação Dinâmica', cat:'financeiro', url:'./nexia-pay.html', desc:'Yield management automático' },
+  'nfe-modulo':      { icon:'🧾', name:'NF-e & NFS-e', cat:'financeiro', url:'./nexia-pay.html', desc:'Emissão automática via SEFAZ' },
+  'nexia-cobranca':  { icon:'🔔', name:'Cobrança', cat:'financeiro', url:'./nexia-pay.html', desc:'Régua automatizada multi-canal' },
+  'mrr-dashboard':   { icon:'💰', name:'MRR Dashboard', cat:'financeiro', url:'./nexia-pay.html', desc:'Receita recorrente e LTV' },
+  'multi-model':     { icon:'🤖', name:'Multi-Model', cat:'infra', url:'./cortex-app.html', desc:'Claude, GPT-4, Groq — roteamento automático' },
+  'rag-engine':      { icon:'📚', name:'RAG Engine', cat:'infra', url:'./studio.html', desc:'Base de conhecimento com embeddings' },
+  'swarm-control':   { icon:'🐝', name:'Swarm Control', cat:'infra', url:'./swarm-control.html', desc:'Agentes autônomos em paralelo' },
+  'ces-matchmaking': { icon:'🤝', name:'CES Matchmaking', cat:'ces', url:'./cortex-app.html', desc:'IA conecta executivos no evento' },
+  'vp-sos':          { icon:'🆘', name:'SOS Offline', cat:'viajante', url:'./cortex-app.html', desc:'Botão SOS funciona sem internet' },
+  'vp-rooming':      { icon:'🏨', name:'Rooming List', cat:'viajante', url:'./cortex-app.html', desc:'Distribuição visual de quartos' },
+  'bez-scraper':     { icon:'🕷️', name:'Leilão Scraper', cat:'bezsan', url:'./cortex-app.html', desc:'Monitor de leilões em 12 portais' },
+  'spl-overbooking': { icon:'🔒', name:'Anti-Overbooking', cat:'splash', url:'./cortex-app.html', desc:'Trava instantânea de datas' },
+  'spl-dynamic-price':{ icon:'💹', name:'Yield Management', cat:'splash', url:'./cortex-app.html', desc:'Preço automático por demanda' }
+};
+
+const TENANT_ID = new URLSearchParams(window.location.search).get('tenant') || 'demo-tenant';
+
+// ── Firebase init ───────────────────────────────────────────────
+let db = null;
+try {
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+} catch(e) { console.warn('Firebase init failed, using API fallback'); }
+
+// ── Load panel ──────────────────────────────────────────────────
+async function loadPanel() {
+  try {
+    let onboardingData = null;
+    let tenantData = null;
+
+    // Try Firestore first
+    if (db) {
+      try {
+        const [onboardingDoc, tenantDoc] = await Promise.all([
+          db.collection('tenants').doc(TENANT_ID).collection('onboarding').doc('architect').get(),
+          db.collection('tenants').doc(TENANT_ID).get()
+        ]);
+        onboardingData = onboardingDoc.exists ? onboardingDoc.data() : null;
+        tenantData = tenantDoc.exists ? tenantDoc.data() : null;
+      } catch(e) {}
+    }
+
+    // Try API fallback
+    if (!onboardingData) {
+      try {
+        const res = await fetch('/api/architect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId: TENANT_ID, action: 'status' })
+        });
+        const data = await res.json();
+        if (data.complete) onboardingData = data;
+      } catch(e) {}
+    }
+
+    renderPanel(onboardingData, tenantData);
+  } catch(err) {
+    console.error('Load panel error:', err);
+    renderPanel(null, null);
+  }
+}
+
+// ── Render ──────────────────────────────────────────────────────
+function renderPanel(onboarding, tenant) {
+  const main = document.getElementById('main-content');
+
+  if (!onboarding?.recommendedModules?.length) {
+    // No onboarding done yet
+    main.innerHTML = `
+      <div class="onboarding-prompt">
+        <div style="font-size:3rem;margin-bottom:1rem">🧠</div>
+        <h3>Configure seu painel com o Arquiteto IA</h3>
+        <p>Responda 3 perguntas rápidas e a IA monta o painel ideal para o seu negócio — em menos de 30 segundos.</p>
+        <a href="./architect.html?tenant=${TENANT_ID}" class="cta-btn">Iniciar Configuração →</a>
+      </div>
+      <div class="section-header"><div class="section-title">Todos os Módulos</div><a href="./nexia-store.html" class="section-link">Ver Store completa →</a></div>
+      ${renderModuleGrid(Object.keys(MODULE_CATALOG), [], false)}`;
+    return;
+  }
+
+  // Show sector badge
+  const sectorBadge = document.getElementById('sector-badge');
+  if (onboarding.sectorLabel) {
+    sectorBadge.textContent = onboarding.sectorLabel;
+    sectorBadge.style.display = 'inline-flex';
+  }
+
+  const priority = onboarding.priorityModules || [];
+  const recommended = onboarding.recommendedModules || [];
+  const all = [...new Set([...priority, ...recommended])];
+
+  main.innerHTML = `
+    <!-- Welcome -->
+    <div class="welcome">
+      <div class="welcome-icon">⚡</div>
+      <div class="welcome-text">
+        <h2>Painel configurado para ${onboarding.sectorLabel || 'Seu Negócio'}</h2>
+        <p>${onboarding.explanation || 'Módulos selecionados com base no seu perfil e desafios operacionais.'}</p>
+      </div>
+      <div class="welcome-cta">
+        <a href="./architect.html?tenant=${TENANT_ID}" class="cta-btn" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2)">Reconfigurar</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">${recommended.length}</div><div class="stat-label">Módulos ativos</div><div class="stat-delta">↑ Configurados hoje</div></div>
+      <div class="stat-card"><div class="stat-num">${priority.length}</div><div class="stat-label">Prioridade alta</div><div class="stat-delta">Ativar primeiro</div></div>
+      <div class="stat-card"><div class="stat-num">${Object.keys(MODULE_CATALOG).length}</div><div class="stat-label">Disponíveis</div><div class="stat-delta">Na Store</div></div>
+      <div class="stat-card"><div class="stat-num">24/7</div><div class="stat-label">Agentes ativos</div><div class="stat-delta">CORTEX rodando</div></div>
+    </div>
+
+    <!-- Priority modules -->
+    <div class="section-header">
+      <div class="section-title">⚡ Ativar Primeiro — Prioridade</div>
+      <a href="./nexia-store.html" class="section-link">Ver todos →</a>
+    </div>
+    ${renderModuleGrid(priority, priority, true)}
+
+    <!-- All recommended -->
+    <div class="section-header">
+      <div class="section-title">📦 Todos os Recomendados</div>
+      <a href="./nexia-store.html" class="section-link">Store completa →</a>
+    </div>
+    ${renderModuleGrid(recommended.filter(m => !priority.includes(m)), priority, false)}
+  `;
+}
+
+function renderModuleGrid(moduleIds, priorityIds, isPrioritySection) {
+  const cards = moduleIds
+    .filter(id => MODULE_CATALOG[id])
+    .map(id => {
+      const m = MODULE_CATALOG[id];
+      const isPriority = priorityIds.includes(id);
+      return `
+        <div class="module-card ${isPriority ? 'priority' : ''}" onclick="window.location.href='${m.url}?tenant=${TENANT_ID}'">
+          <div class="mod-top">
+            <div class="mod-icon ${isPriority ? 'priority-icon' : ''}">${m.icon}</div>
+            <div>
+              <div class="mod-title">${m.name}</div>
+              <div class="mod-cat">${m.cat}</div>
+            </div>
+          </div>
+          <div class="mod-desc">${m.desc}</div>
+          <div class="mod-footer">
+            ${isPriority ? '<span class="priority-badge">⚡ PRIORIDADE</span>' : '<span></span>'}
+            <button class="open-btn" onclick="event.stopPropagation();window.open('${m.url}?tenant=${TENANT_ID}','_blank')">Abrir →</button>
+          </div>
+        </div>`;
+    }).join('');
+
+  if (!cards) return '<p style="color:var(--text3);font-size:.85rem;padding:.5rem 0">Nenhum módulo nesta seção.</p>';
+  return `<div class="modules-grid">${cards}</div>`;
+}
+
+// ── Init ────────────────────────────────────────────────────────
+loadPanel();
+</script>
+  <script src="../core/nexia-engine.js"></script>
+</body>
+</html>

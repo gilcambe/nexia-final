@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ NEXIA Flow — Motor de Automação</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#131829;
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.10);
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35);
+  --blue:#0057FF;--bbg:rgba(0,87,255,.08);--bbrd:rgba(0,87,255,.25);
+  --green:#00D68F;--gnbg:rgba(0,214,143,.07);
+  --red:#FF3D71;--rbg:rgba(255,61,113,.08);--rbrd:rgba(255,61,113,.22);
+  --purple:#9B5CF6;--pbg:rgba(155,92,246,.08);--pbrd:rgba(155,92,246,.25);
+  --orange:#F59E0B;--obg:rgba(245,158,11,.08);--obrd:rgba(245,158,11,.25);
+  --cyan:#00E5FF;--cbg:rgba(0,229,255,.07);--cbrd:rgba(0,229,255,.2);
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+  --r:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);overflow:hidden}
+button{font-family:var(--ff);cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:var(--ff);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,87,255,.25);border-radius:2px}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-rows:48px 1fr;height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:0;z-index:100}
+.tb-logo{display:flex;align-items:center;gap:9px;padding:0 16px;border-right:1px solid var(--brd);height:100%}
+.gem{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#0d1117,#1a1a2e,var(--purple));border:1px solid var(--pbrd);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(155,92,246,.2)}
+.gem i{font-size:13px;color:var(--purple)}
+.tb-brand{font-size:13px;font-weight:800}.tb-brand span{color:var(--purple)}
+.tb-center{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+.flow-name{font-size:13px;font-weight:700;color:var(--text);padding:5px 12px;border-radius:7px;border:1px solid var(--brd);background:var(--bg3);cursor:pointer}
+.flow-name:hover{border-color:var(--brd2)}
+.flow-status{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--ffm)}
+.flow-status.active{background:var(--gnbg);color:var(--green);border:1px solid rgba(0,214,143,.2)}
+.flow-status.draft{background:var(--bg3);color:var(--text3);border:1px solid var(--brd)}
+.flow-status .sd{width:5px;height:5px;border-radius:50%;background:currentColor}
+.tb-right{display:flex;align-items:center;gap:8px;padding:0 16px;border-left:1px solid var(--brd);height:100%}
+.btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;border:1px solid transparent}
+.btn-purple{background:var(--pbg);color:var(--purple);border-color:var(--pbrd)}.btn-purple:hover{background:rgba(155,92,246,.14)}
+.btn-green{background:var(--gnbg);color:var(--green);border-color:rgba(0,214,143,.25)}.btn-green:hover{background:rgba(0,214,143,.14)}
+.btn-ghost{background:var(--bg3);color:var(--text2);border-color:var(--brd)}.btn-ghost:hover{border-color:var(--brd2);color:var(--text)}
+.btn-red{background:var(--rbg);color:var(--red);border-color:var(--rbrd)}.btn-red:hover{background:rgba(255,61,113,.14)}
+.btn-primary{background:var(--purple);color:#fff}.btn-primary:hover{box-shadow:0 0 14px rgba(155,92,246,.35)}
+
+/* MAIN LAYOUT */
+.main{display:grid;grid-template-columns:220px 1fr 280px;height:100%;overflow:hidden}
+
+/* LEFT PANEL */
+.panel-left{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.panel-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);font-weight:700;padding:12px 14px 8px;display:flex;align-items:center;gap:6px}
+.panel-label i{font-size:12px;color:var(--purple)}
+.node-list{padding:8px 10px;flex:1;overflow-y:auto}
+.node-group{margin-bottom:14px}
+.node-group-title{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);font-weight:700;margin-bottom:6px;padding-left:2px}
+.node-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--brd);margin-bottom:5px;cursor:grab;transition:all .2s;user-select:none}
+.node-item:hover{border-color:var(--pbrd);background:var(--pbg)}
+.node-item:active{cursor:grabbing}
+.ni-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ni-text{flex:1;min-width:0}
+.ni-name{font-size:11px;font-weight:700;color:var(--text2)}
+.ni-desc{font-size:9px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Trigger colors */
+.ni-trigger .ni-icon{background:rgba(0,87,255,.12);color:var(--blue)}
+.ni-action .ni-icon{background:rgba(155,92,246,.12);color:var(--purple)}
+.ni-condition .ni-icon{background:rgba(245,158,11,.12);color:var(--orange)}
+.ni-delay .ni-icon{background:rgba(0,229,255,.12);color:var(--cyan)}
+
+/* CANVAS */
+.canvas-area{position:relative;overflow:hidden;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.02) 39px,rgba(255,255,255,.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.02) 39px,rgba(255,255,255,.02) 40px);background-color:#07090E}
+#flowCanvas{position:absolute;inset:0;width:100%;height:100%}
+.canvas-toolbar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--brd2);border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:6px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.ct-btn{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);background:none;border:1px solid transparent;cursor:pointer;transition:all .2s}
+.ct-btn:hover{background:var(--bg3);border-color:var(--brd);color:var(--text2)}
+.ct-sep{width:1px;height:18px;background:var(--brd)}
+.zoom-label{font-size:11px;font-family:var(--ffm);color:var(--text3);min-width:36px;text-align:center}
+.empty-flow{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;color:var(--text3)}
+.empty-flow i{font-size:48px;color:var(--purple);opacity:.3}
+.empty-flow h3{font-size:15px;font-weight:700;color:var(--text2)}
+.empty-flow p{font-size:12px;text-align:center;max-width:260px;line-height:1.6}
+
+/* FLOW NODES (HTML overlay) */
+.flow-node{position:absolute;background:var(--bg2);border:2px solid var(--brd2);border-radius:12px;min-width:200px;cursor:move;user-select:none;transition:box-shadow .2s;z-index:10}
+.flow-node:hover{box-shadow:0 0 0 1px rgba(155,92,246,.3),0 8px 24px rgba(0,0,0,.4)}
+.flow-node.selected{border-color:var(--purple);box-shadow:0 0 0 3px rgba(155,92,246,.2),0 8px 24px rgba(0,0,0,.4)}
+.flow-node.trigger{border-color:rgba(0,87,255,.4)}
+.flow-node.trigger.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,87,255,.2)}
+.flow-node.condition{border-color:rgba(245,158,11,.4)}
+.flow-node.delay-node{border-color:rgba(0,229,255,.3)}
+
+.fn-header{padding:10px 12px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px}
+.fn-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.fn-trigger .fn-icon{background:rgba(0,87,255,.12);color:var(--blue)}
+.fn-action .fn-icon{background:rgba(155,92,246,.12);color:var(--purple)}
+.fn-condition .fn-icon{background:rgba(245,158,11,.12);color:var(--orange)}
+.fn-delay-node .fn-icon{background:rgba(0,229,255,.12);color:var(--cyan)}
+.fn-title{flex:1;font-size:12px;font-weight:700;color:var(--text)}
+.fn-badge{font-size:8px;padding:2px 6px;border-radius:10px;font-weight:700}
+.fn-trigger .fn-badge{background:rgba(0,87,255,.12);color:var(--blue);border:1px solid rgba(0,87,255,.2)}
+.fn-action .fn-badge{background:rgba(155,92,246,.12);color:var(--purple);border:1px solid rgba(155,92,246,.2)}
+.fn-condition .fn-badge{background:rgba(245,158,11,.12);color:var(--orange);border:1px solid rgba(245,158,11,.2)}
+.fn-delay-node .fn-badge{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.2)}
+.fn-body{padding:10px 12px;font-size:11px;color:var(--text3);line-height:1.5}
+.fn-body strong{color:var(--text2);font-weight:600}
+
+/* Node ports */
+.fn-ports{display:flex;justify-content:space-between;align-items:center;padding:0 12px 8px}
+.port{width:10px;height:10px;border-radius:50%;border:2px solid var(--brd2);background:var(--bg3);cursor:crosshair;transition:all .15s;position:relative}
+.port:hover{border-color:var(--purple);background:var(--purple);transform:scale(1.4)}
+.port.out{background:var(--bg4)}
+.port-label{font-size:8px;color:var(--text3);font-family:var(--ffm)}
+.fn-exec-status{height:3px;border-radius:0 0 10px 10px;transition:background .3s}
+.fn-exec-status.ok{background:var(--green)}
+.fn-exec-status.err{background:var(--red)}
+.fn-exec-status.run{background:var(--orange);animation:pulse-bar 1s infinite}
+@keyframes pulse-bar{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* SVG Edges */
+.edge-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.edge-path{fill:none;stroke:rgba(155,92,246,.45);stroke-width:2;stroke-dasharray:none}
+.edge-path:hover{stroke:var(--purple);stroke-width:3}
+.edge-path.active{stroke:var(--green);stroke-dasharray:8 4;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-24}}
+
+/* ======= RIGHT PANEL ======= */
+.panel-right{background:var(--bg2);border-left:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.pr-tabs{display:flex;border-bottom:1px solid var(--brd);flex-shrink:0}
+.pr-tab{flex:1;padding:10px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all .2s}
+.pr-tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.pr-body{display:none;flex:1;overflow-y:auto;padding:14px}
+.pr-body.active{display:block}
+
+/* Props */
+.pf{margin-bottom:12px}
+.pf label{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-weight:600}
+.pf input,.pf select,.pf textarea{width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:8px 12px;color:var(--text);font-size:12px;transition:border-color .2s}
+.pf input:focus,.pf select:focus,.pf textarea:focus{border-color:var(--pbrd)}
+.pf select option{background:var(--bg2)}
+.pf textarea{resize:vertical;min-height:70px;line-height:1.5}
+.prop-section{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);font-weight:700;margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:6px}
+.prop-section i{font-size:12px;color:var(--purple)}
+.no-sel{padding:30px 16px;text-align:center}
+.no-sel i{font-size:36px;color:var(--text3);display:block;margin-bottom:10px}
+.no-sel p{font-size:11px;color:var(--text3);line-height:1.6}
+
+/* Execution Log */
+.exec-log{display:flex;flex-direction:column;gap:6px}
+.exec-item{background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .2s}
+.exec-item:hover{border-color:var(--brd2)}
+.exec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.exec-status{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px}
+.exec-status.ok{background:var(--gnbg);color:var(--green);border:1px solid rgba(0,214,143,.2)}
+.exec-status.err{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.exec-status.run{background:var(--obg);color:var(--orange);border:1px solid var(--obrd)}
+.exec-time{font-size:9px;color:var(--text3);font-family:var(--ffm)}
+.exec-trigger{font-size:11px;color:var(--text2);font-weight:600}
+.exec-steps{font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5}
+.exec-dur{font-size:10px;font-family:var(--ffm);color:var(--text3)}
+
+/* Flow List */
+.flow-list{padding:12px;display:flex;flex-direction:column;gap:6px}
+.flow-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;cursor:pointer;transition:all .2s}
+.flow-item:hover{border-color:var(--brd2)}
+.flow-item.active{border-color:var(--pbrd);background:var(--pbg)}
+.fi-icon{width:28px;height:28px;border-radius:7px;background:var(--pbg);border:1px solid var(--pbrd);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--purple);flex-shrink:0}
+.fi-info{flex:1;min-width:0}
+.fi-name{font-size:12px;font-weight:700;color:var(--text2)}
+.flow-item.active .fi-name{color:var(--text)}
+.fi-meta{font-size:10px;color:var(--text3)}
+.fi-status{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px}
+.fi-status.active{background:var(--gnbg);color:var(--green);border:1px solid rgba(0,214,143,.2)}
+.fi-status.draft{background:var(--bg);color:var(--text3);border:1px solid var(--brd)}
+
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.mov.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--brd2);border-radius:14px;width:min(520px,92vw);max-height:88vh;overflow-y:auto;padding:24px}
+.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.modal-title i{color:var(--purple)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--brd)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-weight:600}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px 13px;color:var(--text);font-size:12px;transition:border-color .2s}
+.inp:focus{border-color:var(--pbrd)}
+.inp option{background:var(--bg2)}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:9999;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;background:var(--bg2);border:1px solid var(--brd);color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.4);animation:toastin .3s ease;pointer-events:auto}
+.toast.ok{border-color:rgba(0,214,143,.3);color:var(--green)}
+.toast.info{border-color:var(--pbrd);color:var(--purple)}
+.toast.err{border-color:var(--rbrd);color:var(--red)}
+@keyframes toastin{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ══ MOBILE ══ */
+#mob-flow-btn{display:none;position:fixed;top:58px;left:8px;z-index:900;width:36px;height:36px;border-radius:9px;background:var(--bg2);border:1px solid var(--pbrd);color:var(--purple);font-size:16px;align-items:center;justify-content:center;cursor:pointer}
+@media(max-width:768px){
+  .main{grid-template-columns:1fr!important}
+  .sidebar-left{position:fixed;top:0;left:-240px;height:100vh;z-index:800;width:220px;transition:left .3s;background:var(--bg2);border-right:1px solid var(--brd)}
+  .sidebar-left.open{left:0}
+  .sidebar-right{display:none}
+  #mob-flow-btn{display:flex}
+  .topbar{padding:0 12px 0 54px}
+  .canvas{height:calc(100vh - 44px)}
+}
+@media(max-width:480px){
+  .tb-brand{font-size:13px}
+  select{font-size:11px;padding:4px 6px}
+}
+</style>
+</head>
+<body>
+
+<!-- FIREBASE (Compat — unificado com o restante do projeto) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script>
+(function initFlowFirebase() {
+  const FB_CONFIG = {
+    apiKey: "AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",
+    authDomain: "nexia-c8710.firebaseapp.com",
+    projectId: "nexia-c8710",
+    storageBucket: "nexia-c8710.firebasestorage.app",
+    messagingSenderId: "623044447905",
+    appId: "1:623044447905:web:13f70e1584fb0fcf8d2ae0"
+  };
+  try { firebase.initializeApp(FB_CONFIG); } catch(e) {}
+
+  const db   = firebase.firestore();
+  const auth = firebase.auth();
+  window.__db   = db;
+  window.__auth = auth;
+  window.__fsReady = true;
+
+  // Shim: mesma interface modular → compat
+  window.__fs = {
+    collection: (db, path) => db.collection(path),
+    doc: (db, path, id) => id ? db.collection(path).doc(id) : db.doc(path),
+    addDoc: (ref, data) => ref.add(data),
+    setDoc: (ref, data, opts) => opts?.merge ? ref.set(data, { merge: true }) : ref.set(data),
+    getDoc: (ref) => ref.get(),
+    getDocs: (ref) => ref.get(),
+    updateDoc: (ref, data) => ref.update(data),
+    deleteDoc: (ref) => ref.delete(),
+    serverTimestamp: () => firebase.firestore.FieldValue.serverTimestamp(),
+    query: (ref, ...constraints) => {
+      let q = ref;
+      constraints.forEach(c => { q = c(q); });
+      return q;
+    },
+    where: (field, op, val) => (ref) => ref.where(field, op, val),
+    orderBy: (field, dir) => (ref) => ref.orderBy(field, dir || 'asc'),
+    onSnapshot: (ref, cb) => ref.onSnapshot(snap => cb(snap)),
+  };
+
+  // Auth guard
+  document.documentElement.style.visibility = 'hidden';
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
+    } else {
+      document.documentElement.style.visibility = 'visible';
+    }
+  });
+
+  window.__fbReady?.();
+})();
+</script>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="tb-logo">
+      <div class="gem"><i class="ri-git-branch-line"></i></div>
+      <div class="tb-brand">NEXIA <span>Flow</span></div>
+    </div>
+    <div class="tb-center">
+      <div id="flowNameDisplay" class="flow-name" onclick="openRenameModal()" title="Clique para renomear">Sem nome</div>
+      <div class="flow-status draft" id="flowStatusBadge"><div class="sd"></div><span id="flowStatusText">Draft</span></div>
+    </div>
+    <div class="tb-right">
+      <button class="btn btn-ghost" onclick="window.location.href='nexia-master-admin.html'"><i class="ri-arrow-left-line"></i> Voltar</button>
+      <button class="btn btn-ghost" onclick="openNewFlowModal()"><i class="ri-add-line"></i> Novo Flow</button>
+      <button class="btn btn-green" onclick="activateFlow()" id="btnActivate"><i class="ri-play-line"></i> Ativar</button>
+      <button class="btn btn-purple" onclick="testRunFlow()"><i class="ri-flask-line"></i> Testar</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+      <div class="panel-label"><i class="ri-node-tree"></i> Nós Disponíveis</div>
+      <div class="node-list">
+        <div class="node-group">
+          <div class="node-group-title">Triggers</div>
+          <div class="node-item ni-trigger" draggable="true" ondragstart="onNodeDragStart(event,'trigger_lead')" data-ntype="trigger_lead">
+            <div class="ni-icon"><i class="ri-user-add-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Lead Criado</div><div class="ni-desc">Novo lead no CRM</div></div>
+          </div>
+          <div class="node-item ni-trigger" draggable="true" ondragstart="onNodeDragStart(event,'trigger_payment')" data-ntype="trigger_payment">
+            <div class="ni-icon"><i class="ri-bank-card-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Pagamento</div><div class="ni-desc">Confirmação MP/PIX</div></div>
+          </div>
+          <div class="node-item ni-trigger" draggable="true" ondragstart="onNodeDragStart(event,'trigger_timer')" data-ntype="trigger_timer">
+            <div class="ni-icon"><i class="ri-time-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Timer</div><div class="ni-desc">Cron / agendado</div></div>
+          </div>
+          <div class="node-item ni-trigger" draggable="true" ondragstart="onNodeDragStart(event,'trigger_webhook')" data-ntype="trigger_webhook">
+            <div class="ni-icon"><i class="ri-webhook-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Webhook</div><div class="ni-desc">Chamada HTTP externa</div></div>
+          </div>
+          <div class="node-item ni-trigger" draggable="true" ondragstart="onNodeDragStart(event,'trigger_form')" data-ntype="trigger_form">
+            <div class="ni-icon"><i class="ri-survey-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Formulário</div><div class="ni-desc">Submit de formulário</div></div>
+          </div>
+        </div>
+
+        <div class="node-group">
+          <div class="node-group-title">Ações</div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'action_whatsapp')" data-ntype="action_whatsapp">
+            <div class="ni-icon"><i class="ri-whatsapp-line"></i></div>
+            <div class="ni-text"><div class="ni-name">WhatsApp</div><div class="ni-desc">Enviar mensagem WA</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'action_email')" data-ntype="action_email">
+            <div class="ni-icon"><i class="ri-mail-send-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Enviar Email</div><div class="ni-desc">Template de email</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'action_task')" data-ntype="action_task">
+            <div class="ni-icon"><i class="ri-task-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Criar Tarefa</div><div class="ni-desc">No CRM pipeline</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'action_stage')" data-ntype="action_stage">
+            <div class="ni-icon"><i class="ri-drag-move-2-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Mover Stage</div><div class="ni-desc">Atualizar CRM</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'action_api')" data-ntype="action_api">
+            <div class="ni-icon"><i class="ri-terminal-box-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Chamar API</div><div class="ni-desc">HTTP request externo</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'action_notify')" data-ntype="action_notify">
+            <div class="ni-icon"><i class="ri-notification-3-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Notificação</div><div class="ni-desc">Push interno</div></div>
+          </div>
+        </div>
+
+        <div class="node-group">
+          <div class="node-group-title">Lógica</div>
+          <div class="node-item ni-condition" draggable="true" ondragstart="onNodeDragStart(event,'condition')" data-ntype="condition">
+            <div class="ni-icon"><i class="ri-split-cells-horizontal"></i></div>
+            <div class="ni-text"><div class="ni-name">Condição</div><div class="ni-desc">Se/Senão</div></div>
+          </div>
+          <div class="node-item ni-delay" draggable="true" ondragstart="onNodeDragStart(event,'delay')" data-ntype="delay">
+            <div class="ni-icon"><i class="ri-timer-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Aguardar</div><div class="ni-desc">Delay de tempo</div></div>
+          </div>
+          <div class="node-item ni-condition" draggable="true" ondragstart="onNodeDragStart(event,'loop')" data-ntype="loop">
+            <div class="ni-icon"><i class="ri-loop-left-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Loop</div><div class="ni-desc">Repetir N vezes</div></div>
+          </div>
+          <div class="node-item ni-condition" draggable="true" ondragstart="onNodeDragStart(event,'ab_test')" data-ntype="ab_test">
+            <div class="ni-icon"><i class="ri-test-tube-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Teste A/B</div><div class="ni-desc">Dividir tráfego %</div></div>
+          </div>
+        </div>
+
+        <div class="node-group">
+          <div class="node-group-title" style="color:var(--purple)">✦ Inteligência Artificial</div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_cortex')" data-ntype="ai_cortex">
+            <div class="ni-icon" style="color:var(--purple)"><i class="ri-brain-line"></i></div>
+            <div class="ni-text"><div class="ni-name" style="color:var(--purple)">CORTEX IA</div><div class="ni-desc">Decisão por IA</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_gemini')" data-ntype="ai_gemini">
+            <div class="ni-icon" style="color:#4285F4"><i class="ri-google-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Gemini 2.0</div><div class="ni-desc">Google AI</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_grok')" data-ntype="ai_grok">
+            <div class="ni-icon" style="color:#00acee"><i class="ri-twitter-x-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Grok 3</div><div class="ni-desc">xAI — Raciocínio</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_lead_score')" data-ntype="ai_lead_score">
+            <div class="ni-icon" style="color:var(--green)"><i class="ri-bar-chart-grouped-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Score de Lead</div><div class="ni-desc">IA avalia prob. de fechar</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_sentiment')" data-ntype="ai_sentiment">
+            <div class="ni-icon" style="color:#F59E0B"><i class="ri-emotion-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Sentimento</div><div class="ni-desc">Analisa tom da msg</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_classify')" data-ntype="ai_classify">
+            <div class="ni-icon" style="color:var(--cyan)"><i class="ri-flow-chart"></i></div>
+            <div class="ni-text"><div class="ni-name">Classificar</div><div class="ni-desc">Categoriza entrada</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_extract')" data-ntype="ai_extract">
+            <div class="ni-icon" style="color:#10B981"><i class="ri-file-text-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Extrair Dados</div><div class="ni-desc">OCR + NLP</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_generate')" data-ntype="ai_generate">
+            <div class="ni-icon" style="color:#F59E0B"><i class="ri-quill-pen-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Gerar Texto</div><div class="ni-desc">Email/msg com IA</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_imagen')" data-ntype="ai_imagen">
+            <div class="ni-icon" style="color:#4285F4"><i class="ri-image-ai-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Imagen 3</div><div class="ni-desc">Gerar imagem</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_swarm')" data-ntype="ai_swarm">
+            <div class="ni-icon" style="color:var(--purple)"><i class="ri-team-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Swarm IA</div><div class="ni-desc">Multi-agente paralelo</div></div>
+          </div>
+          <div class="node-item" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.05)" draggable="true" ondragstart="onNodeDragStart(event,'ai_pomelli')" data-ntype="ai_pomelli">
+            <div class="ni-icon" style="color:#FF6B35"><i class="ri-links-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Pomelli</div><div class="ni-desc">n8n / automação</div></div>
+          </div>
+        </div>
+
+        <div class="node-group">
+          <div class="node-group-title">Integrações</div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'int_mercadopago')" data-ntype="int_mercadopago">
+            <div class="ni-icon" style="color:#00BCFF"><i class="ri-bank-card-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Mercado Pago</div><div class="ni-desc">Cobrar / Pix / Cartão</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'int_sheets')" data-ntype="int_sheets">
+            <div class="ni-icon" style="color:#0F9D58"><i class="ri-table-2"></i></div>
+            <div class="ni-text"><div class="ni-name">Google Sheets</div><div class="ni-desc">Gravar linha</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'int_slack')" data-ntype="int_slack">
+            <div class="ni-icon" style="color:#4A154B"><i class="ri-slack-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Slack</div><div class="ni-desc">Enviar mensagem</div></div>
+          </div>
+          <div class="node-item ni-action" draggable="true" ondragstart="onNodeDragStart(event,'int_nfe')" data-ntype="int_nfe">
+            <div class="ni-icon" style="color:#DAA520"><i class="ri-file-text-line"></i></div>
+            <div class="ni-text"><div class="ni-name">Emitir NF-e</div><div class="ni-desc">Nota fiscal auto</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas-area" id="canvasArea"
+      ondragover="event.preventDefault()"
+      ondrop="onCanvasDrop(event)">
+      <svg class="edge-svg" id="edgeSvg"></svg>
+      <div id="nodesContainer"></div>
+      <div class="empty-flow" id="emptyFlow">
+        <i class="ri-git-branch-line"></i>
+        <h3>Canvas vazio</h3>
+        <p>Arraste um Trigger do painel esquerdo para começar a construir seu fluxo de automação</p>
+      </div>
+      <div class="canvas-toolbar">
+        <button class="ct-btn" onclick="zoomIn()" title="Zoom +"><i class="ri-zoom-in-line"></i></button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+        <button class="ct-btn" onclick="zoomOut()" title="Zoom -"><i class="ri-zoom-out-line"></i></button>
+        <div class="ct-sep"></div>
+        <button class="ct-btn" onclick="fitView()" title="Ajustar tela"><i class="ri-fullscreen-line"></i></button>
+        <button class="ct-btn" onclick="clearFlow()" title="Limpar canvas" style="color:var(--red)"><i class="ri-delete-bin-line"></i></button>
+        <div class="ct-sep"></div>
+        <button class="ct-btn" onclick="undo()" title="Desfazer"><i class="ri-arrow-go-back-line"></i></button>
+        <button class="ct-btn" onclick="redo()" title="Refazer"><i class="ri-arrow-go-forward-line"></i></button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+      <div class="pr-tabs">
+        <div class="pr-tab active" onclick="switchRTab('props',this)">Propriedades</div>
+        <div class="pr-tab" onclick="switchRTab('flows',this)">Flows</div>
+        <div class="pr-tab" onclick="switchRTab('log',this)">Execuções</div>
+      </div>
+      <div class="pr-body active" id="pr-props">
+        <div class="no-sel">
+          <i class="ri-cursor-line"></i>
+          <p>Clique em um nó do canvas para editar suas propriedades</p>
+        </div>
+      </div>
+      <div class="pr-body" id="pr-flows">
+        <div style="margin-bottom:10px">
+          <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="openNewFlowModal()"><i class="ri-add-line"></i> Novo Flow</button>
+        </div>
+        <div class="flow-list" id="flowList">
+          <div style="text-align:center;padding:20px;color:var(--text3);font-size:11px">Carregando...</div>
+        </div>
+      </div>
+      <div class="pr-body" id="pr-log">
+        <div class="exec-log" id="execLog">
+          <div style="text-align:center;padding:20px;color:var(--text3);font-size:11px">Nenhuma execução ainda.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="mov" id="newFlowModal">
+  <div class="modal">
+    <div class="modal-title"><i class="ri-git-branch-line"></i> Novo Flow</div>
+    <div class="field"><label>Nome do Flow</label><input class="inp" id="newFlowName" placeholder="Ex: Boas-vindas Lead, Cobrança Automática..."></div>
+    <div class="field"><label>Tenant</label>
+      <select class="inp" id="newFlowTenant">
+        <option value="nexia">NEXIA OS</option><option value="ces">CES</option><option value="bezsan">Bezsan</option>
+        <option value="splash">Splash</option><option value="viajante-pro">Viajante Pro</option>
+      </select>
+    </div>
+    <div class="field"><label>Descrição</label><textarea class="inp" id="newFlowDesc" rows="2" placeholder="O que este flow faz?"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('newFlowModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createFlow()"><i class="ri-add-line"></i> Criar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mov" id="renameModal">
+  <div class="modal">
+    <div class="modal-title"><i class="ri-edit-line"></i> Renomear Flow</div>
+    <div class="field"><label>Nome</label><input class="inp" id="renameInput"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('renameModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="renameFlow()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ============================================
+// STATE
+// ============================================
+const STATE = {
+  currentFlowId: null,
+  currentFlow: null,
+  nodes: [],          // {id, type, x, y, props, execStatus}
+  edges: [],          // {id, from, to}  from/to = nodeId
+  flows: [],
+  executions: [],
+  selectedNodeId: null,
+  draggingNodeType: null,
+  draggingNodeId: null,
+  panX: 0, panY: 0,
+  zoom: 1,
+  history: [],
+  historyIdx: -1,
+  autoSaveTimer: null,
+  connecting: false,
+  connectFromId: null,
+};
+
+// ============================================
+// INIT
+// ============================================
+window.addEventListener('DOMContentLoaded', () => {
+  loadFlows();
+});
+
+async function loadFlows() {
+  if (!window.__fsReady) {
+    STATE.flows = [{ id:'demo1', name:'Boas-vindas Lead', tenantId:'nexia', status:'draft', nodes:[], edges:[], execCount:0, createdAt:new Date().toISOString() }];
+    renderFlowList();
+    loadFlow('demo1');
+    return;
+  }
+  try {
+    const { collection, getDocs } = window.__fs;
+    const snap = await getDocs(collection(window.__db, 'data/nexia/flows'));
+    STATE.flows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderFlowList();
+    if (STATE.flows.length > 0) loadFlow(STATE.flows[0].id);
+    loadExecutions();
+  } catch(e) {
+    console.error(e);
+    STATE.flows = [];
+    renderFlowList();
+  }
+}
+
+async function loadExecutions() {
+  if (!window.__fsReady) return;
+  try {
+    const { collection, getDocs, query, orderBy } = window.__fs;
+    const snap = await getDocs(query(collection(window.__db, 'data/nexia/executions'), orderBy('startedAt', 'desc')));
+    STATE.executions = snap.docs.map(d => ({ id: d.id, ...d.data() })).slice(0, 30);
+    renderExecLog();
+  } catch(e) { console.error(e); }
+}
+
+// ============================================
+// FLOW CRUD
+// ============================================
+function openNewFlowModal() {
+  document.getElementById('newFlowName').value = '';
+  document.getElementById('newFlowDesc').value = '';
+  document.getElementById('newFlowModal').classList.add('show');
+  setTimeout(() => document.getElementById('newFlowName').focus(), 100);
+}
+
+async function createFlow() {
+  const name = document.getElementById('newFlowName').value.trim();
+  const tenantId = document.getElementById('newFlowTenant').value;
+  const description = document.getElementById('newFlowDesc').value.trim();
+  if (!name) { toast('Informe o nome do flow', 'err'); return; }
+  closeModal('newFlowModal');
+
+  const flow = { name, tenantId, description, status:'draft', nodes:[], edges:[], execCount:0, createdAt:new Date().toISOString() };
+
+  if (!window.__fsReady) {
+    const id = 'flow_' + Date.now();
+    STATE.flows.unshift({ id, ...flow });
+    renderFlowList();
+    loadFlow(id);
+    toast(`Flow "${name}" criado`, 'ok');
+    return;
+  }
+
+  try {
+    const { collection, addDoc } = window.__fs;
+    const ref = await addDoc(collection(window.__db, 'data/nexia/flows'), flow);
+    STATE.flows.unshift({ id: ref.id, ...flow });
+    renderFlowList();
+    loadFlow(ref.id);
+    toast(`Flow "${name}" criado`, 'ok');
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao criar flow', 'err');
+  }
+}
+
+function loadFlow(flowId) {
+  const flow = STATE.flows.find(f => f.id === flowId);
+  if (!flow) return;
+  STATE.currentFlowId = flowId;
+  STATE.currentFlow = flow;
+  STATE.nodes = JSON.parse(JSON.stringify(flow.nodes || []));
+  STATE.edges = JSON.parse(JSON.stringify(flow.edges || []));
+  STATE.selectedNodeId = null;
+  STATE.history = [snapshot()];
+  STATE.historyIdx = 0;
+
+  document.getElementById('flowNameDisplay').textContent = flow.name;
+  updateFlowStatus(flow.status || 'draft');
+  renderFlowList();
+  renderAll();
+  showNodeProps(null);
+  toast(`Flow "${flow.name}" carregado`, 'info');
+}
+
+function renderFlowList() {
+  const el = document.getElementById('flowList');
+  if (!STATE.flows.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px">Nenhum flow criado.</div>';
+    return;
+  }
+  el.innerHTML = STATE.flows.map(f => `
+    <div class="flow-item ${f.id === STATE.currentFlowId ? 'active' : ''}" onclick="loadFlow('${f.id}')">
+      <div class="fi-icon"><i class="ri-git-branch-line"></i></div>
+      <div class="fi-info">
+        <div class="fi-name">${f.name}</div>
+        <div class="fi-meta">${f.tenantId} · ${f.nodes?.length||0} nós</div>
+      </div>
+      <span class="fi-status ${f.status==='active'?'active':'draft'}">${f.status==='active'?'Live':'Draft'}</span>
+    </div>
+  `).join('');
+}
+
+function updateFlowStatus(status) {
+  const badge = document.getElementById('flowStatusBadge');
+  const txt = document.getElementById('flowStatusText');
+  badge.className = `flow-status ${status}`;
+  txt.textContent = status === 'active' ? 'Ativo' : 'Draft';
+  const btn = document.getElementById('btnActivate');
+  if (status === 'active') {
+    btn.innerHTML = '<i class="ri-stop-line"></i> Desativar';
+    btn.className = 'btn btn-red';
+    btn.onclick = deactivateFlow;
+  } else {
+    btn.innerHTML = '<i class="ri-play-line"></i> Ativar';
+    btn.className = 'btn btn-green';
+    btn.onclick = activateFlow;
+  }
+}
+
+async function activateFlow() {
+  if (!STATE.currentFlowId) return;
+  if (!STATE.nodes.length) { toast('Adicione ao menos um trigger para ativar', 'err'); return; }
+  const hasTrigger = STATE.nodes.some(n => n.type.startsWith('trigger'));
+  if (!hasTrigger) { toast('É necessário ao menos um nó Trigger', 'err'); return; }
+
+  if (window.__fsReady) {
+    try {
+      const { doc, updateDoc } = window.__fs;
+      await updateDoc(doc(window.__db, 'data/nexia/flows', STATE.currentFlowId), { status:'active' });
+    } catch(e) { console.error(e); }
+  }
+
+  const idx = STATE.flows.findIndex(f => f.id === STATE.currentFlowId);
+  if (idx >= 0) STATE.flows[idx].status = 'active';
+  if (STATE.currentFlow) STATE.currentFlow.status = 'active';
+  updateFlowStatus('active');
+  renderFlowList();
+  toast('Flow ativado com sucesso!', 'ok');
+}
+
+async function deactivateFlow() {
+  if (!STATE.currentFlowId) return;
+  if (window.__fsReady) {
+    try {
+      const { doc, updateDoc } = window.__fs;
+      await updateDoc(doc(window.__db, 'data/nexia/flows', STATE.currentFlowId), { status:'draft' });
+    } catch(e) { console.error(e); }
+  }
+  const idx = STATE.flows.findIndex(f => f.id === STATE.currentFlowId);
+  if (idx >= 0) STATE.flows[idx].status = 'draft';
+  if (STATE.currentFlow) STATE.currentFlow.status = 'draft';
+  updateFlowStatus('draft');
+  renderFlowList();
+  toast('Flow pausado', 'info');
+}
+
+function openRenameModal() {
+  document.getElementById('renameInput').value = STATE.currentFlow?.name || '';
+  document.getElementById('renameModal').classList.add('show');
+  setTimeout(() => document.getElementById('renameInput').focus(), 100);
+}
+
+async function renameFlow() {
+  const name = document.getElementById('renameInput').value.trim();
+  if (!name) return;
+  closeModal('renameModal');
+  document.getElementById('flowNameDisplay').textContent = name;
+  if (STATE.currentFlow) STATE.currentFlow.name = name;
+  const idx = STATE.flows.findIndex(f => f.id === STATE.currentFlowId);
+  if (idx >= 0) STATE.flows[idx].name = name;
+  renderFlowList();
+  if (window.__fsReady) {
+    try {
+      const { doc, updateDoc } = window.__fs;
+      await updateDoc(doc(window.__db, 'data/nexia/flows', STATE.currentFlowId), { name });
+    } catch(e) { console.error(e); }
+  }
+}
+
+// ============================================
+// NODE TYPES CONFIG
+// ============================================
+const NODE_DEF = {
+  trigger_lead:    { label:'Lead Criado',    icon:'ri-user-add-line',           cat:'trigger',   color:'blue',   desc:'Disparado quando um novo lead é criado no CRM' },
+  trigger_payment: { label:'Pagamento',      icon:'ri-bank-card-line',          cat:'trigger',   color:'blue',   desc:'Disparado ao confirmar pagamento via MP/PIX' },
+  trigger_timer:   { label:'Timer',          icon:'ri-time-line',               cat:'trigger',   color:'blue',   desc:'Executa em horário/intervalo agendado' },
+  trigger_webhook: { label:'Webhook',        icon:'ri-webhook-line',            cat:'trigger',   color:'blue',   desc:'Chamada HTTP externa aciona o flow' },
+  trigger_form:    { label:'Formulário',     icon:'ri-survey-line',             cat:'trigger',   color:'blue',   desc:'Disparado ao enviar formulário' },
+  action_whatsapp: { label:'WhatsApp',       icon:'ri-whatsapp-line',           cat:'action',    color:'purple', desc:'Envia mensagem via WhatsApp Business' },
+  action_email:    { label:'Enviar Email',   icon:'ri-mail-send-line',          cat:'action',    color:'purple', desc:'Envia email com template configurável' },
+  action_task:     { label:'Criar Tarefa',   icon:'ri-task-line',               cat:'action',    color:'purple', desc:'Cria tarefa no CRM pipeline' },
+  action_stage:    { label:'Mover Stage',    icon:'ri-drag-move-2-line',        cat:'action',    color:'purple', desc:'Move lead para outro estágio do CRM' },
+  action_api:      { label:'Chamar API',     icon:'ri-terminal-box-line',       cat:'action',    color:'purple', desc:'Executa requisição HTTP externa' },
+  action_notify:   { label:'Notificação',    icon:'ri-notification-3-line',     cat:'action',    color:'purple', desc:'Envia notificação push interna' },
+  condition:       { label:'Condição',       icon:'ri-split-cells-horizontal',  cat:'condition', color:'orange', desc:'Bifurcação condicional (Se/Senão)' },
+  delay:           { label:'Aguardar',       icon:'ri-timer-line',              cat:'delay',     color:'cyan',   desc:'Aguarda tempo definido antes de continuar' },
+};
+
+function getNodeClass(type) {
+  const def = NODE_DEF[type];
+  if (!def) return 'flow-node';
+  const cat = def.cat;
+  if (cat === 'trigger') return 'flow-node trigger fn-trigger';
+  if (cat === 'condition') return 'flow-node condition fn-condition';
+  if (cat === 'delay') return 'flow-node delay-node fn-delay-node';
+  return 'flow-node fn-action';
+}
+
+function getNodeBadge(type) {
+  const def = NODE_DEF[type];
+  const labels = { trigger:'TRIGGER', action:'AÇÃO', condition:'CONDIÇÃO', delay:'DELAY' };
+  return labels[def?.cat] || type.toUpperCase();
+}
+
+// ============================================
+// DRAG FROM PANEL
+// ============================================
+function onNodeDragStart(ev, type) {
+  STATE.draggingNodeType = type;
+  ev.dataTransfer.effectAllowed = 'copy';
+}
+
+function onCanvasDrop(ev) {
+  ev.preventDefault();
+  if (!STATE.draggingNodeType && !STATE.currentFlowId) return;
+  if (!STATE.currentFlowId) { toast('Crie ou selecione um flow primeiro', 'err'); return; }
+  if (!STATE.draggingNodeType) return;
+
+  const area = document.getElementById('canvasArea');
+  const rect = area.getBoundingClientRect();
+  const x = (ev.clientX - rect.left - STATE.panX) / STATE.zoom;
+  const y = (ev.clientY - rect.top - STATE.panY) / STATE.zoom;
+
+  addNode(STATE.draggingNodeType, x, y);
+  STATE.draggingNodeType = null;
+}
+
+// ============================================
+// NODE MANAGEMENT
+// ============================================
+function addNode(type, x, y) {
+  const def = NODE_DEF[type];
+  const node = {
+    id: 'node_' + Date.now(),
+    type,
+    x: Math.round(x),
+    y: Math.round(y),
+    execStatus: null,
+    props: getDefaultNodeProps(type),
+  };
+  STATE.nodes.push(node);
+  pushHistory();
+  renderAll();
+  selectNode(node.id);
+  scheduleAutoSave();
+}
+
+function removeNode(id) {
+  STATE.nodes = STATE.nodes.filter(n => n.id !== id);
+  STATE.edges = STATE.edges.filter(e => e.from !== id && e.to !== id);
+  if (STATE.selectedNodeId === id) { STATE.selectedNodeId = null; showNodeProps(null); }
+  pushHistory();
+  renderAll();
+  scheduleAutoSave();
+}
+
+function selectNode(id) {
+  STATE.selectedNodeId = id;
+  document.querySelectorAll('.flow-node').forEach(el => {
+    el.classList.toggle('selected', el.dataset.nid === id);
+  });
+  const node = STATE.nodes.find(n => n.id === id);
+  showNodeProps(node);
+}
+
+function getDefaultNodeProps(type) {
+  switch(type) {
+    case 'trigger_timer':   return { cron:'0 9 * * 1-5', label:'Seg-Sex 09:00' };
+    case 'trigger_webhook': return { path:'/webhook/'+Math.random().toString(36).slice(2,8), method:'POST' };
+    case 'action_whatsapp': return { to:'{{lead.phone}}', message:'Olá {{lead.name}}, tudo bem?' };
+    case 'action_email':    return { to:'{{lead.email}}', subject:'Bem-vindo!', template:'welcome' };
+    case 'action_task':     return { title:'Ligar para {{lead.name}}', assignTo:'Responsável', due:'1d' };
+    case 'action_stage':    return { stage:'Qualificado' };
+    case 'action_api':      return { url:'https://api.exemplo.com/endpoint', method:'POST', body:'{}' };
+    case 'action_notify':   return { title:'Novo evento', message:'{{trigger.data}}' };
+    case 'condition':       return { field:'{{lead.score}}', operator:'>', value:'50', trueLabel:'Sim', falseLabel:'Não' };
+    case 'delay':           return { amount:1, unit:'days' };
+    default:                return {};
+  }
+}
+
+// ============================================
+// RENDER
+// ============================================
+function renderAll() {
+  renderNodes();
+  renderEdges();
+  const empty = document.getElementById('emptyFlow');
+  if (empty) empty.style.display = STATE.nodes.length ? 'none' : '';
+}
+
+function renderNodes() {
+  const container = document.getElementById('nodesContainer');
+  container.innerHTML = '';
+  STATE.nodes.forEach(node => {
+    const def = NODE_DEF[node.type] || { label:node.type, icon:'ri-circle-line', cat:'action' };
+    const el = document.createElement('div');
+    el.className = getNodeClass(node.type);
+    el.dataset.nid = node.id;
+    el.style.cssText = `left:${node.x + STATE.panX}px;top:${node.y + STATE.panY}px;transform:scale(${STATE.zoom})`;
+    if (node.id === STATE.selectedNodeId) el.classList.add('selected');
+
+    const propSummary = getNodeSummary(node);
+    el.innerHTML = `
+      <div class="fn-header">
+        <div class="fn-icon"><i class="${def.icon}"></i></div>
+        <div class="fn-title">${def.label}</div>
+        <span class="fn-badge">${getNodeBadge(node.type)}</span>
+        <button onclick="event.stopPropagation();removeNode('${node.id}')" style="color:var(--red);font-size:13px;margin-left:4px;opacity:.6;padding:0 2px"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="fn-body">${propSummary}</div>
+      <div class="fn-ports">
+        ${def.cat !== 'trigger' ? `<span class="port-label">entrada</span><div class="port in" data-nid="${node.id}" data-dir="in" onclick="onPortClick(event,'${node.id}','in')"></div>` : '<span></span><span></span>'}
+        <div class="port out" data-nid="${node.id}" data-dir="out" onclick="onPortClick(event,'${node.id}','out')"></div>
+        <span class="port-label">saída</span>
+        ${node.type === 'condition' ? `<div class="port out" data-nid="${node.id}" data-dir="false" onclick="onPortClick(event,'${node.id}','false')"></div><span class="port-label">não</span>` : ''}
+      </div>
+      <div class="fn-exec-status ${node.execStatus||''}"></div>
+    `;
+    el.onclick = (e) => {
+      if (!e.target.closest('.port') && !e.target.closest('button')) selectNode(node.id);
+    };
+    makeDraggable(el, node);
+    container.appendChild(el);
+  });
+}
+
+function getNodeSummary(node) {
+  const p = node.props || {};
+  switch(node.type) {
+    case 'trigger_timer': return `<strong>Cron:</strong> ${p.label||p.cron||'—'}`;
+    case 'trigger_webhook': return `<strong>${p.method||'POST'}</strong> ${p.path||'—'}`;
+    case 'action_whatsapp': return `<strong>Para:</strong> ${p.to||'—'}<br><strong>Msg:</strong> ${(p.message||'').slice(0,40)}...`;
+    case 'action_email': return `<strong>Para:</strong> ${p.to||'—'}<br><strong>Assunto:</strong> ${p.subject||'—'}`;
+    case 'action_api': return `<strong>${p.method||'POST'}</strong> ${(p.url||'—').slice(0,30)}`;
+    case 'action_task': return `<strong>Tarefa:</strong> ${(p.title||'—').replace(/{{[^}]+}}/g,'…').slice(0,35)}`;
+    case 'action_stage': return `<strong>Stage:</strong> ${p.stage||'—'}`;
+    case 'condition': return `<strong>Se</strong> ${p.field||'—'} ${p.operator||'>'} ${p.value||'—'}`;
+    case 'delay': return `<strong>Aguardar:</strong> ${p.amount||1} ${p.unit||'days'}`;
+    default: return '<span>Configurado</span>';
+  }
+}
+
+function renderEdges() {
+  const svg = document.getElementById('edgeSvg');
+  svg.innerHTML = '';
+  STATE.edges.forEach(edge => {
+    const fromNode = STATE.nodes.find(n => n.id === edge.from);
+    const toNode = STATE.nodes.find(n => n.id === edge.to);
+    if (!fromNode || !toNode) return;
+    const x1 = fromNode.x + STATE.panX + 210;
+    const y1 = fromNode.y + STATE.panY + 60;
+    const x2 = toNode.x + STATE.panX;
+    const y2 = toNode.y + STATE.panY + 60;
+    const cp1x = x1 + Math.abs(x2 - x1) * .5;
+    const cp2x = x2 - Math.abs(x2 - x1) * .5;
+    const d = `M${x1},${y1} C${cp1x},${y1} ${cp2x},${y2} ${x2},${y2}`;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'edge-path' + (edge.active ? ' active' : ''));
+    path.onclick = () => {
+      nexiaConfirm('Remover esta conexão?', function() {
+        STATE.edges = STATE.edges.filter(e => e.id !== edge.id);
+        renderEdges();
+        scheduleAutoSave();
+      }
+    };
+    svg.appendChild(path);
+    // Arrow marker
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    arrow.setAttribute('cx', x2);
+    arrow.setAttribute('cy', y2);
+    arrow.setAttribute('r', '4');
+    arrow.setAttribute('fill', 'rgba(155,92,246,.6)');
+    svg.appendChild(arrow);
+  });
+}
+
+// ============================================
+// NODE DRAGGING
+// ============================================
+function makeDraggable(el, node) {
+  let startX, startY, startNX, startNY, isDragging = false;
+  el.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.port') || e.target.closest('button') || e.target.tagName === 'INPUT') return;
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startNX = node.x;
+    startNY = node.y;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = (e.clientX - startX) / STATE.zoom;
+    const dy = (e.clientY - startY) / STATE.zoom;
+    node.x = Math.round(startNX + dx);
+    node.y = Math.round(startNY + dy);
+    el.style.left = (node.x + STATE.panX) + 'px';
+    el.style.top = (node.y + STATE.panY) + 'px';
+    renderEdges();
+  });
+  document.addEventListener('mouseup', () => {
+    if (isDragging) { isDragging = false; scheduleAutoSave(); }
+  });
+}
+
+// ============================================
+// PORT CONNECTIONS
+// ============================================
+function onPortClick(ev, nodeId, dir) {
+  ev.stopPropagation();
+  if (!STATE.connecting) {
+    STATE.connecting = true;
+    STATE.connectFromId = nodeId;
+    toast('Clique na porta de entrada do próximo nó', 'info');
+  } else {
+    if (dir === 'in' && nodeId !== STATE.connectFromId) {
+      const edgeExists = STATE.edges.some(e => e.from === STATE.connectFromId && e.to === nodeId);
+      if (!edgeExists) {
+        STATE.edges.push({ id:'edge_'+Date.now(), from:STATE.connectFromId, to:nodeId });
+        renderEdges();
+        scheduleAutoSave();
+      } else {
+        toast('Conexão já existe', 'err');
+      }
+    }
+    STATE.connecting = false;
+    STATE.connectFromId = null;
+  }
+}
+
+// ============================================
+// PROPS PANEL
+// ============================================
+function showNodeProps(node) {
+  const panel = document.getElementById('pr-props');
+  if (!node) {
+    panel.innerHTML = `<div class="no-sel"><i class="ri-cursor-line"></i><p>Clique em um nó do canvas para editar suas propriedades</p></div>`;
+    return;
+  }
+  const def = NODE_DEF[node.type] || {};
+  const p = node.props || {};
+  let html = `<div class="prop-section"><i class="ri-info-i"></i> ${def.label||node.type}</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.5">${def.desc||''}</div>`;
+
+  switch(node.type) {
+    case 'trigger_timer':
+      html += propField(node.id,'cron','Expressão Cron',p.cron||'0 9 * * 1-5');
+      html += propField(node.id,'label','Rótulo amigável',p.label||'Seg-Sex 09:00');
+      break;
+    case 'trigger_webhook':
+      html += `<div class="pf"><label>URL do Webhook</label><div style="background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:8px 12px;font-family:var(--ffm);font-size:11px;color:var(--cyan)">/api/actions${p.path||'/webhook/abc'}</div></div>`;
+      html += propSelect(node.id,'method','Método',p.method||'POST',['POST','GET','PUT']);
+      break;
+    case 'action_whatsapp':
+      html += propField(node.id,'to','Número/Variável',p.to||'{{lead.phone}}');
+      html += propTextarea(node.id,'message','Mensagem',p.message||'Olá {{lead.name}}!');
+      break;
+    case 'action_email':
+      html += propField(node.id,'to','Para',p.to||'{{lead.email}}');
+      html += propField(node.id,'subject','Assunto',p.subject||'');
+      html += propSelect(node.id,'template','Template',p.template||'welcome',['welcome','followup','payment_ok','custom']);
+      break;
+    case 'action_task':
+      html += propField(node.id,'title','Título da Tarefa',p.title||'');
+      html += propField(node.id,'assignTo','Atribuir a',p.assignTo||'Responsável');
+      html += propSelect(node.id,'due','Prazo',p.due||'1d',['1d','3d','7d','14d','custom']);
+      break;
+    case 'action_stage':
+      html += propSelect(node.id,'stage','Stage de Destino',p.stage||'Qualificado',['Lead','Qualificado','Proposta','Negociação','Fechado']);
+      break;
+    case 'action_api':
+      html += propField(node.id,'url','URL',p.url||'https://');
+      html += propSelect(node.id,'method','Método',p.method||'POST',['POST','GET','PUT','PATCH','DELETE']);
+      html += propTextarea(node.id,'body','Body (JSON)',p.body||'{}');
+      html += propField(node.id,'headers','Headers (JSON)',p.headers||'{}');
+      break;
+    case 'action_notify':
+      html += propField(node.id,'title','Título',p.title||'Nova notificação');
+      html += propTextarea(node.id,'message','Mensagem',p.message||'');
+      break;
+    case 'condition':
+      html += propField(node.id,'field','Campo',p.field||'{{lead.score}}');
+      html += propSelect(node.id,'operator','Operador',p.operator||'>',['>', '<', '>=', '<=', '==', '!=', 'contains', 'not_contains']);
+      html += propField(node.id,'value','Valor',p.value||'50');
+      break;
+    case 'delay':
+      html += `<div class="prop-row"><div class="pf" style="flex:1"><label>Quantidade</label><input type="number" value="${p.amount||1}" min="1" onchange="updateNodeProp('${node.id}','amount',this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:8px 12px;color:var(--text);font-size:12px"></div>
+        <div class="pf" style="flex:1">
+          ${propSelect(node.id,'unit','Unidade',p.unit||'days',['minutes','hours','days','weeks'])}
+        </div></div>`;
+      break;
+  }
+
+  html += `<div class="prop-section" style="margin-top:20px"><i class="ri-code-line"></i> Variáveis Disponíveis</div>
+    <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:10px;font-family:var(--ffm);font-size:10px;color:var(--text3);line-height:1.8">
+      {{lead.name}} {{lead.email}} {{lead.phone}}<br>
+      {{payment.amount}} {{payment.id}}<br>
+      {{tenant.id}} {{tenant.name}}<br>
+      {{trigger.data}} {{now}}
+    </div>
+    <div style="height:12px"></div>
+    <button class="btn btn-red" style="width:100%;justify-content:center" onclick="removeNode('${node.id}')"><i class="ri-delete-bin-line"></i> Remover Nó</button>`;
+
+  panel.innerHTML = html;
+}
+
+function propField(nodeId, key, label, val) {
+  return `<div class="pf"><label>${label}</label><input type="text" value="${escAttr(val)}" onchange="updateNodeProp('${nodeId}','${key}',this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:8px 12px;color:var(--text);font-size:12px"></div>`;
+}
+
+function propSelect(nodeId, key, label, val, opts) {
+  return `<div class="pf"><label>${label}</label><select onchange="updateNodeProp('${nodeId}','${key}',this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:8px 12px;color:var(--text);font-size:12px">
+    ${opts.map(o=>`<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('')}
+  </select></div>`;
+}
+
+function propTextarea(nodeId, key, label, val) {
+  return `<div class="pf"><label>${label}</label><textarea rows="3" onchange="updateNodeProp('${nodeId}','${key}',this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;padding:8px 12px;color:var(--text);font-size:12px;resize:vertical;line-height:1.5">${escHtml(val)}</textarea></div>`;
+}
+
+function updateNodeProp(nodeId, key, val) {
+  const node = STATE.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.props[key] = val;
+  // Refresh body summary without full re-render
+  const bodyEl = document.querySelector(`[data-nid="${nodeId}"] .fn-body`);
+  if (bodyEl) bodyEl.innerHTML = getNodeSummary(node);
+  scheduleAutoSave();
+}
+
+// ============================================
+// ZOOM / PAN
+// ============================================
+function zoomIn()  { STATE.zoom = Math.min(2,   STATE.zoom + .1); applyZoom(); }
+function zoomOut() { STATE.zoom = Math.max(0.3,  STATE.zoom - .1); applyZoom(); }
+
+function applyZoom() {
+  document.getElementById('zoomLabel').textContent = Math.round(STATE.zoom * 100) + '%';
+  document.querySelectorAll('.flow-node').forEach(el => {
+    const node = STATE.nodes.find(n => n.id === el.dataset.nid);
+    if (node) el.style.transform = `scale(${STATE.zoom})`;
+  });
+  renderEdges();
+}
+
+function fitView() {
+  if (!STATE.nodes.length) return;
+  STATE.zoom = 1;
+  STATE.panX = 40;
+  STATE.panY = 40;
+  document.getElementById('zoomLabel').textContent = '100%';
+  renderAll();
+}
+
+// ============================================
+// HISTORY
+// ============================================
+function snapshot() {
+  return { nodes: JSON.parse(JSON.stringify(STATE.nodes)), edges: JSON.parse(JSON.stringify(STATE.edges)) };
+}
+
+function pushHistory() {
+  STATE.history = STATE.history.slice(0, STATE.historyIdx + 1);
+  STATE.history.push(snapshot());
+  STATE.historyIdx = STATE.history.length - 1;
+}
+
+function undo() {
+  if (STATE.historyIdx <= 0) return;
+  STATE.historyIdx--;
+  const snap = STATE.history[STATE.historyIdx];
+  STATE.nodes = JSON.parse(JSON.stringify(snap.nodes));
+  STATE.edges = JSON.parse(JSON.stringify(snap.edges));
+  renderAll();
+  scheduleAutoSave();
+}
+
+function redo() {
+  if (STATE.historyIdx >= STATE.history.length - 1) return;
+  STATE.historyIdx++;
+  const snap = STATE.history[STATE.historyIdx];
+  STATE.nodes = JSON.parse(JSON.stringify(snap.nodes));
+  STATE.edges = JSON.parse(JSON.stringify(snap.edges));
+  renderAll();
+  scheduleAutoSave();
+}
+
+function clearFlow() {
+  nexiaConfirm('Limpar todos os nós?', function(){
+  STATE.nodes = [];
+  STATE.edges = [];
+  STATE.selectedNodeId = null;
+  pushHistory();
+  renderAll();
+  showNodeProps(null);
+  scheduleAutoSave();
+}
+
+// ============================================
+// AUTO SAVE (600ms)
+// ============================================
+function scheduleAutoSave() {
+  clearTimeout(STATE.autoSaveTimer);
+  STATE.autoSaveTimer = setTimeout(doAutoSave, 600);
+}
+
+async function doAutoSave() {
+  if (!STATE.currentFlowId) return;
+  const data = { nodes: STATE.nodes, edges: STATE.edges, updatedAt: new Date().toISOString() };
+  const idx = STATE.flows.findIndex(f => f.id === STATE.currentFlowId);
+  if (idx >= 0) { STATE.flows[idx].nodes = STATE.nodes; STATE.flows[idx].edges = STATE.edges; }
+
+  if (!window.__fsReady) return;
+  try {
+    const { doc, updateDoc } = window.__fs;
+    await updateDoc(doc(window.__db, 'data/nexia/flows', STATE.currentFlowId), data);
+  } catch(e) { console.error('Auto-save error:', e); }
+}
+
+// ============================================
+// TEST RUN
+// ============================================
+async function testRunFlow() {
+  if (!STATE.currentFlowId) { toast('Selecione um flow', 'err'); return; }
+  if (!STATE.nodes.length) { toast('Adicione nós ao flow primeiro', 'err'); return; }
+
+  toast('Executando flow de teste...', 'info');
+
+  // Visual: mark nodes as running
+  STATE.nodes.forEach(n => { n.execStatus = 'run'; });
+  renderNodes();
+
+  const execId = 'exec_' + Date.now();
+  const execData = {
+    flowId: STATE.currentFlowId,
+    flowName: STATE.currentFlow?.name || '—',
+    trigger: 'test',
+    status: 'running',
+    steps: STATE.nodes.map(n => ({ nodeId: n.id, type: n.type, status:'pending' })),
+    startedAt: new Date().toISOString(),
+    duration: null,
+  };
+
+  // Simulate execution step by step
+  const startTime = Date.now();
+  for (let i = 0; i < STATE.nodes.length; i++) {
+    await delay(400 + Math.random() * 400);
+    STATE.nodes[i].execStatus = 'ok';
+    renderNodes();
+  }
+
+  const duration = Date.now() - startTime;
+  execData.status = 'success';
+  execData.duration = duration;
+  execData.endedAt = new Date().toISOString();
+
+  // Save execution to Firestore
+  if (window.__fsReady) {
+    try {
+      const { collection, addDoc } = window.__fs;
+      await addDoc(collection(window.__db, 'data/nexia/executions'), execData);
+    } catch(e) { console.error(e); }
+  }
+
+  STATE.executions.unshift({ id: execId, ...execData });
+  renderExecLog();
+  toast(`Flow executado em ${duration}ms ✓`, 'ok');
+
+  // Reset status after 3s
+  setTimeout(() => {
+    STATE.nodes.forEach(n => { n.execStatus = null; });
+    renderNodes();
+  }, 3000);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ============================================
+// EXEC LOG
+// ============================================
+function renderExecLog() {
+  const el = document.getElementById('execLog');
+  if (!STATE.executions.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px">Nenhuma execução ainda.</div>';
+    return;
+  }
+  el.innerHTML = STATE.executions.slice(0, 20).map(ex => {
+    const dt = ex.startedAt ? new Date(ex.startedAt).toLocaleString('pt-BR') : '—';
+    const dur = ex.duration ? `${ex.duration}ms` : '—';
+    const stClass = ex.status === 'success' ? 'ok' : ex.status === 'running' ? 'run' : 'err';
+    const stLabel = ex.status === 'success' ? 'OK' : ex.status === 'running' ? 'EXEC' : 'ERRO';
+    return `<div class="exec-item">
+      <div class="exec-header">
+        <span class="exec-status ${stClass}">${stLabel}</span>
+        <span class="exec-time">${dt}</span>
+      </div>
+      <div class="exec-trigger">${ex.flowName||'—'} · ${ex.trigger||'—'}</div>
+      <div class="exec-steps">${(ex.steps||[]).length} nós · ${dur}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================
+// TABS
+// ============================================
+function switchRTab(tab, btn) {
+  document.querySelectorAll('.pr-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pr-body').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pr-' + tab)?.classList.add('active');
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function toast(msg, type='info') {
+  const icons = { ok:'ri-checkbox-circle-line', info:'ri-information-line', err:'ri-error-warning-line' };
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="${icons[type]||icons.info}"></i> ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); doAutoSave(); toast('Salvo!','ok'); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && STATE.selectedNodeId) {
+    e.preventDefault(); removeNode(STATE.selectedNodeId);
+  }
+  if (e.key === 'Escape') { STATE.connecting = false; STATE.connectFromId = null; }
+});
+
+// ── MOBILE SIDEBAR FLOW ──
+(function(){
+  const btn = document.createElement('button');
+  btn.id = 'mob-flow-btn';
+  btn.innerHTML = '<i class="ri-menu-line"></i>';
+  btn.onclick = () => {
+    const sl = document.querySelector('.sidebar-left');
+    if(sl) sl.classList.toggle('open');
+  };
+  document.body.appendChild(btn);
+  const ov = document.createElement('div');
+  Object.assign(ov.style,{position:'fixed',inset:'0',zIndex:'799',display:'none',background:'rgba(0,0,0,.5)'});
+  ov.onclick = () => { document.querySelector('.sidebar-left')?.classList.remove('open'); ov.style.display='none'; };
+  document.body.appendChild(ov);
+  document.querySelector('.sidebar-left')?.addEventListener('transitionend', function(){
+    ov.style.display = this.classList.contains('open') ? 'block' : 'none';
+  });
+  function applyMob(){
+    btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  }
+  window.addEventListener('resize', applyMob);
+  applyMob();
+})();
+</script>
+  <script src="../core/nexia-engine.js"></script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

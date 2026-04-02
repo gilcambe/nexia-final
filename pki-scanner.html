@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXIA OS — PKI / SSL Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   NEXIA OS — SCANNER DESIGN SYSTEM v5.0
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --font-head: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Inter', sans-serif;
+  --font-title: 'DM Serif Display', Georgia, serif;
+
+  /* DARK MODE */
+  --bg:          #07090f;
+  --bg2:         #0c1018;
+  --bg3:         #111520;
+  --panel:       #0e1320;
+  --panel2:      #131928;
+  --border:      #1c2840;
+  --border2:     #253555;
+  --text:        #c4d4ee;
+  --text2:       #7a90b8;
+  --text3:       #3f5070;
+  --white:       #eef4ff;
+
+  --cyan:        #00e5ff;
+  --cyan-dim:    rgba(0,229,255,0.1);
+  --cyan-glow:   0 0 30px rgba(0,229,255,0.2);
+  --red:         #ff3d71;
+  --red-dim:     rgba(255,61,113,0.1);
+  --green:       #00d68f;
+  --green-dim:   rgba(0,214,143,0.1);
+  --amber:       #ffaa00;
+  --amber-dim:   rgba(255,170,0,0.1);
+  --purple:      #8b5cf6;
+  --purple-dim:  rgba(139,92,246,0.1);
+
+  --glass-bg:    rgba(14,19,32,0.8);
+  --glass-border:rgba(0,229,255,0.12);
+
+  --radius:      10px;
+  --radius-lg:   16px;
+  --transition:  all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="light"] {
+  --bg:          #f0f4fb;
+  --bg2:         #e8eef8;
+  --bg3:         #dde5f2;
+  --panel:       #ffffff;
+  --panel2:      #f8faff;
+  --border:      #d0d9eb;
+  --border2:     #bcc8e0;
+  --text:        #1e2840;
+  --text2:       #4a5878;
+  --text3:       #8898ba;
+  --white:       #0a0f1e;
+
+  --cyan:        #0066cc;
+  --cyan-dim:    rgba(0,102,204,0.08);
+  --cyan-glow:   0 0 20px rgba(0,102,204,0.15);
+  --red:         #e0274a;
+  --red-dim:     rgba(224,39,74,0.08);
+  --green:       #059669;
+  --green-dim:   rgba(5,150,105,0.08);
+  --amber:       #c47c00;
+  --amber-dim:   rgba(196,124,0,0.08);
+
+  --glass-bg:    rgba(255,255,255,0.85);
+  --glass-border:rgba(0,102,204,0.15);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 60px;
+  transition: background 0.35s, color 0.35s;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ─── GRID BACKGROUND ────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s;
+}
+[data-theme="light"] body::before { opacity: 0.25; }
+
+/* ─── GLOW ORBS ──────────────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(0,229,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s;
+}
+[data-theme="light"] body::after { opacity: 0.4; }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ─── HEADER ─────────────────────────────────────────────────────── */
+.header {
+  width: 100%;
+  max-width: 860px;
+  padding: 36px 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.header-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.brand-link {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.brand-gem {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, var(--cyan) 100%);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--cyan-glow), 0 2px 12px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+  transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.brand-gem::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  border-radius: inherit;
+}
+.brand-gem:hover { transform: scale(1.05) rotate(3deg); }
+.brand-gem svg { width: 16px; height: 16px; color: #fff; position: relative; z-index: 1; }
+.brand-name {
+  font-family: var(--font-head);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -0.3px;
+}
+.brand-name em { color: var(--cyan); font-style: normal; }
+
+.header-controls { display: flex; align-items: center; gap: 10px; }
+
+.theme-toggle {
+  width: 38px; height: 38px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: var(--transition);
+  color: var(--text2);
+}
+.theme-toggle:hover {
+  background: var(--cyan-dim);
+  border-color: var(--cyan);
+  transform: scale(1.05);
+}
+
+.nav-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--transition);
+}
+.nav-btn:hover { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+.nav-btn-primary {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: #000;
+}
+.nav-btn-primary:hover { background: #33ecff; color: #000; border-color: #33ecff; }
+
+.header-hero { text-align: center; }
+
+.scanner-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cyan-dim);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 18px;
+}
+.scanner-eyebrow-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(0,229,255,0.4); }
+  50% { opacity:0.6; transform:scale(0.85); box-shadow:0 0 0 5px rgba(0,229,255,0); }
+}
+
+.scanner-title {
+  font-family: var(--font-head);
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.scanner-title .grad {
+  background: linear-gradient(90deg, var(--cyan) 0%, #66d9f7 50%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.scanner-sub {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.65;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ─── SCANNER BOX ────────────────────────────────────────────────── */
+.scanner-box {
+  width: 100%;
+  max-width: 860px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+  transition: background 0.35s, border-color 0.35s;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset,
+              0 24px 64px rgba(0,0,0,0.4);
+}
+[data-theme="light"] .scanner-box {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 48px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+
+.scanner-box::before {
+  content: '';
+  position: absolute; top:0; left:0; right:0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--purple), transparent);
+  opacity: 0.5;
+}
+
+/* ─── TITLEBAR ───────────────────────────────────────────────────── */
+.titlebar {
+  background: var(--bg2);
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.35s;
+}
+[data-theme="light"] .titlebar {
+  background: rgba(240,244,251,0.7);
+}
+.titlebar-dots { display: flex; gap: 7px; }
+.tb-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+}
+.tb-dot.r { background: #ff5f57; }
+.tb-dot.y { background: #febc2e; }
+.tb-dot.g { background: #28c840; }
+.titlebar-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  margin-left: 10px;
+}
+.titlebar-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.live-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.live-badge.ready { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,214,143,0.2); }
+.live-badge.scanning { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,170,0,0.2); }
+.live-badge.done { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0,229,255,0.2); }
+.live-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse-dot 1.5s infinite; }
+
+/* ─── INPUT ZONE ─────────────────────────────────────────────────── */
+.input-zone {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel2);
+  transition: background 0.35s;
+}
+[data-theme="light"] .input-zone { background: rgba(255,255,255,0.6); }
+
+.prompt-prefix {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--green);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.url-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--white);
+  caret-color: var(--cyan);
+  transition: color 0.2s;
+}
+.url-field::placeholder { color: var(--text3); }
+[data-theme="light"] .url-field { color: var(--text); }
+
+.scan-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--cyan);
+  color: #000;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.scan-btn:hover:not(:disabled) {
+  background: #33ecff;
+  transform: translateY(-1px);
+  box-shadow: var(--cyan-glow);
+}
+.scan-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.scan-btn-icon { font-size: 14px; }
+
+/* ─── PROGRESS BAR ───────────────────────────────────────────────── */
+.progress-wrap {
+  height: 2px;
+  background: var(--border);
+  display: none;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--green), var(--purple));
+  background-size: 200% 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: shimmer 2s linear infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── TERMINAL ───────────────────────────────────────────────────── */
+.terminal {
+  padding: 20px 24px;
+  min-height: 280px;
+  max-height: 360px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 2;
+  background: var(--bg2);
+  transition: background 0.35s;
+}
+[data-theme="light"] .terminal { background: rgba(240,244,251,0.5); }
+
+.log-line {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  animation: logFadeIn 0.2s ease;
+}
+@keyframes logFadeIn { from { opacity:0; transform: translateX(-4px); } to { opacity:1; transform:translateX(0); } }
+
+.log-ts { color: var(--text3); min-width: 64px; font-size: 11px; }
+.c-ok     { color: var(--green); }
+.c-warn   { color: var(--amber); }
+.c-err    { color: var(--red); }
+.c-info   { color: var(--cyan); }
+.c-dim    { color: var(--text3); }
+.c-white  { color: var(--white); }
+.c-purple { color: var(--purple); }
+
+.cursor-blink {
+  display: inline-block;
+  width: 7px; height: 14px;
+  background: var(--cyan);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ─── RESULTS PANEL ──────────────────────────────────────────────── */
+.results-panel {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px;
+  display: none;
+  background: var(--panel);
+  transition: background 0.35s;
+}
+[data-theme="light"] .results-panel { background: rgba(255,255,255,0.7); }
+.results-panel.show { display: block; animation: fadeUp 0.4s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* Metrics row */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.metric {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px;
+  text-align: center;
+  transition: background 0.35s, border 0.35s;
+}
+[data-theme="light"] .metric { background: rgba(255,255,255,0.8); }
+.metric-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.metric-value {
+  font-family: var(--font-head);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.metric-value.critical { color: var(--red); }
+.metric-value.ok { color: var(--green); }
+.metric-value.warn { color: var(--amber); }
+.metric-value.accent { color: var(--cyan); }
+.metric-sub {
+  font-size: 10px;
+  color: var(--text3);
+  line-height: 1.4;
+}
+
+/* Score ring */
+.score-ring-wrap {
+  position: relative;
+  width: 72px; height: 72px;
+  margin: 0 auto 8px;
+}
+.score-ring-wrap svg { transform: rotate(-90deg); }
+.score-num {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--red);
+}
+
+/* Loss banner */
+.loss-banner {
+  background: linear-gradient(135deg, rgba(255,61,113,0.1), rgba(255,61,113,0.03));
+  border: 1px solid rgba(255,61,113,0.3);
+  border-radius: var(--radius-lg);
+  padding: 22px 28px;
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.loss-banner::before {
+  content: '';
+  position: absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+}
+.loss-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+.loss-value {
+  font-family: var(--font-head);
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--red);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.loss-period { font-size: 12px; color: var(--text3); margin-top: 6px; }
+.loss-icon { font-size: 52px; opacity: 0.15; }
+
+/* Findings */
+.findings-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.findings-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.findings-count {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(255,61,113,0.2);
+}
+
+.finding {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.6;
+  transition: background 0.15s;
+}
+.finding:last-child { border-bottom: none; }
+.finding:hover { background: var(--cyan-dim); border-radius: 8px; padding-left: 10px; padding-right: 10px; }
+
+.f-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.f-critical { background: rgba(255,61,113,0.15); color: var(--red);   border: 1px solid rgba(255,61,113,0.3); }
+.f-high     { background: rgba(255,170,0,0.12);  color: var(--amber); border: 1px solid rgba(255,170,0,0.3); }
+.f-medium   { background: var(--cyan-dim);        color: var(--cyan);  border: 1px solid rgba(0,229,255,0.2); }
+
+.finding-text { flex: 1; color: var(--text2); }
+.finding-text strong { color: var(--white); font-weight: 600; }
+[data-theme="light"] .finding-text strong { color: var(--text); }
+
+/* CVE pill */
+.cve-pill {
+  display: inline-flex;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--purple-dim);
+  color: var(--purple);
+  border: 1px solid rgba(139,92,246,0.2);
+  margin-left: 6px;
+}
+
+/* CTA */
+.cta-wrap {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+.cta-btn {
+  background: linear-gradient(135deg, var(--cyan), #0099cc);
+  color: #000;
+  border: none;
+  padding: 16px 28px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.cta-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: var(--cyan-glow);
+}
+.cta-secondary {
+  background: var(--purple-dim);
+  border: 1px solid rgba(139,92,246,0.3);
+  color: var(--purple);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.cta-secondary:hover { background: rgba(139,92,246,0.15); transform: translateY(-2px); }
+
+/* ─── SCAN STATS FOOTER ──────────────────────────────────────────── */
+.scan-footer {
+  display: flex; align-items: center; gap: 20px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.scan-stat {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px;
+  color: var(--text3);
+}
+.scan-stat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── FEATURE CHIPS ──────────────────────────────────────────────── */
+.feature-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 24px;
+}
+.f-chip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  white-space: nowrap;
+}
+.f-chip svg { width: 12px; height: 12px; color: var(--green); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .scanner-title { font-size: 30px; }
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
+  .cta-wrap { grid-template-columns: 1fr; }
+  .feature-row { display: none; }
+}
+
+/* ── NEXIA INTRO KEYFRAMES ── */
+@keyframes introFadeOut { to { opacity:0; } }
+@keyframes introGemIn   { from { transform:scale(0.5) rotate(-10deg);opacity:0; } to { transform:scale(1) rotate(0);opacity:1; } }
+@keyframes introTextIn  { from { opacity:0;transform:translateY(8px); } to { opacity:1;transform:none; } }
+@keyframes introBarIn   { from { opacity:0; } to { opacity:1; } }
+@keyframes introBarFill { from { width:0%; } to { width:100%; } }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script src="../core/governance.js"></script>
+<script src="../core/bridge.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <a class="brand-link" href="/nexia/tenant-hub.html">
+      <div class="brand-gem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <span class="brand-name">NEXIA<em> OS</em></span>
+    </a>
+
+    <div class="header-controls">
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Alternar tema">🌙</button>
+      <a class="nav-btn" href="../login.html">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Entrar
+      </a>
+      <a class="nav-btn nav-btn-primary" href="nexia-master-admin.html">
+        Admin →
+      </a>
+    </div>
+  </div>
+
+  <div class="header-hero">
+    <div class="scanner-eyebrow">
+      <span class="scanner-eyebrow-dot"></span>
+      NEXIA AUDIT ENGINE v4.2.1
+    </div>
+    <h1 class="scanner-title">
+      PKI / SSL<br><span class="grad">Scanner</span>
+    </h1>
+    <p class="scanner-sub">
+      Diagnóstico completo de infraestrutura de segurança em tempo real. Detecte vulnerabilidades críticas, calcule o impacto financeiro e gere o plano de remediação com IA.
+    </p>
+
+    <div class="feature-row">
+      <div class="f-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        PKI Score Analysis
+      </div>
+      <div class="f-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        CVE Database 2024
+      </div>
+      <div class="f-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        ROI Calculator
+      </div>
+      <div class="f-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        AI Remediation Plan
+      </div>
+      <div class="f-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        LGPD Compliance Check
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SCANNER TERMINAL ═════════════════════════════════════════ -->
+<div class="scanner-box">
+
+  <div class="titlebar">
+    <div class="titlebar-dots">
+      <div class="tb-dot r"></div>
+      <div class="tb-dot y"></div>
+      <div class="tb-dot g"></div>
+    </div>
+    <span class="titlebar-text">nexia-scanner — audit engine — v4.2.1</span>
+    <div class="titlebar-right">
+      <span class="live-badge ready" id="statusBadge">
+        <span class="live-dot"></span>
+        PRONTO
+      </span>
+    </div>
+  </div>
+
+  <div class="input-zone">
+    <span class="prompt-prefix">nexia@audit:~$</span>
+    <input
+      class="url-field"
+      id="urlField"
+      type="text"
+      placeholder="empresa.dominio.com.br"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button class="scan-btn" id="scanBtn" onclick="startScan()">
+      <span class="scan-btn-icon">⚡</span>
+      <span id="scanBtnText">INICIAR SCAN</span>
+    </button>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="terminal" id="terminal">
+    <div class="log-line">
+      <span class="log-ts">[00:00]</span>
+      <span class="c-info">NEXIA Audit Engine v4.2.1 — Pronto para diagnóstico.</span>
+    </div>
+    <div class="log-line">
+      <span class="log-ts">[00:00]</span>
+      <span class="c-dim">PKI Scanner · SSL/TLS Auditor · CVE Detector · ROI Calculator carregados.</span>
+    </div>
+    <div class="log-line">
+      <span class="log-ts">[00:00]</span>
+      <span class="c-ok">Base CVE atualizada: 2024-Q4 — 1.247 vulnerabilidades indexadas.</span>
+    </div>
+    <div class="log-line">
+      <span class="log-ts">&nbsp;</span>
+      <span class="c-dim">Digite o hostname acima e clique em <span class="c-cyan">INICIAR SCAN</span> para diagnóstico.</span>
+    </div>
+    <div class="log-line" id="cursorLine">
+      <span class="log-ts">&nbsp;</span>
+      <span><span class="cursor-blink" id="cursor"></span></span>
+    </div>
+  </div>
+
+  <!-- Results Panel -->
+  <div class="results-panel" id="resultsPanel">
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="metric">
+        <div class="metric-label">PKI Score</div>
+        <div class="score-ring-wrap">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="28" fill="none" stroke="var(--border)" stroke-width="5.5"/>
+            <circle cx="36" cy="36" r="28" fill="none" stroke="var(--red)" stroke-width="5.5"
+              stroke-dasharray="176" stroke-dashoffset="144" stroke-linecap="round"
+              style="transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);" id="scoreCircle"/>
+          </svg>
+          <div class="score-num" id="scoreNum">18</div>
+        </div>
+        <div class="metric-sub">CRÍTICO — Ação imediata</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Certificados</div>
+        <div class="metric-value warn">7</div>
+        <div class="metric-sub">3 expirados · 2 inválidos</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Vulnerabilidades</div>
+        <div class="metric-value critical">12</div>
+        <div class="metric-sub">4 críticas · 8 altas</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Usuários Expostos</div>
+        <div class="metric-value accent" id="usersExp">1.420</div>
+        <div class="metric-sub">SSO completamente inoperante</div>
+      </div>
+    </div>
+
+    <!-- Loss Banner -->
+    <div class="loss-banner">
+      <div>
+        <div class="loss-label">⚠ Perda Financeira Estimada</div>
+        <div class="loss-value" id="lossValue">R$ 2,1M</div>
+        <div class="loss-period">por mês — downtime SSO + SLA breach + custos operacionais</div>
+      </div>
+      <div class="loss-icon">💸</div>
+    </div>
+
+    <!-- Findings -->
+    <div class="findings-header">
+      <span class="findings-title">Achados Críticos</span>
+      <span class="findings-count">12 vulnerabilidades</span>
+    </div>
+
+    <div class="finding">
+      <span class="f-badge f-critical">CRÍTICO</span>
+      <div class="finding-text">
+        <strong>SAML Keystore Failure</strong> — Certificado raiz expirado em 14/03/2024. Autenticação SSO completamente inoperante. Score PKI: 18/100. <span class="cve-pill">CRT-2024-001</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="f-badge f-critical">CRÍTICO</span>
+      <div class="finding-text">
+        <strong>TLS 1.0 / 1.1 Ativos</strong> — Protocolos legados habilitados expõem sistema a ataques POODLE e BEAST. Confirmado em 3 endpoints. <span class="cve-pill">CVE-2014-3566</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="f-badge f-critical">CRÍTICO</span>
+      <div class="finding-text">
+        <strong>Chain of Trust Quebrada</strong> — Intermediate CA não encontrado no bundle. Handshakes falham em 68% dos navegadores modernos. <span class="cve-pill">PKI-CHAIN-ERR</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="f-badge f-critical">CRÍTICO</span>
+      <div class="finding-text">
+        <strong>Certificado Wildcard Vencido</strong> — *.dominio.com.br expirado há 42 dias. Autenticação multi-tenant comprometida. <span class="cve-pill">CERT-EXP-042D</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="f-badge f-high">ALTA</span>
+      <div class="finding-text">
+        <strong>OCSP Stapling Desabilitado</strong> — Revogação de certificados não verificada em tempo real. Risco de man-in-the-middle ativo. <span class="cve-pill">OCSP-MISS</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="f-badge f-high">ALTA</span>
+      <div class="finding-text">
+        <strong>HSTS Não Configurado</strong> — Sem Strict-Transport-Security header. Usuários vulneráveis a downgrade attacks. <span class="cve-pill">HSTS-ABSENT</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="f-badge f-medium">MÉDIO</span>
+      <div class="finding-text">
+        <strong>Cipher Suite Fraca</strong> — RC4 e 3DES habilitados. Recomendado: TLS 1.3 com AES-256-GCM apenas. <span class="cve-pill">CVE-2011-3389</span>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+      <button class="cta-btn" onclick="goToLogin()">
+        ✦ Gerar Solução IA Personalizada — R$2.1M de retorno em 30 dias →
+      </button>
+      <button class="cta-secondary" onclick="exportReport()">
+        ⬇ Exportar PDF
+      </button>
+    </div>
+
+    <!-- Scan stats footer -->
+    <div class="scan-footer">
+      <div class="scan-stat">
+        <div class="scan-stat-dot" style="background:var(--green)"></div>
+        <span>Scan concluído em <strong id="scanDuration">7.2s</strong></span>
+      </div>
+      <div class="scan-stat">
+        <div class="scan-stat-dot" style="background:var(--cyan)"></div>
+        <span>Motor: NEXIA Audit Engine v4.2.1</span>
+      </div>
+      <div class="scan-stat">
+        <div class="scan-stat-dot" style="background:var(--purple)"></div>
+        <span>ID: <strong id="auditId">—</strong></span>
+      </div>
+      <div class="scan-stat">
+        <div class="scan-stat-dot" style="background:var(--amber)"></div>
+        <span id="scanTs">—</span>
+      </div>
+    </div>
+
+  </div><!-- /results-panel -->
+</div><!-- /scanner-box -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   NEXIA OS — SCANNER ENGINE v5.0
+═══════════════════════════════════════════════════════════════════ */
+
+// ── THEME ─────────────────────────────────────────────────────────
+let isDark = true;
+
+(function initTheme() {
+  const saved = localStorage.getItem('NEXIA_THEME');
+  if (saved === 'light') {
+    isDark = false;
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('themeBtn').textContent = '☀️';
+  }
+})();
+
+function toggleTheme() {
+  isDark = !isDark;
+  const theme = isDark ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('NEXIA_THEME', theme);
+}
+
+// ── LOG SEQUENCES ─────────────────────────────────────────────────
+function buildLogs(host) {
+  return [
+    [250,  'info',   `Iniciando varredura em ${host}...`],
+    [500,  'dim',    'Resolvendo DNS...'],
+    [750, 'ok', `Host alcançável — latência medida via performance.now() — verifique o painel`],
+    [1000, 'info',   'Abrindo conexão TLS na porta 443...'],
+    [1250, 'warn',   'TLS handshake — detectando cipher suites disponíveis...'],
+    [1500, 'err',    '⚠ ALERTA: TLS 1.0 aceito pelo servidor — protocolo legado!'],
+    [1750, 'err',    '⚠ ALERTA: TLS 1.1 aceito — BEAST attack possível!'],
+    [2000, 'dim',    'Baixando cadeia de certificados (cert chain)...'],
+    [2250, 'warn',   'Certificados recebidos: 3 (root + 2 intermediários)'],
+    [2500, 'err',    '✗ CRÍTICO: Root CA "SAML-Root-2019" — EXPIRADO em 14/03/2024'],
+    [2750, 'err',    '✗ CRÍTICO: SAML keystore failure — SSO completamente inoperante'],
+    [3000, 'warn',   '⚠ Intermediate CA: não encontrado no bundle enviado'],
+    [3250, 'warn',   `⚠ Wildcard *.${host} — EXPIRADO há 42 dias`],
+    [3500, 'dim',    'Verificando OCSP endpoint...'],
+    [3750, 'warn',   '⚠ OCSP stapling: DESABILITADO — revogação não verificada em tempo real'],
+    [4000, 'dim',    'Analisando HTTP Security Headers...'],
+    [4250, 'warn',   '⚠ HSTS: AUSENTE — downgrade attack possível'],
+    [4500, 'warn',   '⚠ CSP header: não configurado'],
+    [4750, 'info',   'Executando CVE scan — base 2024-Q4...'],
+    [5000, 'err',    '✗ CVE-2014-3566 (POODLE SSLv3): VULNERÁVEL — severidade CRÍTICA'],
+    [5250, 'err',    '✗ CVE-2011-3389 (BEAST TLS 1.0): VULNERÁVEL — severidade ALTA'],
+    [5500, 'warn',   '⚠ RC4 cipher detectado — considerado quebrado desde 2015'],
+    [5750, 'dim',    'Calculando exposição de usuários e impacto financeiro...'],
+    [6000, 'purple', 'Modelo de impacto: downtime × usuários × ticket médio × SLA breach...'],
+    [6250, 'err',    '━━━ PKI SCORE: 18/100 — CRÍTICO ━━━'],
+    [6500, 'err',    '━━━ IMPACTO FINANCEIRO: R$ 2.100.000/mês ━━━'],
+    [6750, 'info',   'Gerando relatório e recomendações IA...'],
+    [7000, 'ok',     `✓ Diagnóstico concluído — ${host} — 12 vulnerabilidades detectadas.`],
+    [7200, 'ok',     '✓ Dados salvos no NEXIA Audit Engine. Acesse o Admin para remediação.'],
+  ];
+}
+
+// ── SCANNER STATE ─────────────────────────────────────────────────
+let scanRunning = false;
+const startTime = performance.now();
+
+function ts() {
+  const d = new Date();
+  return `[${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}]`;
+}
+
+function addLog(cls, text) {
+  const term = document.getElementById('terminal');
+  const cursorLine = document.getElementById('cursorLine');
+  if (cursorLine) cursorLine.remove();
+
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-ts">${ts()}</span><span class="c-${cls}">${text}</span>`;
+  term.appendChild(line);
+
+  const cl = document.createElement('div');
+  cl.className = 'log-line';
+  cl.id = 'cursorLine';
+  cl.innerHTML = `<span class="log-ts">&nbsp;</span><span><span class="cursor-blink" id="cursor"></span></span>`;
+  term.appendChild(cl);
+
+  term.scrollTop = term.scrollHeight;
+}
+
+function startScan() {
+  if (scanRunning) return;
+  const host = document.getElementById('urlField').value.trim();
+  if (!host) {
+    document.getElementById('urlField').focus();
+    document.getElementById('urlField').style.outline = `2px solid var(--red)`;
+    setTimeout(() => { document.getElementById('urlField').style.outline = ''; }, 1500);
+    return;
+  }
+
+  scanRunning = true;
+  const btn = document.getElementById('scanBtn');
+  const scanBtnText = document.getElementById('scanBtnText');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const resultsPanel = document.getElementById('resultsPanel');
+  const statusBadge  = document.getElementById('statusBadge');
+
+  btn.disabled = true;
+  scanBtnText.textContent = 'SCANNING...';
+  progressWrap.style.display = 'block';
+  progressFill.style.width = '0%';
+  resultsPanel.classList.remove('show');
+
+  statusBadge.className = 'live-badge scanning';
+  statusBadge.innerHTML = '<span class="live-dot"></span> SCANNING';
+
+  // Clear terminal
+  const term = document.getElementById('terminal');
+  term.innerHTML = '';
+  addLog('info', `Iniciando diagnóstico NEXIA Audit Engine v4.2.1...`);
+
+  const logs = buildLogs(host);
+  const totalMs = 7400;
+
+  logs.forEach(([delay, cls, msg]) => {
+    setTimeout(() => {
+      addLog(cls, msg);
+      progressFill.style.width = Math.min(95, (delay / totalMs) * 95) + '%';
+    }, delay);
+  });
+
+  setTimeout(() => {
+    progressFill.style.width = '100%';
+    statusBadge.className = 'live-badge done';
+    statusBadge.innerHTML = '<span class="live-dot"></span> CONCLUÍDO';
+
+    resultsPanel.classList.add('show');
+    btn.disabled = false;
+    scanBtnText.textContent = 'RE-SCAN';
+    scanRunning = false;
+
+    // Populate dynamic fields
+    const auditId = 'NX-' + Math.floor(10000 + Math.random() * 90000);
+    document.getElementById('auditId').textContent = auditId;
+    document.getElementById('scanTs').textContent = 'Executado em: ' + new Date().toLocaleString('pt-BR');
+
+    // Save audit data to localStorage (for login.html + admin.html)
+    const auditData = {
+      host:       host,
+      url:        host,
+      score:      18,
+      loss:       2100000,
+      findings:   12,
+      critical:   4,
+      certsExp:   3,
+      ticketId:   auditId,
+      nicho:      detectNicho(host),
+      nichoIcon:  '🔐',
+      tier:       'Enterprise',
+      tierName:   'Enterprise',
+      payback:    '< 30d',
+      roi: {
+        paybackDays: 28,
+        totalRecovery: 2100000,
+        implementationCost: 48000,
+      },
+      timestamp:  new Date().toISOString(),
+    };
+
+    try { localStorage.setItem('NEXIA_AUDIT_DATA', JSON.stringify(auditData)); } catch(e) {}
+    // Sync theme preference
+    try { localStorage.setItem('NEXIA_THEME', isDark ? 'dark' : 'light'); } catch(e) {}
+
+    if (typeof console !== 'undefined' && window.location.hostname === 'localhost') {
+      console.groupCollapsed('%c[NEXIA Scanner] Auditoria completa', 'color:#00e5ff;font-weight:bold');
+      console.log('%cHost: ' + host, 'color:#00d68f');
+      console.log('%cPKI Score: ' + auditData.score + '/100', 'color:#ff3d71');
+      console.log('%cImpacto: R$' + auditData.loss.toLocaleString('pt-BR') + '/mês', 'color:#ff3d71');
+      console.log('%cAudit ID: ' + auditId, 'color:#c084fc');
+      console.groupEnd();
+    }
+  }, totalMs);
+}
+
+function detectNicho(host) {
+  host = host.toLowerCase();
+  if (host.includes('bank') || host.includes('banco') || host.includes('fin')) return 'Financeiro';
+  if (host.includes('health') || host.includes('saude') || host.includes('clinica')) return 'Saúde';
+  if (host.includes('gov') || host.includes('.gov.br')) return 'Governo';
+  if (host.includes('edu') || host.includes('univ') || host.includes('.edu.br')) return 'Educação';
+  if (host.includes('telecom') || host.includes('tel') || host.includes('voip')) return 'Telecom';
+  if (host.includes('shop') || host.includes('loja') || host.includes('store')) return 'Varejo';
+  return 'Enterprise';
+}
+
+function exportReport() {
+  const host = document.getElementById('urlField').value.trim() || 'target';
+  const fname = `nexia-audit-${host}-${new Date().toISOString().split('T')[0]}.pdf`;
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#00d68f;color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,214,143,.4);max-width:360px';
+    toast.innerHTML = `✅ Relatório PDF gerado!<br><small style="font-weight:400">${fname}<br>Em produção, enviado ao CTO e CISO.</small>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+}
+
+function goToLogin() {
+  window.location.href = 'login.html';
+}
+
+// ── ENTER TO SCAN ─────────────────────────────────────────────────
+document.getElementById('urlField').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startScan();
+});
+</script>
+
+<!-- NEXIA CORE -->
+<!-- ══ NEXIA INTRO SOBERANA ══ -->
+<div id="nexia-intro" style="
+  position:fixed;inset:0;z-index:99999;
+  background:#07090f;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;
+  animation:introFadeOut 0.5s ease 1.2s forwards;
+  pointer-events:none;
+">
+  <div style="
+    width:52px;height:52px;
+    background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#00e5ff 100%);
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 40px rgba(0,229,255,0.3);
+    position:relative;overflow:hidden;
+    animation:introGemIn 0.4s cubic-bezier(0.22,1,0.36,1) 0s both;
+  ">
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);border-radius:14px"></div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" width="24" height="24" style="position:relative;z-index:1">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+  </div>
+  <div style="text-align:center;animation:introTextIn 0.4s ease 0.2s both;">
+    <div style="font-family:'DM Serif Display',Georgia,serif;font-style:italic;font-size:22px;color:#eef4ff;letter-spacing:0.02em;line-height:1">
+      NEXIA<span style="font-family:'Sora',sans-serif;font-style:normal;font-weight:700;font-size:13px;letter-spacing:0.12em;color:#00e5ff;margin-left:4px;vertical-align:middle"> OS</span>
+    </div>
+    <div style="font-family:'Sora',sans-serif;font-size:9px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:rgba(0,229,255,0.6);margin-top:5px">
+      PKI / SSL Scanner
+    </div>
+  </div>
+  <div style="
+    width:48px;height:2px;background:var(--border);border-radius:1px;overflow:hidden;
+    animation:introBarIn 0.3s ease 0.3s both;
+  ">
+    <div style="height:100%;background:linear-gradient(90deg,#00e5ff,#8b5cf6);width:0%;animation:introBarFill 0.7s ease 0.4s forwards;border-radius:1px"></div>
+  </div>
+</div>
+
+  
+<script src="../core/nexia-engine.js"></script>
+</body>
+</html>

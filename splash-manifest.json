@@ -1,0 +1,14 @@
+{
+  "name": "Splash Eventos",
+  "short_name": "Splash",
+  "description": "Gestão de espaços e eventos — NEXIA OS",
+  "start_url": "/splash/splash-admin.html",
+  "display": "standalone",
+  "background_color": "#07090F",
+  "theme_color": "#a855f7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

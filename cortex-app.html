@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORTEX — NEXIA OS</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script>
+function nexiaGetProfile() {
+  try {
+    return (typeof NexiaAuth !== 'undefined' && typeof NexiaAuth.getProfile === 'function')
+      ? NexiaAuth.getProfile() : null;
+  } catch(e) { return null; }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090F;--bg2:#0D1117;--bg3:#161B22;--bg4:#0a0d14;
+  --cyan:#00E5FF;--cyan2:#00B8CC;--cyanlt:rgba(0,229,255,.07);--cyanbrd:rgba(0,229,255,.15);
+  --purple:#A855F7;--purplt:rgba(168,85,247,.07);--purpbrd:rgba(168,85,247,.18);
+  --green:#10B981;--greenlt:rgba(16,185,129,.08);--greenbrd:rgba(16,185,129,.2);
+  --amber:#F59E0B;--amberlt:rgba(245,158,11,.08);
+  --red:#EF4444;--redlt:rgba(239,68,68,.08);
+  --text:#CDD5E0;--text2:rgba(205,213,224,.6);--text3:rgba(205,213,224,.3);
+  --brd:rgba(255,255,255,.05);--brd2:rgba(255,255,255,.09);
+  --gold:#FFD700;
+  --sb:240px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.shell{display:flex;height:100vh;width:100vw;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sb{width:var(--sb);background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:transform .25s}
+.sb-hd{padding:14px 12px 10px;border-bottom:1px solid var(--brd)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.brand-orb{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#0f2942,#1a0f2e);border:1px solid var(--cyanbrd);display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:16px;flex-shrink:0}
+.brand-name{font-size:14px;font-weight:800;letter-spacing:-.3px}
+.brand-name span{color:var(--cyan)}
+.btn-new{width:100%;padding:8px 12px;border-radius:8px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(168,85,247,.06));border:1px solid var(--cyanbrd);color:var(--cyan);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s}
+.btn-new:hover{background:linear-gradient(135deg,rgba(0,229,255,.13),rgba(168,85,247,.1));box-shadow:0 0 12px rgba(0,229,255,.08)}
+.conv-wrap{flex:1;overflow-y:auto;padding:8px}
+.conv-wrap::-webkit-scrollbar{width:3px}.conv-wrap::-webkit-scrollbar-thumb{background:var(--cyanbrd);border-radius:2px}
+.conv-sec{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;padding:8px 6px 3px}
+.conv-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;cursor:pointer;transition:all .2s;position:relative}
+.conv-item:hover{background:rgba(255,255,255,.03)}
+.conv-item.active{background:var(--cyanlt);border:1px solid var(--cyanbrd)}
+.conv-ico{width:26px;height:26px;border-radius:6px;background:var(--bg3);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);flex-shrink:0}
+.conv-item.active .conv-ico{background:rgba(0,229,255,.08);border-color:var(--cyanbrd);color:var(--cyan)}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-prev{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.conv-del{width:18px;height:18px;border-radius:4px;background:transparent;border:none;color:var(--text3);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:10px}
+.conv-item:hover .conv-del{display:flex}
+.conv-del:hover{background:var(--redlt);color:var(--red)}
+.sb-ft{padding:10px 12px;border-top:1px solid var(--brd)}
+.user-card{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;background:var(--bg3);border:1px solid var(--brd)}
+.user-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--cyan2),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-plan{font-size:9px;color:var(--text3)}
+.user-plan.master{color:var(--gold)}
+.plan-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600}
+.plan-badge.master{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.2)}
+.plan-badge.pro{background:var(--purplt);color:var(--purple);border:1px solid var(--purpbrd)}
+.plan-badge.starter{background:var(--cyanlt);color:var(--cyan);border:1px solid var(--cyanbrd)}
+.plan-badge.free{background:var(--bg3);color:var(--text3);border:1px solid var(--brd)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--brd);background:var(--bg2);flex-shrink:0}
+.tb-menu{width:32px;height:32px;border-radius:7px;background:transparent;border:1px solid var(--brd);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s}
+.tb-menu:hover{border-color:var(--cyanbrd);color:var(--cyan)}
+.tb-title{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
+.model-sel{padding:5px 9px;border-radius:7px;background:var(--bg3);border:1px solid var(--brd2);color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;outline:none;max-width:200px}
+.model-sel:focus{border-color:var(--cyanbrd)}
+.model-sel option{background:var(--bg3)}
+.model-sel optgroup{color:var(--text3);font-size:10px}
+.tb-btn{width:30px;height:30px;border-radius:7px;background:transparent;border:1px solid var(--brd);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0}
+.tb-btn:hover{border-color:var(--cyanbrd);color:var(--cyan)}
+.tb-btn.active{background:var(--cyanlt);border-color:var(--cyanbrd);color:var(--cyan)}
+.usage-pill{font-size:10px;padding:3px 8px;border-radius:12px;border:1px solid var(--brd);color:var(--text3);white-space:nowrap;flex-shrink:0}
+.usage-pill.unlimited{border-color:rgba(255,215,0,.2);color:var(--gold)}
+.usage-pill.warning{border-color:rgba(245,158,11,.3);color:var(--amber)}
+.usage-pill.danger{border-color:rgba(239,68,68,.3);color:var(--red)}
+
+/* ── MESSAGES ── */
+.msgs{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+.msgs::-webkit-scrollbar{width:4px}.msgs::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+
+/* Welcome */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:40px 20px;gap:16px}
+.w-orb{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(168,85,247,.12));border:1px solid var(--cyanbrd);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--cyan);margin-bottom:4px}
+.welcome h2{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.welcome h2 span{color:var(--cyan)}
+.welcome p{font-size:13px;color:var(--text2);max-width:420px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;max-width:520px}
+.chip{padding:6px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd2);font-size:11px;color:var(--text2);cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--cyanbrd);color:var(--cyan);background:var(--cyanlt)}
+.chip i{margin-right:5px;font-size:12px}
+
+/* Mensagens */
+.msg{display:flex;gap:10px;align-items:flex-start;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.msg-av.bot{background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(168,85,247,.12));border:1px solid var(--cyanbrd);color:var(--cyan)}
+.msg-av.user{background:linear-gradient(135deg,var(--cyan2),var(--purple));color:#fff;font-size:11px;font-weight:700}
+.msg-body{flex:1;min-width:0;max-width:84%}
+.msg-header{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.msg-name{font-size:11px;font-weight:600;color:var(--text3)}
+.msg-model{font-size:9px;padding:2px 6px;border-radius:8px;background:var(--bg3);border:1px solid var(--brd);color:var(--text3)}
+.msg-ts{font-size:9px;color:var(--text3)}
+.msg-bubble{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.65}
+.msg.bot .msg-bubble{background:var(--bg2);border:1px solid var(--brd2);border-radius:4px 12px 12px 12px}
+.msg.user .msg-bubble{background:linear-gradient(135deg,rgba(0,229,255,.1),rgba(168,85,247,.08));border:1px solid var(--cyanbrd);border-radius:12px 4px 12px 12px;text-align:right}
+/* Markdown dentro do bubble */
+.msg-bubble h1,.msg-bubble h2,.msg-bubble h3{font-size:14px;font-weight:700;margin:12px 0 6px;color:var(--text)}
+.msg-bubble h1{font-size:16px}
+.msg-bubble p{margin:0 0 8px;color:var(--text)}
+.msg-bubble p:last-child{margin-bottom:0}
+.msg-bubble ul,.msg-bubble ol{margin:6px 0 8px 18px}
+.msg-bubble li{margin:3px 0;color:var(--text)}
+.msg-bubble strong{color:var(--cyan);font-weight:600}
+.msg-bubble em{color:var(--text2)}
+.msg-bubble code{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.1);padding:1px 5px;border-radius:4px;color:var(--cyan)}
+.msg-bubble pre{margin:10px 0;border-radius:8px;overflow:hidden;border:1px solid var(--brd2);position:relative}
+.msg-bubble pre code{background:transparent;border:none;padding:0;font-size:12px;color:inherit}
+.msg-bubble blockquote{border-left:3px solid var(--cyanbrd);padding-left:12px;color:var(--text2);margin:8px 0}
+.msg-bubble table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.msg-bubble th{background:var(--bg3);padding:6px 10px;text-align:left;color:var(--cyan);font-weight:600;border:1px solid var(--brd2)}
+.msg-bubble td{padding:5px 10px;border:1px solid var(--brd);color:var(--text)}
+.msg-bubble tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.msg-bubble a{color:var(--cyan);text-decoration:none}
+.msg-bubble a:hover{text-decoration:underline}
+.copy-btn{position:absolute;top:6px;right:6px;padding:3px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--brd2);color:var(--text3);font-size:10px;cursor:pointer;transition:all .2s}
+.copy-btn:hover{border-color:var(--cyanbrd);color:var(--cyan)}
+/* Streaming cursor */
+.streaming-cursor{display:inline-block;width:2px;height:14px;background:var(--cyan);border-radius:1px;animation:blink .6s infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.streaming-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--cyan);padding:2px 7px;border-radius:10px;border:1px solid var(--cyanbrd);background:var(--cyanlt);margin-bottom:6px}
+.streaming-badge .dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+
+/* Actions display */
+.actions-bar{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.action-tag{font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--brd2);color:var(--text3)}
+.action-tag.ok{border-color:var(--greenbrd);color:var(--green);background:var(--greenlt)}
+.action-tag.fail{border-color:rgba(239,68,68,.2);color:var(--red);background:var(--redlt)}
+
+/* Imagem gerada */
+.img-result{margin-top:8px;border-radius:8px;overflow:hidden;border:1px solid var(--brd2);max-width:400px}
+.img-result img{width:100%;display:block}
+
+/* Loader */
+.loader{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2);border:1px solid var(--brd2);border-radius:12px;width:fit-content}
+.loader-dots{display:flex;gap:4px}
+.loader-dots span{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:bounce .9s ease infinite}
+.loader-dots span:nth-child(2){animation-delay:.15s}
+.loader-dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+.loader-text{font-size:11px;color:var(--text3)}
+
+/* ── INPUT AREA ── */
+.input-area{padding:12px 14px;border-top:1px solid var(--brd);background:var(--bg2);flex-shrink:0}
+.input-wrap{display:flex;gap:8px;align-items:flex-end;background:var(--bg3);border:1px solid var(--brd2);border-radius:12px;padding:10px 12px;transition:border-color .2s}
+.input-wrap:focus-within{border-color:var(--cyanbrd)}
+textarea#inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:inherit;resize:none;min-height:22px;max-height:180px;line-height:1.6}
+textarea#inp::placeholder{color:var(--text3)}
+.input-actions{display:flex;gap:6px;align-items:flex-end;flex-shrink:0}
+.btn-att{width:30px;height:30px;border-radius:7px;background:transparent;border:1px solid var(--brd);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0}
+.btn-att:hover{border-color:var(--cyanbrd);color:var(--cyan)}
+.btn-send{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--cyan2),#0077aa);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0}
+.btn-send:hover{box-shadow:0 0 14px rgba(0,229,255,.25)}
+.btn-send:disabled{opacity:.4;cursor:not-allowed}
+.input-footer{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding:0 2px}
+.input-hint{font-size:10px;color:var(--text3)}
+.char-count{font-size:10px;color:var(--text3)}
+
+/* RAG Panel */
+.rag-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.rag-panel{background:var(--bg2);border:1px solid var(--brd2);border-radius:14px;padding:20px;width:460px;max-height:80vh;overflow-y:auto}
+.rag-panel h3{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.rag-panel h3 i{color:var(--cyan)}
+.rag-drop{border:2px dashed var(--brd2);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px}
+.rag-drop:hover,.rag-drop.drag{border-color:var(--cyanbrd);background:var(--cyanlt)}
+.rag-drop i{font-size:26px;color:var(--text3);margin-bottom:8px;display:block}
+.rag-drop p{font-size:12px;color:var(--text3)}
+.rag-files{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.rag-file{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;font-size:11px}
+.rag-file i{color:var(--cyan)}
+.rag-file-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rag-file-size{color:var(--text3);flex-shrink:0}
+.rag-file-del{width:18px;height:18px;background:transparent;border:none;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:color .2s}
+.rag-file-del:hover{color:var(--red)}
+.rag-prog{height:3px;background:var(--brd);border-radius:2px;overflow:hidden;margin-top:6px}
+.rag-prog-bar{height:100%;background:var(--cyan);border-radius:2px;transition:width .3s}
+.panel-close{float:right;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;transition:color .2s}
+.panel-close:hover{color:var(--text)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 14px;border-radius:9px;background:var(--bg3);border:1px solid var(--brd2);font-size:12px;display:flex;align-items:center;gap:7px;z-index:200;animation:slideUp .25s ease;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.success{border-color:var(--greenbrd);color:var(--green)}
+.toast.error{border-color:rgba(239,68,68,.3);color:var(--red)}
+.toast.info{border-color:var(--cyanbrd);color:var(--cyan)}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Mobile */
+@media(max-width:640px){
+  .sb{position:fixed;inset:0 auto 0 0;z-index:50;transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sb" id="sidebar">
+  <div class="sb-hd">
+    <div class="brand">
+      <div class="brand-orb">✦</div>
+      <div class="brand-name">NEXIA <span>CORTEX</span></div>
+    </div>
+    <button class="btn-new" onclick="newConv()">
+      <i class="ri-add-circle-line"></i> Nova Conversa
+    </button>
+  </div>
+  <div class="conv-wrap" id="convList"></div>
+  <div class="sb-ft">
+    <div class="user-card">
+      <div class="user-av" id="userAv">?</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Carregando...</div>
+        <div class="user-plan" id="userPlanLabel"><span class="plan-badge" id="planBadge">free</span></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="tb-menu" onclick="toggleSb()"><i class="ri-menu-line"></i></button>
+    <div class="tb-title" id="convTitle">CORTEX — Assistente Universal</div>
+
+    <select class="model-sel" id="modelSel">
+      <option value="auto">⚡ Auto (melhor para a tarefa)</option>
+      <optgroup label="── ANTHROPIC ──">
+        <option value="claude">✦ Claude Sonnet 4.6 ★</option>
+        <option value="claude_opus">✦ Claude Opus 4.6</option>
+      </optgroup>
+      <optgroup label="── OPENAI ──">
+        <option value="gpt4o">⚡ GPT-4o</option>
+        <option value="gpt4o_mini">⚡ GPT-4o Mini</option>
+      </optgroup>
+      <optgroup label="── GROQ (rápido) ──">
+        <option value="groq_llama3">🦙 Llama 3 70B</option>
+        <option value="groq_mixtral">🔥 Mixtral 8x7B</option>
+        <option value="groq_llama3_fast">🦙 Llama 3.1 Fast</option>
+      </optgroup>
+      <optgroup label="── DEEPSEEK (código) ──">
+        <option value="deepseek_coder">💻 DeepSeek Coder</option>
+        <option value="deepseek_chat">💻 DeepSeek Chat</option>
+      </optgroup>
+      <optgroup label="── GOOGLE ──">
+        <option value="gemini_pro">🌐 Gemini 1.5 Pro (2M ctx)</option>
+        <option value="gemini_flash">🌐 Gemini 2.0 Flash</option>
+      </optgroup>
+      <optgroup label="── xAI ──">
+        <option value="grok3">🚀 Grok-3 (tempo real)</option>
+      </optgroup>
+      <optgroup label="── BUSCA EM TEMPO REAL ──">
+        <option value="perplexity">🔍 Perplexity</option>
+        <option value="perplexity_fast">🔍 Perplexity Fast</option>
+      </optgroup>
+      <optgroup label="── ESPECIALISTAS ──">
+        <option value="swarm_all">🤖 Swarm: Dev+Security+Business</option>
+        <option value="swarm_dev">🤖 Swarm: Dev+Architect</option>
+        <option value="swarm_biz">🤖 Swarm: Business+Finance+Legal</option>
+      </optgroup>
+    </select>
+
+    <button class="tb-btn" id="ragBtn" onclick="toggleRAGPanel()" title="Ativar RAG — seus documentos como contexto"><i class="ri-file-search-line"></i></button>
+    <button class="tb-btn tb-btn-autodev" onclick="toggleAutoDevPanel()" title="AutoDev — Gerar projeto completo com IA"><i class="ri-code-box-line"></i></button>
+    <button class="tb-btn" onclick="clearConv()" title="Limpar conversa"><i class="ri-delete-bin-line"></i></button>
+    <button class="tb-btn" onclick="location.href='../nexia/tenant-hub.html'" title="Voltar ao dashboard"><i class="ri-home-3-line"></i></button>
+    <div class="usage-pill" id="usagePill">···</div>
+  </div>
+
+  <!-- Messages -->
+  <div class="msgs" id="msgs">
+    <div class="welcome" id="welcome">
+      <div class="w-orb"><i class="ri-brain-line"></i></div>
+      <h2>Olá, eu sou o <span>CORTEX</span></h2>
+      <p>O orquestrador de IAs do NEXIA OS. Combino Claude, GPT-4o, Groq, DeepSeek, Gemini, Perplexity e mais — escolhendo automaticamente a melhor IA para cada tarefa.</p>
+      <div class="chips">
+        <div class="chip" onclick="useChip(this)"><i class="ri-code-s-slash-line"></i>Escreva um sistema de CRM completo em Firebase</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-shield-check-line"></i>Audite meu código de autenticação Firebase</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-line-chart-line"></i>Analise as tendências do mercado imobiliário agora</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-file-text-line"></i>Analise este contrato e identifique riscos jurídicos</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-image-line"></i>Gere uma imagem de dashboard moderno para fintech</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-team-line"></i>Ative swarm completo: Dev + Security + Business</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-robot-line"></i>Crie um agente de vendas que qualifica leads 24/7</div>
+        <div class="chip" onclick="useChip(this)"><i class="ri-money-dollar-circle-line"></i>Calcule o MRR projetado com 20 clientes no plano Pro</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="inp" placeholder="Pergunte ao CORTEX, gere código, analise documentos, busque em tempo real... (Enter para enviar)" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <div class="input-actions">
+        <button class="btn-att" onclick="document.getElementById('fileInput').click()" title="Anexar arquivo ao RAG"><i class="ri-attachment-2"></i></button>
+        <input type="file" id="fileInput" style="display:none" accept=".pdf,.txt,.md,.js,.ts,.py,.html,.css,.json,.csv" multiple onchange="handleFiles(this.files)">
+        <button class="btn-send" id="btnSend" onclick="sendMsg()" title="Enviar (Enter)"><i class="ri-send-plane-fill"></i></button>
+      </div>
+    </div>
+    <div class="input-footer">
+      <span class="input-hint"><kbd>Enter</kbd> envia · <kbd>Shift+Enter</kbd> nova linha</span>
+      <span class="char-count" id="charCount">0 / ∞</span>
+    </div>
+  </div>
+</main>
+
+</div>
+
+<!-- RAG Panel -->
+<div class="rag-overlay" id="ragOverlay" style="display:none" onclick="if(event.target===this)toggleRAGPanel()">
+  <div class="rag-panel">
+    <button class="panel-close" onclick="toggleRAGPanel()"><i class="ri-close-line"></i></button>
+    <h3><i class="ri-file-search-line"></i> Documentos no Contexto (RAG)</h3>
+    <div class="rag-drop" id="ragDrop" onclick="document.getElementById('ragFileInput').click()" ondragover="e=>{e.preventDefault();this.classList.add('drag')}" ondragleave="e=>{this.classList.remove('drag')}" ondrop="e=>{e.preventDefault();this.classList.remove('drag');handleFiles(e.dataTransfer.files)}">
+      <i class="ri-upload-cloud-2-line"></i>
+      <p>Arraste PDFs, TXT, código, CSV, MD...</p>
+      <p style="margin-top:4px;font-size:10px;color:var(--text3)">O CORTEX vai usar esses documentos como referência</p>
+    </div>
+    <input type="file" id="ragFileInput" style="display:none" accept=".pdf,.txt,.md,.js,.ts,.py,.html,.css,.json,.csv" multiple onchange="handleFiles(this.files)">
+    <div class="rag-files" id="ragFileList"></div>
+    <div class="rag-prog" id="ragProg" style="display:none"><div class="rag-prog-bar" id="ragProgBar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- AutoDev Panel -->
+<div class="rag-overlay" id="autodevOverlay" style="display:none" onclick="if(event.target===this)toggleAutoDevPanel()">
+  <div class="rag-panel" style="max-width:600px;width:95%">
+    <button class="panel-close" onclick="toggleAutoDevPanel()"><i class="ri-close-line"></i></button>
+    <h3><i class="ri-code-box-line"></i> AutoDev — Gerador de Projetos IA</h3>
+
+    <div id="autodevForm">
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">DESCRIÇÃO DO PROJETO *</label>
+        <textarea id="adDesc" rows="3" placeholder="Ex: API REST de autenticação com Firebase + JWT, endpoint de login, cadastro e reset de senha" style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;color:var(--text);font-size:13px;resize:vertical;font-family:inherit;outline:none"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">TIPO DE PROJETO</label>
+          <select id="adType" style="width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;color:var(--text);font-size:12px">
+            <option value="auto">🤖 Auto-detectar</option>
+            <option value="api">🔌 API / Backend</option>
+            <option value="frontend">🖥️ Frontend / UI</option>
+            <option value="fullstack">⚡ Full Stack</option>
+            <option value="bot">🤖 Bot / Automação</option>
+            <option value="lib">📦 Biblioteca</option>
+            <option value="script">📜 Script / CLI</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">STACK</label>
+          <select id="adStack" style="width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;color:var(--text);font-size:12px">
+            <option value="auto">🤖 Auto-detectar</option>
+            <option value="netlify-functions">⚡ Netlify Functions (Node.js)</option>
+            <option value="html">🌐 HTML/CSS/JS puro</option>
+            <option value="react">⚛️ React + Vite + Tailwind</option>
+            <option value="nextjs">▲ Next.js 14</option>
+            <option value="express">🚂 Node.js + Express</option>
+            <option value="python">🐍 Python + FastAPI</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="runAutoDevGenerate()" style="width:100%;padding:11px;background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(168,85,247,.1));border:1px solid var(--cyanbrd);border-radius:9px;color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em" id="adGenBtn">
+        <i class="ri-code-ai-line"></i> Gerar Projeto Completo
+      </button>
+    </div>
+
+    <div id="autodevResult" style="display:none;margin-top:14px">
+      <div id="adResultHeader" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span id="adResultTitle" style="font-size:13px;font-weight:700;color:var(--cyan)"></span>
+        <div style="display:flex;gap:6px">
+          <button onclick="downloadProject()" style="padding:5px 10px;background:var(--greenlt);border:1px solid var(--greenbrd);border-radius:6px;color:var(--green);font-size:11px;font-weight:600;cursor:pointer"><i class="ri-download-2-line"></i> Baixar ZIP</button>
+          <button onclick="sendProjectToChat()" style="padding:5px 10px;background:var(--cyanlt);border:1px solid var(--cyanbrd);border-radius:6px;color:var(--cyan);font-size:11px;font-weight:600;cursor:pointer"><i class="ri-chat-3-line"></i> Enviar ao Chat</button>
+        </div>
+      </div>
+      <div id="adFileList" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+
+    <div id="autodevLoading" style="display:none;text-align:center;padding:20px 0">
+      <div style="width:36px;height:36px;border:2px solid var(--cyanbrd);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px"></div>
+      <p style="color:var(--text2);font-size:12px" id="adLoadMsg">Gerando projeto com IA...</p>
+    </div>
+
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--brd)">
+      <p style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">PIPELINE DE CÓDIGO (envie código no chat para usar)</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button onclick="setPipelineAction('review')" class="pipe-btn">🔍 Review</button>
+        <button onclick="setPipelineAction('fix')" class="pipe-btn">🔧 Fix</button>
+        <button onclick="setPipelineAction('refactor')" class="pipe-btn">♻️ Refactor</button>
+        <button onclick="setPipelineAction('test')" class="pipe-btn">🧪 Testes</button>
+        <button onclick="setPipelineAction('security')" class="pipe-btn">🛡️ Segurança</button>
+        <button onclick="setPipelineAction('optimize')" class="pipe-btn">⚡ Otimizar</button>
+        <button onclick="setPipelineAction('docs')" class="pipe-btn">📄 Docs</button>
+        <button onclick="setPipelineAction('explain')" class="pipe-btn">💡 Explicar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── AUTODEV ───────────────────────────────────────────────────────────────
+let lastGeneratedProject = null;
+
+function toggleAutoDevPanel() {
+  const o = document.getElementById('autodevOverlay');
+  o.style.display = o.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function runAutoDevGenerate() {
+  const desc = document.getElementById('adDesc').value.trim();
+  if (!desc) { toast('⚠️ Descreva o projeto antes de gerar', 'error'); return; }
+
+  const btn = document.getElementById('adGenBtn');
+  btn.disabled = true;
+  document.getElementById('autodevForm').querySelector('button').textContent = '⏳ Gerando...';
+  document.getElementById('autodevLoading').style.display = 'block';
+  document.getElementById('autodevResult').style.display = 'none';
+
+  const msgs = ['Analisando a descrição...', 'Definindo arquitetura...', 'Gerando arquivos...', 'Finalizando o projeto...'];
+  let mi = 0;
+  const ticker = setInterval(() => { document.getElementById('adLoadMsg').textContent = msgs[mi % msgs.length]; mi++; }, 2500);
+
+  try {
+    const res = await fetch(`${API_BASE}/autodev`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generate_project',
+        description: desc,
+        projectType: document.getElementById('adType').value,
+        stack: document.getElementById('adStack').value,
+        tenantId, userId
+      })
+    });
+    const data = await res.json();
+    clearInterval(ticker);
+    if (!data.ok) throw new Error(data.error || 'Falha na geração');
+
+    lastGeneratedProject = data;
+    showGeneratedProject(data);
+    toast(`✅ Projeto gerado! ${data.fileCount} arquivo(s)`, 'success');
+  } catch (e) {
+    clearInterval(ticker);
+    toast(`❌ ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('adGenBtn').innerHTML = '<i class="ri-code-ai-line"></i> Gerar Projeto Completo';
+    document.getElementById('autodevLoading').style.display = 'none';
+  }
+}
+
+function showGeneratedProject(data) {
+  const result = document.getElementById('autodevResult');
+  result.style.display = 'block';
+
+  const name = data.meta?.projectName || data.projectId || 'projeto';
+  document.getElementById('adResultTitle').textContent = `📁 ${name} · ${data.fileCount} arquivo(s) · via ${data.modelUsed || 'IA'}`;
+
+  const list = document.getElementById('adFileList');
+  list.innerHTML = Object.entries(data.files || {}).map(([fname, content]) => {
+    const ext = fname.split('.').pop();
+    const icons = { js:'ri-javascript-line', ts:'ri-code-s-slash-line', py:'ri-python-line', html:'ri-html5-line', css:'ri-css3-line', json:'ri-braces-line', md:'ri-markdown-line', toml:'ri-settings-3-line', txt:'ri-file-text-line' };
+    const ico = icons[ext] || 'ri-file-code-line';
+    const lines = (content || '').split('\n').length;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border-radius:7px;border:1px solid var(--brd);cursor:pointer" onclick="previewFile('${escHtml(fname)}')">
+      <i class="${ico}" style="color:var(--cyan);font-size:13px;flex-shrink:0"></i>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(fname)}</span>
+      <span style="font-size:10px;color:var(--text3);flex-shrink:0">${lines}L</span>
+    </div>`;
+  }).join('');
+}
+
+function previewFile(fname) {
+  if (!lastGeneratedProject?.files) return;
+  const content = lastGeneratedProject.files[fname] || '';
+  const ext = fname.split('.').pop();
+  toggleAutoDevPanel();
+  const msg = `**📄 \`${fname}\`** (${content.split('\n').length} linhas)\n\n\`\`\`${ext}\n${content}\n\`\`\``;
+  appendMsg('bot', msg, { model: 'AutoDev Preview' }, false);
+}
+
+function sendProjectToChat() {
+  if (!lastGeneratedProject?.files) return;
+  toggleAutoDevPanel();
+  const files = Object.keys(lastGeneratedProject.files);
+  const summary = `📁 **Projeto Gerado: \`${lastGeneratedProject.meta?.projectName || lastGeneratedProject.projectId}\`**\n\n**${files.length} arquivos gerados:**\n${files.map(f => `- \`${f}\``).join('\n')}\n\n**Modelo usado:** ${lastGeneratedProject.modelUsed}\n\nDigite \`mostrar [nome_do_arquivo]\` para ver o conteúdo de qualquer arquivo.`;
+  appendMsg('bot', summary, { model: 'AutoDev' }, false);
+}
+
+function downloadProject() {
+  if (!lastGeneratedProject?.files) return;
+  const projectName = lastGeneratedProject.meta?.projectName || lastGeneratedProject.projectId || 'projeto';
+  const files = lastGeneratedProject.files;
+  const lines = [`# ${projectName}\n`];
+  for (const [fname, content] of Object.entries(files)) {
+    lines.push(`\n${'='.repeat(60)}\n// FILE: ${fname}\n${'='.repeat(60)}\n${content}\n`);
+  }
+  const blob = new Blob([lines.join('')], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${projectName}.txt`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('✅ Projeto baixado!', 'success');
+}
+
+function setPipelineAction(action) {
+  const labels = { review:'🔍 REVISAR', fix:'🔧 CORRIGIR', refactor:'♻️ REFATORAR', test:'🧪 GERAR TESTES', security:'🛡️ AUDITAR SEGURANÇA', optimize:'⚡ OTIMIZAR', docs:'📄 DOCUMENTAR', explain:'💡 EXPLICAR' };
+  const inp = document.getElementById('inp');
+  inp.value = `${labels[action] || action}:\n\`\`\`\n[Cole seu código aqui]\n\`\`\``;
+  toggleAutoDevPanel();
+  inp.focus();
+  inp.selectionStart = inp.selectionEnd = inp.value.indexOf('[Cole seu código aqui]');
+  autoResize(inp);
+  toast(`Ação ${action} selecionada — cole seu código`, 'info');
+}
+</script>
+<style>
+.pipe-btn{padding:5px 10px;background:var(--bg3);border:1px solid var(--brd2);border-radius:6px;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s}
+.pipe-btn:hover{background:var(--cyanlt);border-color:var(--cyanbrd);color:var(--cyan)}
+.tb-btn-autodev{color:var(--purple)!important;border-color:var(--purpbrd)!important}
+.tb-btn-autodev:hover{background:var(--purplt)!important}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────
+const API_BASE = '/api';
+const marked_opts = { breaks: true, gfm: true };
+
+// ── STATE ───────────────────────────────────────────────────────────────
+let userId = null, tenantId = 'nexia', userPlan = 'free', isUnlimited = false;
+let activeConvId = null;
+let isThinking = false;
+let ragEnabled = false;
+let ragFiles = [];
+let conversations = {};
+
+// ── BOOT ─────────────────────────────────────────────────────────────────
+(function boot() {
+  function check() {
+    if (typeof NEXIA !== 'undefined' && NEXIA.auth) {
+      NEXIA.auth.onAuthStateChanged(u => {
+        if (!u) { window.location.href = '../login.html'; return; }
+        userId = u.uid;
+        const p = nexiaGetProfile();
+        if (p?.tenantSlug) tenantId = p.tenantSlug;
+        else {
+          const wait = setInterval(() => {
+            const pp = nexiaGetProfile();
+            if (pp) { clearInterval(wait); tenantId = pp.tenantSlug || tenantId; init(); }
+          }, 150);
+          setTimeout(() => clearInterval(wait), 3000);
+        }
+        init();
+      });
+    } else if (typeof firebase !== 'undefined') {
+      firebase.auth().onAuthStateChanged(u => {
+        if (!u) { window.location.href = '../login.html'; return; }
+        userId = u.uid;
+        init();
+      });
+    } else { setTimeout(check, 80); }
+  }
+  check();
+})();
+
+async function init() {
+  loadConvs();
+  if (!activeConvId) newConv(false);
+  await loadUsage();
+  loadProfile();
+}
+
+function loadProfile() {
+  const p = nexiaGetProfile();
+  const name = p?.name || p?.displayName || (userId ? userId.slice(0,8) : 'Usuário');
+  document.getElementById('userAv').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = name;
+  userPlan = p?.plan || 'free';
+  isUnlimited = userPlan === 'master' || userPlan === 'enterprise' ||
+    (typeof tenantId !== 'undefined' && tenantId === 'nexia');
+  const badge = document.getElementById('planBadge');
+  badge.textContent = userPlan.toUpperCase();
+  badge.className = `plan-badge ${userPlan}`;
+}
+
+// ── CONVERSATIONS ─────────────────────────────────────────────────────────
+function loadConvs() {
+  try {
+    const raw = localStorage.getItem(`cortex_convs_${tenantId}_${userId}`);
+    conversations = raw ? JSON.parse(raw) : {};
+  } catch { conversations = {}; }
+  renderConvList();
+}
+
+function saveConvs() {
+  try { localStorage.setItem(`cortex_convs_${tenantId}_${userId}`, JSON.stringify(conversations)); } catch {}
+}
+
+function newConv(focus=true) {
+  const id = `conv_${Date.now()}`;
+  conversations[id] = { id, name: 'Nova conversa', preview: '', ts: Date.now(), msgs: [] };
+  activeConvId = id;
+  saveConvs();
+  renderConvList();
+  clearMessages();
+  if (focus) document.getElementById('inp').focus();
+  updateTitle('Nova conversa');
+  return id;
+}
+
+function switchConv(id) {
+  if (!conversations[id]) return;
+  activeConvId = id;
+  renderConvList();
+  clearMessages();
+  const conv = conversations[id];
+  if (conv.msgs.length) {
+    document.getElementById('welcome').style.display = 'none';
+    conv.msgs.forEach(m => appendMsg(m.role, m.content, m.meta, false));
+  }
+  updateTitle(conv.name);
+}
+
+function deleteConv(id, e) {
+  e.stopPropagation();
+  delete conversations[id];
+  saveConvs();
+  if (activeConvId === id) { activeConvId = null; newConv(); }
+  renderConvList();
+}
+
+function renderConvList() {
+  const list = document.getElementById('convList');
+  const sorted = Object.values(conversations).sort((a,b) => b.ts - a.ts);
+  if (!sorted.length) { list.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:11px;padding:20px">Nenhuma conversa ainda</div>'; return; }
+
+  const today = [], older = [];
+  const now = Date.now();
+  sorted.forEach(c => (now - c.ts < 86400000 ? today : older).push(c));
+
+  let html = '';
+  if (today.length) { html += '<div class="conv-sec">Hoje</div>'; today.forEach(c => html += convItemHTML(c)); }
+  if (older.length) { html += '<div class="conv-sec">Anteriores</div>'; older.forEach(c => html += convItemHTML(c)); }
+  list.innerHTML = html;
+}
+
+function convItemHTML(c) {
+  const ic = { code:'ri-code-s-slash-line', search:'ri-search-line', image:'ri-image-line', swarm:'ri-team-line', finance:'ri-money-dollar-circle-line' }[c.type] || 'ri-chat-3-line';
+  return `<div class="conv-item ${c.id===activeConvId?'active':''}" onclick="switchConv('${c.id}')">
+    <div class="conv-ico"><i class="${ic}"></i></div>
+    <div class="conv-info">
+      <div class="conv-name">${escHtml(c.name)}</div>
+      <div class="conv-prev">${escHtml(c.preview||'')}</div>
+    </div>
+    <button class="conv-del" onclick="deleteConv('${c.id}',event)"><i class="ri-close-line"></i></button>
+  </div>`;
+}
+
+function updateConvMeta(userMsg, botMsg, type) {
+  if (!activeConvId || !conversations[activeConvId]) return;
+  const conv = conversations[activeConvId];
+  if (conv.name === 'Nova conversa') conv.name = userMsg.slice(0, 38) + (userMsg.length > 38 ? '...' : '');
+  conv.preview = botMsg.slice(0, 60).replace(/[#*`]/g, '') + '...';
+  conv.ts = Date.now();
+  conv.type = type;
+  saveConvs();
+  renderConvList();
+  updateTitle(conv.name);
+}
+
+function updateTitle(name) { document.getElementById('convTitle').textContent = name; }
+
+// ── USAGE ────────────────────────────────────────────────────────────────
+async function loadUsage() {
+  try {
+    const res = await fetch(`${API_BASE}/usage?tenantId=${tenantId}&userId=${userId}`);
+    if (!res.ok) return;
+    const d = await res.json();
+    updateUsagePill(d);
+  } catch {}
+}
+
+function updateUsagePill(d) {
+  const pill = document.getElementById('usagePill');
+  if (isUnlimited || d?.unlimited) {
+    pill.textContent = '∞ ILIMITADO';
+    pill.className = 'usage-pill unlimited';
+    return;
+  }
+  if (!d?.today) { pill.textContent = '···'; return; }
+  const { calls=0, limit=50 } = d.today;
+  const pct = Math.round((calls/limit)*100);
+  pill.textContent = `${calls}/${limit} msgs`;
+  pill.className = `usage-pill ${pct>=90?'danger':pct>=70?'warning':''}`;
+}
+
+// ── SEND MESSAGE ──────────────────────────────────────────────────────────
+async function sendMsg() {
+  if (isThinking) return;
+  const input = document.getElementById('inp');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!activeConvId) newConv(false);
+  input.value = ''; autoResize(input);
+  updateCharCount(0);
+
+  isThinking = true;
+  document.getElementById('btnSend').disabled = true;
+
+  appendMsg('user', text, null, true);
+  const loaderId = showLoader();
+
+  const modelSel = document.getElementById('modelSel').value;
+
+  // Resolve modelo e se é swarm
+  let model = modelSel;
+  let swarmAgents = null;
+  if (modelSel === 'swarm_all') { model = 'auto'; swarmAgents = ['dev','security','business']; }
+  else if (modelSel === 'swarm_dev') { model = 'auto'; swarmAgents = ['dev','architect']; }
+  else if (modelSel === 'swarm_biz') { model = 'auto'; swarmAgents = ['business','finance','legal']; }
+
+  try {
+    const payload = {
+      userId,
+      tenantId,
+      message: text,
+      conversationId: activeConvId,
+      ragEnabled,
+      model,
+      stream: true
+    };
+    if (swarmAgents) { payload.model = 'auto'; payload._swarmAgents = swarmAgents; }
+
+    const res = await fetch(`${API_BASE}/cortex`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    hideLoader(loaderId);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({error:'Erro desconhecido'}));
+      if (res.status === 429) {
+        appendMsg('bot', `🔒 **Limite atingido**\n\n${err.error}\n\n**Uso:** ${err.calls}/${err.limit} msgs/dia no plano **${err.plan?.toUpperCase()}**`, null, true);
+      } else {
+        appendMsg('bot', `❌ **Erro ${res.status}:** ${err.error || 'Falha na API'}`, null, true);
+      }
+      return;
+    }
+
+    const ct = res.headers.get('content-type') || '';
+
+    if (ct.includes('text/event-stream')) {
+      // ── SSE streaming real ─────────────────────────────────────────
+      await handleSSEStream(res, text);
+    } else {
+      // ── JSON response ──────────────────────────────────────────────
+      const data = await res.json();
+      if (data.error) { appendMsg('bot', `❌ ${data.error}`, null, true); return; }
+      const meta = { model: data._meta?.modelUsed, actions: data.actions, unlimited: data._meta?.unlimited, usage: data._meta?.usage };
+      appendMsg('bot', data.reply, meta, true);
+      updateConvMeta(text, data.reply, data.type);
+      if (meta.usage) updateUsagePill({ today: meta.usage });
+    }
+
+  } catch(e) {
+    hideLoader(loaderId);
+    appendMsg('bot', `❌ **Erro de rede:** ${e.message}`, null, true);
+  } finally {
+    isThinking = false;
+    document.getElementById('btnSend').disabled = false;
+    document.getElementById('inp').focus();
+  }
+}
+
+async function handleSSEStream(res, userText) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  let fullText = '';
+  let meta = {};
+  let msgEl = null;
+
+  while(true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, {stream:true});
+    const lines = buf.split('\n');
+    buf = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (data === '[DONE]') break;
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.done) {
+          // Mensagem completa
+          meta = {
+            model: parsed.model,
+            actions: parsed.actions,
+            swarm: parsed.swarm,
+            unlimited: parsed.usage?.unlimited,
+            usage: parsed.usage
+          };
+          // Remove cursor piscante
+          if (msgEl) {
+            const cursor = msgEl.querySelector('.streaming-cursor');
+            if (cursor) cursor.remove();
+            const badge = msgEl.querySelector('.streaming-badge');
+            if (badge) badge.remove();
+            // Re-renderiza markdown final limpo
+            const bubble = msgEl.querySelector('.msg-bubble');
+            if (bubble) {
+              bubble.innerHTML = renderMarkdown(fullText);
+              if (typeof hljs !== "undefined") hljs.highlightAll();
+              addCopyBtns(bubble);
+            }
+            // Adiciona meta (modelo usado)
+            if (meta.model) {
+              const hdr = msgEl.querySelector('.msg-header');
+              if (hdr) {
+                const mTag = document.createElement('span');
+                mTag.className = 'msg-model';
+                mTag.textContent = meta.model;
+                hdr.appendChild(mTag);
+              }
+            }
+            // Mostra ações CRM executadas
+            if (meta.actions?.length) renderActions(msgEl, meta.actions);
+          }
+          if (meta.usage) updateUsagePill({ today: meta.usage });
+          updateConvMeta(userText, fullText, 'chat');
+          saveMsgToConv('user', userText);
+          saveMsgToConv('bot', fullText, meta);
+          break;
+        }
+        if (parsed.token !== undefined) {
+          fullText += parsed.token;
+          if (!msgEl) {
+            msgEl = createStreamingBubble();
+          }
+          const bubble = msgEl.querySelector('.msg-bubble');
+          if (bubble) {
+            // Atualiza incrementalmente (com cursor)
+            bubble.innerHTML = renderMarkdown(fullText) + '<span class="streaming-cursor"></span>';
+            scrollToBottom();
+          }
+        }
+      } catch {}
+    }
+  }
+}
+
+function createStreamingBubble() {
+  const msgs = document.getElementById('msgs');
+  document.getElementById('welcome').style.display = 'none';
+
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.innerHTML = `
+    <div class="msg-av bot">✦</div>
+    <div class="msg-body">
+      <div class="msg-header">
+        <span class="msg-name">CORTEX</span>
+        <div class="streaming-badge"><span class="dot"></span> gerando...</div>
+        <span class="msg-ts">${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <div class="msg-bubble"><span class="streaming-cursor"></span></div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+// ── APPEND MESSAGE ────────────────────────────────────────────────────────
+function appendMsg(role, content, meta, save=true) {
+  const msgs = document.getElementById('msgs');
+  document.getElementById('welcome').style.display = 'none';
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const initials = userId ? userId.slice(0,2).toUpperCase() : 'EU';
+
+  if (role === 'user') {
+    div.innerHTML = `
+      <div class="msg-av user">${initials}</div>
+      <div class="msg-body">
+        <div class="msg-header">
+          <span class="msg-name">Você</span>
+          <span class="msg-ts">${ts}</span>
+        </div>
+        <div class="msg-bubble">${escHtml(content)}</div>
+      </div>`;
+  } else {
+    const modelTag = meta?.model ? `<span class="msg-model">${escHtml(meta.model)}</span>` : '';
+    const unlimitedTag = (meta?.unlimited || isUnlimited) ? `<span class="msg-model" style="color:var(--gold);border-color:rgba(255,215,0,.2)">∞</span>` : '';
+    div.innerHTML = `
+      <div class="msg-av bot">✦</div>
+      <div class="msg-body">
+        <div class="msg-header">
+          <span class="msg-name">CORTEX</span>
+          ${modelTag}${unlimitedTag}
+          <span class="msg-ts">${ts}</span>
+        </div>
+        <div class="msg-bubble">${renderMarkdown(content)}</div>
+      </div>`;
+    if (meta?.actions?.length) renderActions(div, meta.actions);
+  }
+
+  msgs.appendChild(div);
+  if (role === 'bot') { if (typeof hljs !== "undefined") hljs.highlightAll(); addCopyBtns(div); }
+  scrollToBottom();
+  if (save) saveMsgToConv(role, content, meta);
+}
+
+function renderActions(msgEl, actions) {
+  const bar = document.createElement('div');
+  bar.className = 'actions-bar';
+  actions.forEach(a => {
+    const tag = document.createElement('div');
+    tag.className = `action-tag ${a.ok?'ok':'fail'}`;
+    tag.textContent = a.ok ? `✅ ${a.action}` : `⚠️ ${a.action||'ação'}: ${a.error}`;
+    bar.appendChild(tag);
+  });
+  const body = msgEl.querySelector('.msg-body');
+  if (body) body.appendChild(bar);
+}
+
+function saveMsgToConv(role, content, meta) {
+  if (!activeConvId || !conversations[activeConvId]) return;
+  conversations[activeConvId].msgs = (conversations[activeConvId].msgs || []).concat({role, content, meta, ts: Date.now()});
+  saveConvs();
+}
+
+// ── MARKDOWN ─────────────────────────────────────────────────────────────
+function renderMarkdown(text) {
+  if (typeof marked === 'undefined') return escHtml(text).replace(/\n/g,'<br>');
+  marked.setOptions({ breaks: true, gfm: true });
+  return marked.parse(text);
+}
+
+function addCopyBtns(el) {
+  el.querySelectorAll('pre').forEach(pre => {
+    if (pre.querySelector('.copy-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<i class="ri-file-copy-line"></i> Copiar';
+    btn.onclick = () => {
+      const code = pre.querySelector('code')?.textContent || '';
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerHTML = '<i class="ri-check-line"></i> Copiado!';
+        setTimeout(() => btn.innerHTML = '<i class="ri-file-copy-line"></i> Copiar', 1800);
+      });
+    };
+    pre.style.position = 'relative';
+    pre.appendChild(btn);
+  });
+}
+
+// ── LOADER ───────────────────────────────────────────────────────────────
+let loaderCount = 0;
+function showLoader() {
+  const id = ++loaderCount;
+  const msgs = document.getElementById('msgs');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = `loader_${id}`;
+  div.innerHTML = `<div class="msg-av bot">✦</div><div class="loader"><div class="loader-dots"><span></span><span></span><span></span></div><span class="loader-text">CORTEX processando...</span></div>`;
+  msgs.appendChild(div); scrollToBottom();
+  return id;
+}
+
+function hideLoader(id) {
+  const el = document.getElementById(`loader_${id}`);
+  if (el) el.remove();
+}
+
+// ── RAG ───────────────────────────────────────────────────────────────────
+function toggleRAGPanel() {
+  const overlay = document.getElementById('ragOverlay');
+  overlay.style.display = overlay.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function handleFiles(files) {
+  if (!files?.length) return;
+  const prog = document.getElementById('ragProg');
+  const bar = document.getElementById('ragProgBar');
+  prog.style.display = 'block'; bar.style.width = '0%';
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    bar.style.width = `${Math.round(((i+1)/files.length)*100)}%`;
+    try {
+      const text = await readFileText(file);
+      if (!text) continue;
+
+      // Chama RAG engine
+      const res = await fetch(`${API_BASE}/rag`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action:'index', tenantId, userId, fileName: file.name, content: text })
+      });
+      const d = await res.json();
+      if (d.ok || d.chunksIndexed) {
+        ragFiles.push({ name: file.name, size: file.size, chunks: d.chunksIndexed });
+        if (!ragEnabled) { ragEnabled = true; document.getElementById('ragBtn').classList.add('active'); }
+        toast(`✅ ${file.name} indexado (${d.chunksIndexed} chunks)`, 'success');
+      } else { toast(`⚠️ Erro ao indexar ${file.name}: ${d.error}`, 'error'); }
+    } catch(e) { toast(`❌ ${file.name}: ${e.message}`, 'error'); }
+  }
+
+  prog.style.display = 'none';
+  renderRAGFiles();
+  document.getElementById('fileInput').value = '';
+  document.getElementById('ragFileInput').value = '';
+}
+
+function readFileText(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.onerror = rej;
+    reader.readAsText(file);
+  });
+}
+
+function renderRAGFiles() {
+  const list = document.getElementById('ragFileList');
+  if (!ragFiles.length) { list.innerHTML = ''; return; }
+  list.innerHTML = ragFiles.map((f,i) => `
+    <div class="rag-file">
+      <i class="ri-file-text-line"></i>
+      <div class="rag-file-name">${escHtml(f.name)}</div>
+      <div class="rag-file-size">${(f.size/1024).toFixed(1)}KB · ${f.chunks} chunks</div>
+      <button class="rag-file-del" onclick="removeRAGFile(${i})"><i class="ri-close-line"></i></button>
+    </div>`).join('');
+}
+
+function removeRAGFile(i) {
+  ragFiles.splice(i, 1);
+  if (!ragFiles.length) { ragEnabled = false; document.getElementById('ragBtn').classList.remove('active'); }
+  renderRAGFiles();
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────────────────
+function clearMessages() {
+  document.getElementById('msgs').innerHTML = '<div class="welcome" id="welcome"><div class="w-orb"><i class="ri-brain-line"></i></div><h2>Olá, eu sou o <span>CORTEX</span></h2><p>O orquestrador de IAs do NEXIA OS. Combino Claude, GPT-4o, Groq, DeepSeek, Gemini, Perplexity e mais — escolhendo automaticamente a melhor IA para cada tarefa.</p></div>';
+}
+
+function clearConv() {
+  nexiaConfirm('Limpar esta conversa?', function(){
+  if (activeConvId && conversations[activeConvId]) { conversations[activeConvId].msgs = []; saveConvs(); }
+  clearMessages();
+}
+
+function toggleSb() { document.getElementById('sidebar').classList.toggle('open'); }
+function scrollToBottom() { const m = document.getElementById('msgs'); m.scrollTop = m.scrollHeight; }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,180)+'px'; updateCharCount(el.value.length); }
+function updateCharCount(n) { const el=document.getElementById('charCount'); if(el) el.textContent=isUnlimited?`${n} / ∞`:`${n} / 32000`; }
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function useChip(el) { document.getElementById('inp').value=el.textContent.replace(/^\S+\s/,''); document.getElementById('inp').focus(); }
+function escHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="ri-${type==='success'?'check-circle':type==='error'?'error-warning':'information'}-line"></i> ${escHtml(msg)}`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── CHAR COUNT ON INPUT ───────────────────────────────────────────────────
+document.getElementById('inp').addEventListener('input', function() {
+  autoResize(this);
+  updateCharCount(this.value.length);
+});
+
+// Inicializa o char count
+updateCharCount(0);
+</script>
+
+<script>
+/* NEXIA v38 — UI helpers globais (substitui alert/confirm nativos) */
+if (!window.nexiaToast) {
+  window.nexiaToast = function(msg, type, duration) {
+    type = type || 'info'; duration = duration || 4000;
+    var colors = {info:'#00e5ff', ok:'#00d68f', warn:'#ffaa00', err:'#ff3d71'};
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+colors[type]+';color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;line-height:1.4;font-size:14px';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();}, duration);
+  };
+}
+if (!window.nexiaConfirm) {
+  window.nexiaConfirm = function(msg, onOk, onCancel) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = '<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:440px;width:100%;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px;line-height:1.5">'+msg+'</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#00d68f;color:#000;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:14px">OK</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 28px;font-weight:600;cursor:pointer;font-size:14px">Cancelar</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#nc-ok').onclick = function(){ overlay.remove(); if(onOk) onOk(); };
+    overlay.querySelector('#nc-cancel').onclick = function(){ overlay.remove(); if(onCancel) onCancel(); };
+  };
+}
+</script>
+
+</body>
+</html>

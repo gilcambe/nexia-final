@@ -1,138 +1,299 @@
-'use strict';
-const NexiaAuth = (() => {
-  let _currentUser = null, _userProfile = null, _authCallbacks = [];
-  // CORRIGIDO v38: flag para evitar múltiplos listeners (memory leak)
-  let _authListenerRegistered = false;
-  let _authUnsubscribe = null;
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║  NEXIA OS — AUTH v10.0  (NOVO)                              ║
+ * ║  Firebase Auth integration · Perfil · Tenant onboarding     ║
+ * ║  FASE 2: Auth real — cada user isolado no seu tenant        ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ *
+ * POST /api/auth
+ *   action: "verify"      → verifica token Firebase e retorna perfil
+ *   action: "register"    → onboarding: cria tenant + perfil de admin
+ *   action: "profile"     → retorna/atualiza perfil do user
+ *   action: "invite"      → convida membro para o tenant (requer admin)
+ *   action: "accept"      → aceita convite e vincula user ao tenant
+ */
 
-  function init() {
-    const waitAuth = () => {
-      if (!NEXIA._ready || !NEXIA.auth) { setTimeout(waitAuth, 200); return; }
-      // Registra listener apenas uma vez — evita acúmulo em SPA
-      if (_authListenerRegistered) return;
-      _authListenerRegistered = true;
-      NEXIA.auth.onAuthStateChanged(async user => {
-        _currentUser = user;
-        if (user) {
-          try {
-            const snap = await NEXIA.db.collection('users').doc(user.uid).get();
-            if (snap.exists) {
-              _userProfile = snap.data();
-              const slug = _userProfile.tenantSlug || _userProfile.tenant;
-              if (slug) NEXIA.setTenant(slug);
-            } else {
-              _userProfile = { uid: user.uid, email: user.email, displayName: user.displayName || user.email, tenantSlug: 'guest', role: 'user', createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-              await NEXIA.db.collection('users').doc(user.uid).set(_userProfile);
-            }
-          } catch(e) { NEXIA.log('Auth profile error: ' + e.message, 'warn'); }
-        } else { _userProfile = null; }
-        _authCallbacks.forEach(cb => { try { cb(_userProfile); } catch(e) {} });
-      });
-    };
-    waitAuth();
+
+let admin, db;
+try {
+  admin = require('firebase-admin');
+  if (!admin.apps.length) {
+    const saRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
+    const saB64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+    if (!saRaw && !saB64) throw new Error('FIREBASE_SERVICE_ACCOUNT não configurada');
+    const saJson = saRaw || Buffer.from(saB64, 'base64').toString('utf8');
+    admin.initializeApp({ credential: admin.credential.cert(JSON.parse(saJson)) });
+  }
+  db = admin.firestore();
+} catch (e) {
+  console.warn('[NEXIA] Firebase indisponivel:', e.message);
+  db = null;
+}
+const now = () => admin && admin.firestore
+  ? admin.firestore.FieldValue.serverTimestamp()
+  : new Date().toISOString();
+const { HEADERS, makeHeaders } = require('./middleware');
+
+
+// ── Verifica token Firebase ID ────────────────────────────────
+async function verifyToken(token) {
+  if (!token) throw new Error('Token ausente');
+  const decoded = await admin.auth().verifyIdToken(token);
+  return decoded;
+}
+
+
+// ── Busca ou cria perfil do usuário ───────────────────────────
+async function getOrCreateProfile(uid, email, displayName) {
+  const ref  = db.collection('users').doc(uid);
+  const snap = await ref.get();
+
+
+  if (snap.exists) {
+    // Atualiza lastSeen
+    await ref.update({ lastSeen: now() });
+    return snap.data();
   }
 
-  async function login(email, password) {
-    if (!NEXIA.auth) throw new Error('Serviço de autenticação indisponível. Tente novamente.');
-    try {
-      const cred = await NEXIA.auth.signInWithEmailAndPassword(email, password);
-      return cred.user;
-    } catch (e) {
-      const msg = {
-        'auth/user-not-found':      'E-mail não cadastrado.',
-        'auth/wrong-password':      'Senha incorreta.',
-        'auth/invalid-email':       'E-mail inválido.',
-        'auth/user-disabled':       'Conta desativada. Contate o suporte.',
-        'auth/too-many-requests':   'Muitas tentativas. Aguarde alguns minutos.',
-        'auth/network-request-failed': 'Sem conexão com a internet.',
-        'auth/invalid-credential':  'Credenciais inválidas.',
-      }[e.code] || 'Erro ao fazer login. Tente novamente.';
-      throw new Error(msg);
-    }
-  }
 
-  async function register(email, password, displayName, tenantSlug = 'guest') {
-    if (!NEXIA.auth) throw new Error('Auth indisponível');
-    const cred = await NEXIA.auth.createUserWithEmailAndPassword(email, password);
-    const user = cred.user;
-    await user.updateProfile({ displayName });
-    await NEXIA.db.collection('users').doc(user.uid).set({ uid: user.uid, email, displayName, tenantSlug, role: 'user', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    await NEXIA.db.collection('tenants').doc(tenantSlug).collection('members').doc(user.uid).set({ uid: user.uid, email, displayName, role: 'user', joinedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    return user;
-  }
-
-  async function logout() {
-    if (NEXIA.auth) await NEXIA.auth.signOut();
-    _currentUser = null; _userProfile = null;
-    window.location.href = '/login';
-  }
-
-  function requireAuth(redirectTo = '/login') {
-    if (document.body) document.body.style.visibility = 'hidden';
-    else document.addEventListener('DOMContentLoaded', () => { document.body.style.visibility = 'hidden'; });
-
-    const waitCheck = () => {
-      if (!NEXIA._ready) { setTimeout(waitCheck, 100); return; }
-      if (!NEXIA.auth) { document.body.style.visibility = 'visible'; return; }
-
-      // CORRIGIDO v38: cancela listener anterior antes de criar novo (evita memory leak)
-      if (_authUnsubscribe) { _authUnsubscribe(); _authUnsubscribe = null; }
-
-      _authUnsubscribe = NEXIA.auth.onAuthStateChanged(user => {
-        // Unsubscribe after first check — listener must not persist (memory leak + spurious redirects)
-        if (_authUnsubscribe) { _authUnsubscribe(); _authUnsubscribe = null; }
-        if (!user) {
-          window.location.href = redirectTo;
-        } else {
-          document.body.style.visibility = 'visible';
-        }
-      });
-    };
-    waitCheck();
-  }
-
-  function _autoGuard() {
-    const path = window.location.pathname;
-    // CORRIGIDO v38: vp-passenger, vp-guide e architect adicionados
-    const PROTECTED = [
-      /-admin\.html$/,              // *-admin.html (bezsan-admin, ces-admin, vp-admin, etc.)
-      /\/nexia\//,                  // /nexia/* (todos os painéis master)
-      /cortex-app\.html$/,
-      /flow\.html$/,
-      /studio\.html$/,
-      /tenant-hub\.html$/,
-      /my-panel\.html$/,
-      /pabx-softphone\.html$/,
-      /nexia-pay\.html$/,
-      /nexia-store\.html$/,
-      /swarm-control\.html$/,
-      /pki-scanner\.html$/,
-      /vp-passenger\.html$/,        // CORRIGIDO: estava sem proteção
-      /vp-guide\.html$/,            // CORRIGIDO: estava sem proteção
-      /architect\.html$/,           // CORRIGIDO: estava sem proteção (criação de tenant)
-      /qa-test-center\.html$/,      // QA CENTER: acesso apenas para master,           // CORRIGIDO: estava sem proteção (criação de tenant)
-    ];
-    const isProtected = PROTECTED.some(rx => rx.test(path));
-    const isLoginPage  = /\/login(\.html)?$/.test(path) || path === '/';
-    if (isProtected && !isLoginPage) {
-      requireAuth('/login?next=' + encodeURIComponent(path));
-    }
-  }
-
-  function onChange(cb) { _authCallbacks.push(cb); }
-
-  init(); _autoGuard();
-
-  return {
-    login,
-    register,
-    logout,
-    onChange,
-    requireAuth,
-    getUser:       () => _currentUser,
-    getProfile:    () => _userProfile,
-    isLogged:      () => !!_currentUser,
-    getTenantSlug: () => _userProfile?.tenantSlug || NEXIA.currentTenant?.slug || 'nexia'
+  // Novo usuário — perfil básico sem tenant ainda
+  const profile = {
+    uid, email: email || '',
+    displayName: displayName || email?.split('@')[0] || 'Usuário',
+    role: 'user',
+    tenantSlug: null,
+    plan: 'free',
+    onboarded: false,
+    createdAt: now(),
+    lastSeen: now()
   };
-})();
-window.NexiaAuth = NexiaAuth;
+  await ref.set(profile);
+  return profile;
+}
+
+
+// ── Onboarding: cria tenant + define user como admin ─────────
+async function registerTenant(uid, email, tenantName, tenantSlug) {
+  // Valida slug
+  const slug = tenantSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 30);
+
+
+  // Verifica se slug já existe
+  const existing = await db.collection('tenants').doc(slug).get();
+  if (existing.exists) throw new Error(`Tenant "${slug}" já existe. Escolha outro nome.`);
+
+
+  const batch = db.batch();
+
+
+  // Cria tenant
+  const tenantRef = db.collection('tenants').doc(slug);
+  batch.set(tenantRef, {
+    id: slug, name: tenantName, slug,
+    plan: 'free', ownerId: uid,
+    createdAt: now(), updatedAt: now(),
+    settings: { language: 'pt-BR', timezone: 'America/Sao_Paulo' },
+    ragDocsCount: 0,
+    membersCount: 1
+  });
+
+
+  // Cria member record
+  const memberRef = tenantRef.collection('members').doc(uid);
+  batch.set(memberRef, { userId: uid, email, role: 'admin', joinedAt: now() });
+
+
+  // Atualiza perfil do user
+  const userRef = db.collection('users').doc(uid);
+  batch.update(userRef, {
+    tenantSlug: slug, role: 'admin',
+    onboarded: true, updatedAt: now()
+  });
+
+
+  await batch.commit();
+
+
+  return { tenantId: slug, role: 'admin' };
+}
+
+
+// ── Convida membro ─────────────────────────────────────────────
+async function inviteMember(tenantId, inviterUid, inviteEmail, role = 'member') {
+  // Verifica se inviter é admin
+  const memberDoc = await db.collection('tenants').doc(tenantId).collection('members').doc(inviterUid).get();
+  if (!memberDoc.exists) throw new Error('Inviter não é membro deste tenant');
+  const inviterRole = memberDoc.data().role;
+  if (!['master', 'admin'].includes(inviterRole)) throw new Error('Apenas admins podem convidar membros');
+
+
+  // Cria convite
+  const inviteRef = await db.collection('tenants').doc(tenantId).collection('invites').add({
+    email: inviteEmail, role, invitedBy: inviterUid,
+    status: 'pending', tenantId,
+    createdAt: now(),
+    expiresAt: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 3600_000))
+  });
+
+
+  return { inviteId: inviteRef.id, email: inviteEmail, role };
+}
+
+
+// ── Aceita convite ────────────────────────────────────────────
+async function acceptInvite(uid, email, inviteId) {
+  const inviteRef = db.collection('tenants').doc('*'); // será resolvido por query
+
+
+  // Busca convite por id em todos os tenants (via collectionGroup)
+  const snap = await db.collectionGroup('invites').where(admin.firestore.FieldPath.documentId(), '==', inviteId).get();
+  if (snap.empty) throw new Error('Convite não encontrado');
+
+
+  const inviteDoc = snap.docs[0];
+  const invite    = inviteDoc.data();
+  if (invite.status !== 'pending') throw new Error('Convite já foi usado ou expirou');
+  if (invite.email !== email) throw new Error('Este convite não pertence a este email');
+
+
+  const now_ = now();
+  const batch = db.batch();
+
+
+  // Cria member
+  const memberRef = db.collection('tenants').doc(invite.tenantId).collection('members').doc(uid);
+  batch.set(memberRef, { userId: uid, email, role: invite.role, joinedAt: now_ });
+
+
+  // Atualiza user
+  const userRef = db.collection('users').doc(uid);
+  batch.update(userRef, { tenantSlug: invite.tenantId, role: invite.role, onboarded: true, updatedAt: now_ });
+
+
+  // Marca convite como aceito
+  batch.update(inviteDoc.ref, { status: 'accepted', acceptedAt: now_, acceptedBy: uid });
+
+
+  // Incrementa membersCount
+  batch.update(db.collection('tenants').doc(invite.tenantId), {
+    membersCount: admin.firestore.FieldValue.increment(1), updatedAt: now_
+  });
+
+
+  await batch.commit();
+  return { tenantId: invite.tenantId, role: invite.role };
+}
+
+
+// ── HANDLER ───────────────────────────────────────────────────
+// P3 FIX: IP-based rate limit map (in-memory, resets on cold start — complementa Firebase throttle)
+const _authRLMap = new Map();
+function _checkAuthRateLimit(ip) {
+  const now = Date.now();
+  const WINDOW_MS = 15 * 60 * 1000; // 15 min
+  const MAX_ATTEMPTS = 20;           // 20 tentativas por IP por janela
+  const entry = _authRLMap.get(ip);
+  if (!entry || (now - entry.windowStart) > WINDOW_MS) {
+    _authRLMap.set(ip, { count: 1, windowStart: now });
+    return { ok: true };
+  }
+  if (entry.count >= MAX_ATTEMPTS) {
+    return { ok: false, retryAfter: Math.ceil((WINDOW_MS - (now - entry.windowStart)) / 1000) };
+  }
+  entry.count++;
+  return { ok: true };
+}
+
+exports.handler = async (event) => {
+  const headers = makeHeaders(event);
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
+
+  // P3 FIX: Rate limit por IP — protege contra brute-force / enumeração
+  const clientIp = event.headers?.['x-forwarded-for']?.split(',')[0]?.trim()
+    || event.headers?.['client-ip']
+    || 'unknown';
+  const rl = _checkAuthRateLimit(clientIp);
+  if (!rl.ok) {
+    return { statusCode: 429, headers, body: JSON.stringify({ error: 'Muitas tentativas. Aguarde antes de tentar novamente.', retryAfter: rl.retryAfter }) };
+  }
+
+  try {
+    const body = JSON.parse(event.body || '{}');
+    const { action, token, userId, email, displayName } = body;
+
+
+    // Verifica token em todas as ações exceto verify público
+    let decoded = null;
+    if (token) {
+      try { decoded = await verifyToken(token); } catch (e) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: 'Token inválido ou expirado' }) };
+      }
+    }
+
+
+    // uid is only used from verified decoded token — never from body (VULN-02 prevention)
+    const uid = decoded?.uid;
+
+
+    if (action === 'verify') {
+      if (!decoded) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Token necessário' }) };
+      const profile = await getOrCreateProfile(decoded.uid, decoded.email, decoded.name);
+      return { statusCode: 200, headers, body: JSON.stringify({ uid: decoded.uid, ...profile }) };
+    }
+
+
+    if (action === 'register') {
+      // FIXED: register MUST have a valid Firebase token — uid from body alone is not trusted
+      if (!decoded) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Token Firebase obrigatório para registro' }) };
+      const { tenantName, tenantSlug } = body;
+      if (!tenantName || !tenantSlug) throw new Error('tenantName e tenantSlug são obrigatórios');
+      const result = await registerTenant(decoded.uid, decoded.email, tenantName, tenantSlug);
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, ...result }) };
+    }
+
+
+    if (action === 'profile') {
+      // FIXED: IDOR fix — profile always returns the authenticated caller's own profile
+      if (!decoded) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Token obrigatório para acessar perfil' }) };
+      const profile = await getOrCreateProfile(decoded.uid, decoded.email, decoded.name || displayName);
+      return { statusCode: 200, headers, body: JSON.stringify(profile) };
+    }
+
+
+    if (action === 'invite') {
+      // FIXED: require verified token to send invites
+      if (!decoded) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Token obrigatório para convidar membros' }) };
+      const { tenantId, inviteEmail, role } = body;
+      const result = await inviteMember(tenantId, decoded.uid, inviteEmail, role);
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, ...result }) };
+    }
+
+
+    if (action === 'accept') {
+      // FIXED VULN-02: require a verified Firebase token — never trust uid/email from body alone
+      if (!decoded) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Token Firebase obrigatório para aceitar convite' }) };
+      const { inviteId } = body;
+      const result = await acceptInvite(decoded.uid, decoded.email, inviteId);
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, ...result }) };
+    }
+
+
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ação não reconhecida' }) };
+
+
+  } catch (err) {
+    console.error('[AUTH] ❌', err.message);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+  }
+};
+
+
+
+
+
+
+
+
+
+

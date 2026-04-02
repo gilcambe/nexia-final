@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXIA PABX Cloud — Softphone WebRTC</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Twilio Voice SDK -->
+<!-- Firebase Compat (auth guard) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+<script>
+(function(){
+  try{firebase.initializeApp({apiKey:"AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",authDomain:"nexia-c8710.firebaseapp.com",projectId:"nexia-c8710",storageBucket:"nexia-c8710.firebasestorage.app",messagingSenderId:"623044447905",appId:"1:623044447905:web:13f70e1584fb0fcf8d2ae0"});}catch(e){}
+  document.documentElement.style.visibility='hidden';
+  firebase.auth().onAuthStateChanged(user=>{
+    if(!user) window.location.href='/login?next='+encodeURIComponent(window.location.pathname);
+    else document.documentElement.style.visibility='visible';
+  });
+})();
+</script>
+<script src="https://sdk.twilio.com/js/client/v1.14/twilio.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#111827;
+  --blue:#0057FF;--cyan:#00E5FF;--green:#00D68F;--red:#FF3D71;
+  --yellow:#F59E0B;--purple:#9B5CF6;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace
+}
+body{background:var(--bg);color:var(--text);font-family:var(--ff);min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:56px;background:rgba(7,9,14,.95);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1rem}
+.topbar-logo{font-weight:800;font-size:1rem;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:.3s}
+.status-dot.connected{background:var(--green);box-shadow:0 0 8px var(--green)}
+.status-dot.calling{background:var(--yellow);animation:pulse 1s infinite}
+.status-dot.error{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-label{font-size:.75rem;color:var(--text3);font-family:var(--ffm)}
+.main{flex:1;display:grid;grid-template-columns:320px 1fr;gap:0}
+
+/* ── Sidebar ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-section{padding:1rem;border-bottom:1px solid var(--border)}
+.sidebar-title{font-size:.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.8rem;font-family:var(--ffm)}
+
+/* Dialpad */
+.dialpad-input-wrap{position:relative;margin-bottom:.8rem}
+.dialpad-input{width:100%;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);padding:.65rem 2.5rem .65rem .9rem;border-radius:8px;font-family:var(--ffm);font-size:1.1rem;letter-spacing:2px;outline:none;text-align:center}
+.dialpad-input:focus{border-color:var(--blue)}
+.dial-backspace{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;padding:.2rem}
+.dialpad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.8rem}
+.dial-key{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.7rem;border-radius:8px;cursor:pointer;font-family:var(--ffm);font-size:1rem;font-weight:600;transition:.15s;text-align:center}
+.dial-key:hover{background:rgba(0,87,255,.15);border-color:var(--blue)}
+.dial-key .sub{display:block;font-size:.55rem;color:var(--text3);letter-spacing:1px;margin-top:1px}
+.call-btn{width:100%;background:var(--green);color:#fff;border:none;padding:.75rem;border-radius:8px;cursor:pointer;font-family:var(--ff);font-weight:700;font-size:.9rem;transition:.2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.call-btn:hover{background:#00b87a}
+.call-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed}
+.hangup-btn{width:100%;background:var(--red);color:#fff;border:none;padding:.75rem;border-radius:8px;cursor:pointer;font-family:var(--ff);font-weight:700;font-size:.9rem;display:none;transition:.2s}
+.hangup-btn:hover{background:#cc0044}
+.hangup-btn.show{display:flex;align-items:center;justify-content:center;gap:.5rem}
+
+/* Extensions list */
+.ext-list{display:flex;flex-direction:column;gap:.4rem;max-height:200px;overflow-y:auto}
+.ext-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:7px;cursor:pointer;transition:.15s}
+.ext-item:hover{background:var(--bg3)}
+.ext-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.ext-info{flex:1;min-width:0}
+.ext-name{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ext-num{font-size:.7rem;color:var(--text3);font-family:var(--ffm)}
+.ext-status{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.ext-status.online{background:var(--green)}
+.ext-status.busy{background:var(--red)}
+
+/* Recents */
+.recent-list{display:flex;flex-direction:column;gap:.4rem;max-height:180px;overflow-y:auto}
+.recent-item{display:flex;align-items:center;gap:.7rem;padding:.45rem .3rem;border-bottom:1px solid var(--border);cursor:pointer}
+.recent-item:hover .recent-num{color:var(--blue)}
+.recent-dir{font-size:.9rem}
+.recent-info{flex:1}
+.recent-num{font-size:.82rem;font-weight:600;font-family:var(--ffm)}
+.recent-time{font-size:.7rem;color:var(--text3)}
+.recent-dur{font-size:.7rem;color:var(--text3);font-family:var(--ffm)}
+
+/* ── Main area ── */
+.call-area{display:flex;flex-direction:column;padding:1.5rem;gap:1rem;overflow-y:auto}
+
+/* Active call card */
+.active-call-card{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:1.5rem;display:none}
+.active-call-card.show{display:block}
+.call-contact{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
+.call-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700}
+.call-contact-info h3{font-size:1.1rem;font-weight:700}
+.call-contact-info .call-number{font-family:var(--ffm);color:var(--text3);font-size:.82rem}
+.call-timer{font-family:var(--ffm);font-size:2rem;font-weight:700;color:var(--green);text-align:center;margin:1rem 0}
+.call-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+.ctrl-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:.9rem;border-radius:10px;cursor:pointer;font-size:1.1rem;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:.3rem;font-family:var(--ff);font-size:.75rem}
+.ctrl-btn:hover{border-color:var(--blue);color:var(--text)}
+.ctrl-btn.active{background:rgba(0,87,255,.15);border-color:var(--blue);color:#fff}
+.ctrl-btn.red{background:rgba(255,61,113,.1);border-color:rgba(255,61,113,.3);color:var(--red)}
+.ctrl-btn.red:hover{background:var(--red);color:#fff}
+.ctrl-btn-icon{font-size:1.3rem}
+
+/* CRM popup */
+.crm-popup{background:var(--bg2);border:1px solid rgba(0,87,255,.3);border-radius:12px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem}
+.crm-popup-icon{font-size:1.5rem}
+.crm-popup-info h4{font-size:.9rem;font-weight:700;margin-bottom:.2rem}
+.crm-popup-info p{font-size:.78rem;color:var(--text2)}
+.crm-popup-btn{background:var(--blue);color:#fff;border:none;padding:.4rem .9rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600;margin-left:auto;flex-shrink:0}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem}
+.stat-val{font-size:1.4rem;font-weight:800;color:var(--blue)}
+.stat-label{font-size:.72rem;color:var(--text3);margin-top:.2rem}
+
+/* Incoming call overlay */
+.incoming-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center}
+.incoming-overlay.show{display:flex}
+.incoming-card{background:var(--bg2);border:2px solid var(--green);border-radius:18px;padding:2.5rem;text-align:center;width:320px;animation:incomingRing .5s ease infinite alternate}
+@keyframes incomingRing{from{box-shadow:0 0 20px rgba(0,214,143,.3)}to{box-shadow:0 0 50px rgba(0,214,143,.6)}}
+.incoming-label{font-size:.75rem;color:var(--green);font-family:var(--ffm);letter-spacing:2px;margin-bottom.5rem}
+.incoming-number{font-size:1.4rem;font-weight:800;margin:1rem 0 .3rem}
+.incoming-name{color:var(--text2);font-size:.9rem;margin-bottom:2rem}
+.incoming-btns{display:flex;gap:1rem;justify-content:center}
+.answer-btn{background:var(--green);color:#fff;border:none;width:64px;height:64px;border-radius:50%;cursor:pointer;font-size:1.6rem;transition:.2s}
+.answer-btn:hover{transform:scale(1.1)}
+.reject-btn{background:var(--red);color:#fff;border:none;width:64px;height:64px;border-radius:50%;cursor:pointer;font-size:1.6rem;transition:.2s}
+.reject-btn:hover{transform:scale(1.1)}
+
+/* URA Builder */
+.ura-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem}
+.ura-row{display:flex;align-items:center;gap:.7rem;padding:.5rem;border-bottom:1px solid var(--border)}
+.ura-key{background:var(--bg3);border:1px solid var(--border2);color:var(--cyan);font-family:var(--ffm);font-size:.85rem;padding:.25rem .6rem;border-radius:5px;width:36px;text-align:center;font-weight:700}
+.ura-input{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.35rem .6rem;border-radius:6px;font-family:var(--ff);font-size:.82rem;outline:none}
+.ura-input:focus{border-color:var(--blue)}
+.ura-add{background:var(--blue);color:#fff;border:none;padding:.4rem .9rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600;margin-top:.6rem}
+
+/* Recording indicator */
+.rec-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,61,113,.1);border:1px solid rgba(255,61,113,.3);color:var(--red);font-size:.72rem;font-weight:700;padding:.25rem .6rem;border-radius:20px;font-family:var(--ffm)}
+.rec-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
+
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:.55rem 1.4rem;border-radius:20px;font-size:.82rem;opacity:0;transition:.3s;z-index:9000;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:700px){.main{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}.stats-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-logo">☎️ NEXIA PABX Cloud</div>
+  <div class="status-dot" id="status-dot"></div>
+  <div class="status-label" id="status-label">Conectando...</div>
+  <div style="flex:1"></div>
+  <div class="rec-badge" id="rec-badge" style="display:none"><div class="rec-dot"></div>● REC</div>
+  <div style="font-size:.78rem;color:var(--text3);font-family:var(--ffm)" id="ext-label"></div>
+</div>
+
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Dialpad -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Discador</div>
+      <div class="dialpad-input-wrap">
+        <input type="tel" class="dialpad-input" id="dial-input" placeholder="Digite o número" maxlength="15">
+        <button class="dial-backspace" onclick="dialBackspace()">⌫</button>
+      </div>
+      <div class="dialpad-grid" id="dialpad-grid"></div>
+      <button class="call-btn" id="call-btn" onclick="makeCall()">📞 Ligar</button>
+      <button class="hangup-btn" id="hangup-btn" onclick="hangUp()">📵 Encerrar</button>
+    </div>
+
+    <!-- Extensions -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Ramais</div>
+      <div class="ext-list" id="ext-list"></div>
+    </div>
+
+    <!-- Recents -->
+    <div class="sidebar-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="sidebar-title">Ligações Recentes</div>
+      <div class="recent-list" id="recent-list"></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="call-area">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="stat-today">0</div><div class="stat-label">Ligações hoje</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-avg">0:00</div><div class="stat-label">Tempo médio</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-missed">0</div><div class="stat-label">Perdidas</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-queue">0</div><div class="stat-label">Na fila</div></div>
+    </div>
+
+    <!-- CRM popup (shown on incoming) -->
+    <div class="crm-popup" id="crm-popup" style="display:none">
+      <div class="crm-popup-icon">👤</div>
+      <div class="crm-popup-info">
+        <h4 id="crm-name">Carregando...</h4>
+        <p id="crm-detail">Buscando no CRM...</p>
+      </div>
+      <button class="crm-popup-btn" onclick="openCRM()">Abrir CRM →</button>
+    </div>
+
+    <!-- Active call card -->
+    <div class="active-call-card" id="active-call-card">
+      <div class="call-contact">
+        <div class="call-avatar" id="call-avatar">?</div>
+        <div class="call-contact-info">
+          <h3 id="call-name">---</h3>
+          <div class="call-number" id="call-number"></div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div class="rec-badge" id="call-rec" style="display:none"><div class="rec-dot"></div>● REC</div>
+        </div>
+      </div>
+      <div class="call-timer" id="call-timer">00:00</div>
+      <div class="call-controls">
+        <button class="ctrl-btn" id="btn-mute" onclick="toggleMute()">
+          <span class="ctrl-btn-icon">🎤</span>Mudo
+        </button>
+        <button class="ctrl-btn" id="btn-hold" onclick="toggleHold()">
+          <span class="ctrl-btn-icon">⏸️</span>Espera
+        </button>
+        <button class="ctrl-btn" id="btn-record" onclick="toggleRecord()">
+          <span class="ctrl-btn-icon">⏺️</span>Gravar
+        </button>
+        <button class="ctrl-btn" id="btn-transfer" onclick="startTransfer()">
+          <span class="ctrl-btn-icon">↗️</span>Transferir
+        </button>
+      </div>
+    </div>
+
+    <!-- URA Builder -->
+    <div class="ura-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+        <div class="sidebar-title" style="margin:0">URA — Menu de Voz</div>
+        <button onclick="saveURA()" style="background:var(--blue);color:#fff;border:none;padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:600">Salvar URA</button>
+      </div>
+      <div id="ura-rows"></div>
+      <button class="ura-add" onclick="addURARow()">+ Adicionar opção</button>
+    </div>
+  </div>
+</div>
+
+<!-- Incoming call overlay -->
+<div class="incoming-overlay" id="incoming-overlay">
+  <div class="incoming-card">
+    <div class="incoming-label">CHAMADA ENTRANTE</div>
+    <div style="font-size:3rem;margin-bottom:.5rem">📲</div>
+    <div class="incoming-number" id="incoming-number">+55 11 9999-9999</div>
+    <div class="incoming-name" id="incoming-name">Identificando...</div>
+    <div class="incoming-btns">
+      <button class="reject-btn" onclick="rejectCall()" title="Rejeitar">📵</button>
+      <button class="answer-btn" onclick="answerCall()" title="Atender">📞</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// NEXIA PABX — Twilio Voice WebRTC Client
+// ═══════════════════════════════════════════════════════════════
+
+const TENANT_ID = new URLSearchParams(window.location.search).get('tenant') || 'demo';
+const EXTENSION = new URLSearchParams(window.location.search).get('ext') || '100';
+const AGENT_NAME = new URLSearchParams(window.location.search).get('name') || 'Agente';
+
+let device = null;
+let activeConnection = null;
+let callTimer = null;
+let callSeconds = 0;
+let isMuted = false;
+let isOnHold = false;
+let isRecording = false;
+let callLog = [];
+
+// ── Dialpad keys ────────────────────────────────────────────────
+const KEYS = [
+  {d:'1',s:''},  {d:'2',s:'ABC'}, {d:'3',s:'DEF'},
+  {d:'4',s:'GHI'},{d:'5',s:'JKL'},{d:'6',s:'MNO'},
+  {d:'7',s:'PQRS'},{d:'8',s:'TUV'},{d:'9',s:'WXYZ'},
+  {d:'*',s:''},  {d:'0',s:'+'},   {d:'#',s:''}
+];
+
+// ── Extensions (loaded from Firestore / mock) ──────────────────
+const EXTENSIONS = [
+  { ext:'100', name:'Recepção', status:'online' },
+  { ext:'101', name:'Comercial 1', status:'online' },
+  { ext:'102', name:'Comercial 2', status:'busy' },
+  { ext:'103', name:'Suporte', status:'online' },
+  { ext:'200', name:'Diretoria', status:'offline' }
+];
+
+// ── URA config ─────────────────────────────────────────────────
+let uraConfig = [
+  { key:'1', action:'Vendas — Ramal 101' },
+  { key:'2', action:'Suporte — Ramal 103' },
+  { key:'0', action:'Recepção — Ramal 100' }
+];
+
+// ─────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  buildDialpad();
+  renderExtensions();
+  renderRecents();
+  renderURA();
+  updateExtLabel();
+  await initTwilio();
+  loadStats();
+});
+
+function updateExtLabel() {
+  document.getElementById('ext-label').textContent = `Ramal ${EXTENSION} — ${AGENT_NAME}`;
+}
+
+// ── Build dialpad ────────────────────────────────────────────────
+function buildDialpad() {
+  const grid = document.getElementById('dialpad-grid');
+  grid.innerHTML = KEYS.map(k => `
+    <button class="dial-key" onclick="dialKey('${k.d}')">
+      ${k.d}${k.s ? `<span class="sub">${k.s}</span>` : ''}
+    </button>`).join('');
+
+  // Keyboard support
+  document.getElementById('dial-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') makeCall();
+    if (e.key === 'Escape') hangUp();
+  });
+}
+
+function dialKey(k) {
+  const input = document.getElementById('dial-input');
+  if (input.value.length < 15) {
+    input.value += k;
+    // DTMF tone during active call
+    if (activeConnection) {
+      try { activeConnection.sendDigits(k); } catch(e) {}
+    }
+  }
+}
+
+function dialBackspace() {
+  const input = document.getElementById('dial-input');
+  input.value = input.value.slice(0, -1);
+}
+
+// ── Twilio Voice init ─────────────────────────────────────────────
+async function initTwilio() {
+  setStatus('connecting');
+  try {
+    // Get Twilio token from NEXIA backend
+    const res = await fetch('/api/pabx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'get_token', tenantId: TENANT_ID, extension: EXTENSION, agentName: AGENT_NAME }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    const data = await res.json();
+
+    if (!data.token) {
+      // Demo mode — no real Twilio token
+      setStatus('demo');
+      toast('Modo Demo — sem token Twilio. Funcionalidade simulada.');
+      return;
+    }
+
+    // Initialize Twilio Device
+    device = new Twilio.Device(data.token, {
+      codecPreferences: ['opus', 'pcmu'],
+      fakeLocalDTMF: true,
+      enableRingingState: true,
+      debug: false
+    });
+
+    device.on('ready', () => { setStatus('connected'); toast('☎️ Softphone conectado! Ramal ' + EXTENSION); });
+    device.on('error', (err) => { setStatus('error'); toast('❌ Erro Twilio: ' + err.message); });
+    device.on('disconnect', () => { setStatus('connected'); endCall(); });
+
+    // Incoming call
+    device.on('incoming', (conn) => {
+      activeConnection = conn;
+      const from = conn.parameters.From || 'Número desconhecido';
+      showIncomingCall(from);
+
+      conn.on('disconnect', () => endCall());
+      conn.on('cancel', () => { hideIncomingCall(); endCall(); });
+    });
+
+    device.register();
+
+  } catch(err) {
+    console.warn('Twilio init failed:', err);
+    setStatus('demo');
+    toast('Modo demo ativo (sem credenciais Twilio)');
+  }
+}
+
+// ── Status management ─────────────────────────────────────────────
+function setStatus(s) {
+  const dot = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  dot.className = 'status-dot';
+  const MAP = {
+    connecting: { cls: '', txt: 'Conectando...' },
+    connected:  { cls: 'connected', txt: 'Online' },
+    calling:    { cls: 'calling', txt: 'Em ligação' },
+    error:      { cls: 'error', txt: 'Erro de conexão' },
+    demo:       { cls: 'connected', txt: 'Demo Mode' }
+  };
+  const st = MAP[s] || MAP.connecting;
+  if (st.cls) dot.classList.add(st.cls);
+  label.textContent = st.txt;
+}
+
+// ── Make call ────────────────────────────────────────────────────
+async function makeCall() {
+  const number = document.getElementById('dial-input').value.trim();
+  if (!number) { toast('Digite um número'); return; }
+
+  if (!device) {
+    // Demo mode simulation
+    simulateCall(number);
+    return;
+  }
+
+  try {
+    setStatus('calling');
+    activeConnection = await device.connect({
+      params: {
+        To: number,
+        From: `nexia_ext_${EXTENSION}`,
+        TenantId: TENANT_ID
+      }
+    });
+
+    activeConnection.on('disconnect', () => endCall());
+    activeConnection.on('reject', () => { toast('Chamada rejeitada'); endCall(); });
+
+    startCallUI(number, number);
+  } catch(err) {
+    toast('❌ Erro ao ligar: ' + err.message);
+    setStatus('connected');
+  }
+}
+
+// ── Simulate call (demo) ─────────────────────────────────────────
+function simulateCall(number) {
+  toast(`📞 Discando para ${formatPhone(number)}...`);
+  setTimeout(() => {
+    startCallUI(number, lookupName(number));
+    toast('Conectado (simulação)');
+  }, 1500);
+}
+
+function startCallUI(number, name) {
+  setStatus('calling');
+  document.getElementById('call-btn').style.display = 'none';
+  document.getElementById('hangup-btn').classList.add('show');
+  document.getElementById('active-call-card').classList.add('show');
+
+  const initials = (name || number).split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  document.getElementById('call-avatar').textContent = initials || '?';
+  document.getElementById('call-name').textContent = name || formatPhone(number);
+  document.getElementById('call-number').textContent = formatPhone(number);
+
+  // Start timer
+  callSeconds = 0;
+  clearInterval(callTimer);
+  callTimer = setInterval(() => {
+    callSeconds++;
+    document.getElementById('call-timer').textContent = formatTime(callSeconds);
+  }, 1000);
+
+  // Look up in CRM
+  lookupCRM(number, name);
+
+  // Log call
+  addToRecents({ dir: 'out', number, name: name || number, duration: 0, time: new Date() });
+}
+
+function hangUp() {
+  if (activeConnection) {
+    try { activeConnection.disconnect(); } catch(e) {}
+    activeConnection = null;
+  } else {
+    endCall(); // demo mode
+  }
+}
+
+function endCall() {
+  setStatus('connected');
+  clearInterval(callTimer);
+  document.getElementById('call-btn').style.display = 'flex';
+  document.getElementById('hangup-btn').classList.remove('show');
+  document.getElementById('active-call-card').classList.remove('show');
+  document.getElementById('crm-popup').style.display = 'none';
+  document.getElementById('dial-input').value = '';
+
+  // Reset controls
+  isMuted = isOnHold = isRecording = false;
+  document.getElementById('btn-mute').classList.remove('active');
+  document.getElementById('btn-hold').classList.remove('active');
+  document.getElementById('btn-record').classList.remove('active');
+  document.getElementById('call-rec').style.display = 'none';
+  document.getElementById('rec-badge').style.display = 'none';
+
+  loadStats();
+}
+
+// ── Call controls ─────────────────────────────────────────────────
+function toggleMute() {
+  isMuted = !isMuted;
+  if (activeConnection) {
+    try { activeConnection.mute(isMuted); } catch(e) {}
+  }
+  document.getElementById('btn-mute').classList.toggle('active', isMuted);
+  document.getElementById('btn-mute').querySelector('.ctrl-btn-icon').textContent = isMuted ? '🔇' : '🎤';
+  toast(isMuted ? '🔇 Microfone mudo' : '🎤 Microfone ativo');
+}
+
+function toggleHold() {
+  isOnHold = !isOnHold;
+  document.getElementById('btn-hold').classList.toggle('active', isOnHold);
+  toast(isOnHold ? '⏸️ Ligação em espera' : '▶️ Ligação retomada');
+}
+
+function toggleRecord() {
+  isRecording = !isRecording;
+  document.getElementById('btn-record').classList.toggle('active', isRecording);
+  document.getElementById('call-rec').style.display = isRecording ? 'inline-flex' : 'none';
+  document.getElementById('rec-badge').style.display = isRecording ? 'inline-flex' : 'none';
+
+  // Notify backend to start/stop recording
+  fetch('/api/pabx', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: 'toggle_record',
+      tenantId: TENANT_ID,
+      callSid: activeConnection?.parameters?.CallSid,
+      recording: isRecording
+    }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+  }).catch(() => {});
+
+  toast(isRecording ? '⏺️ Gravando ligação' : '⏹️ Gravação pausada');
+}
+
+function startTransfer() {
+  const ext = prompt('Transferir para ramal:');
+  if (!ext) return;
+  toast(`↗️ Transferindo para ramal ${ext}...`);
+  if (activeConnection) {
+    try {
+      activeConnection.sendDigits(`*${ext}#`);
+    } catch(e) {}
+  }
+}
+
+// ── Incoming call ─────────────────────────────────────────────────
+function showIncomingCall(number) {
+  const name = lookupName(number);
+  document.getElementById('incoming-number').textContent = formatPhone(number);
+  document.getElementById('incoming-name').textContent = name || 'Número desconhecido';
+  document.getElementById('incoming-overlay').classList.add('show');
+
+  // Ringtone via Web Audio
+  playRingtone();
+}
+
+function hideIncomingCall() {
+  document.getElementById('incoming-overlay').classList.remove('show');
+  stopRingtone();
+}
+
+function answerCall() {
+  if (activeConnection) {
+    try { activeConnection.accept(); } catch(e) {}
+  }
+  const num = document.getElementById('incoming-number').textContent;
+  const name = document.getElementById('incoming-name').textContent;
+  hideIncomingCall();
+  startCallUI(num, name);
+}
+
+function rejectCall() {
+  if (activeConnection) {
+    try { activeConnection.reject(); } catch(e) {}
+    activeConnection = null;
+  }
+  hideIncomingCall();
+  toast('📵 Chamada rejeitada');
+}
+
+// ── CRM lookup ────────────────────────────────────────────────────
+async function lookupCRM(number, name) {
+  const popup = document.getElementById('crm-popup');
+  popup.style.display = 'flex';
+  document.getElementById('crm-name').textContent = name || 'Identificando...';
+  document.getElementById('crm-detail').textContent = 'Buscando no CRM...';
+
+  try {
+    const res = await fetch('/api/crm/lookup?phone=' + encodeURIComponent(number).catch(e => console.warn("[NEXIA] fetch failed:", e.message)) + '&tenant=' + TENANT_ID);
+    const data = await res.json();
+    if (data.found) {
+      document.getElementById('crm-name').textContent = data.name;
+      document.getElementById('crm-detail').textContent = `${data.company || ''} · ${data.plan || 'Cliente'} · ${data.totalPurchases ? 'R$ ' + data.totalPurchases : ''}`;
+    } else {
+      document.getElementById('crm-name').textContent = formatPhone(number);
+      document.getElementById('crm-detail').textContent = 'Contato não encontrado no CRM';
+    }
+  } catch(e) {
+    document.getElementById('crm-detail').textContent = 'CRM offline';
+  }
+}
+
+function openCRM() {
+  const number = document.getElementById('call-number').textContent;
+  window.open(`/nexia/cortex-app.html?phone=${encodeURIComponent(number)}&tenant=${TENANT_ID}`, '_blank');
+}
+
+// ── Extensions ────────────────────────────────────────────────────
+function renderExtensions() {
+  document.getElementById('ext-list').innerHTML = EXTENSIONS.map(e => `
+    <div class="ext-item" onclick="dialExtension('${e.ext}')">
+      <div class="ext-avatar">${e.name[0]}</div>
+      <div class="ext-info">
+        <div class="ext-name">${e.name}</div>
+        <div class="ext-num">Ramal ${e.ext}</div>
+      </div>
+      <div class="ext-status ${e.status}"></div>
+    </div>`).join('');
+}
+
+function dialExtension(ext) {
+  document.getElementById('dial-input').value = ext;
+}
+
+// ── Recents ───────────────────────────────────────────────────────
+function renderRecents() {
+  const mock = [
+    { dir:'in', number:'+5511999887766', name:'Maria Silva', duration:234, time:new Date(Date.now()-3600000) },
+    { dir:'out', number:'+5511988776655', name:'João Comércio', duration:87, time:new Date(Date.now()-7200000) },
+    { dir:'missed', number:'+5511977665544', name:'Desconhecido', duration:0, time:new Date(Date.now()-10800000) }
+  ];
+  callLog = [...mock, ...callLog];
+  renderRecentList();
+}
+
+function addToRecents(item) {
+  callLog.unshift(item);
+  renderRecentList();
+}
+
+function renderRecentList() {
+  const icons = { in:'📲', out:'📞', missed:'📵' };
+  document.getElementById('recent-list').innerHTML = callLog.slice(0, 20).map(c => `
+    <div class="recent-item" onclick="dialRecent('${c.number}')">
+      <div class="recent-dir">${icons[c.dir] || '📞'}</div>
+      <div class="recent-info">
+        <div class="recent-num">${c.name || formatPhone(c.number)}</div>
+        <div class="recent-time">${timeAgo(c.time)}</div>
+      </div>
+      <div class="recent-dur">${c.duration ? formatTime(c.duration) : '—'}</div>
+    </div>`).join('');
+}
+
+function dialRecent(number) {
+  document.getElementById('dial-input').value = number;
+}
+
+// ── URA Builder ───────────────────────────────────────────────────
+function renderURA() {
+  document.getElementById('ura-rows').innerHTML = uraConfig.map((row, i) => `
+    <div class="ura-row">
+      <input class="ura-key" value="${row.key}" maxlength="1" onchange="uraConfig[${i}].key=this.value">
+      <input class="ura-input" value="${row.action}" placeholder="Ex: Vendas — Ramal 101" onchange="uraConfig[${i}].action=this.value">
+    </div>`).join('');
+}
+
+function addURARow() {
+  uraConfig.push({ key: String(uraConfig.length + 1), action: '' });
+  renderURA();
+}
+
+async function saveURA() {
+  try {
+    await fetch('/api/pabx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'save_ura', tenantId: TENANT_ID, uraConfig }).catch(e => console.warn("[NEXIA] fetch failed:", e.message))
+    });
+    toast('✅ URA salva com sucesso!');
+  } catch(e) {
+    toast('❌ Erro ao salvar URA');
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const res = await fetch(`/api/pabx?type=stats&tenant=${TENANT_ID}&ext=${EXTENSION}`).catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+    const data = await res.json();
+    document.getElementById('stat-today').textContent = data.today || 0;
+    document.getElementById('stat-avg').textContent = data.avgDuration || '0:00';
+    document.getElementById('stat-missed').textContent = data.missed || 0;
+    document.getElementById('stat-queue').textContent = data.queue || 0;
+  } catch(e) {
+    document.getElementById('stat-today').textContent = callLog.filter(c => c.dir !== 'missed').length;
+    document.getElementById('stat-missed').textContent = callLog.filter(c => c.dir === 'missed').length;
+  }
+}
+
+// ── Audio: Ringtone via Web Audio API ─────────────────────────────
+let ringtoneInterval = null;
+let audioCtx = null;
+
+function playRingtone() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const playBeep = () => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.value = 440;
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.5);
+    };
+    playBeep();
+    ringtoneInterval = setInterval(playBeep, 2000);
+  } catch(e) {}
+}
+
+function stopRingtone() {
+  clearInterval(ringtoneInterval);
+}
+
+// ── Utilities ─────────────────────────────────────────────────────
+function formatTime(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function formatPhone(n) {
+  const d = (n || '').replace(/\D/g, '');
+  if (d.length === 11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return n;
+}
+
+function lookupName(number) {
+  const found = callLog.find(c => c.number === number);
+  return found?.name || null;
+}
+
+function timeAgo(date) {
+  const s = Math.floor((new Date() - new Date(date)) / 1000);
+  if (s < 60) return 'agora';
+  if (s < 3600) return `${Math.floor(s/60)}min`;
+  if (s < 86400) return `${Math.floor(s/3600)}h`;
+  return `${Math.floor(s/86400)}d`;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+</script>
+  <script src="../core/nexia-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXIA Store — 224+ Módulos & Extensões</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#111827;
+  --blue:#0057FF;--cyan:#00E5FF;--green:#00D68F;--red:#FF3D71;
+  --purple:#9B5CF6;--orange:#F59E0B;--gold:#DAA520;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--ff);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+/* Splash */
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo{font-size:3rem;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.splash-sub{font-family:var(--ffm);color:var(--text3);font-size:.85rem;margin-top:.5rem;letter-spacing:3px}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(7,9,14,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px}
+.topbar-logo{font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-nav{display:flex;gap:1rem;align-items:center}
+.lang-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-family:var(--ffm);font-size:.75rem;transition:.2s}
+.lang-btn.active,.lang-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.cart-btn{background:var(--blue);color:#fff;border:none;padding:.4rem 1.2rem;border-radius:8px;cursor:pointer;font-family:var(--ff);font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.5rem;transition:.2s}
+.cart-btn:hover{background:#0043cc}
+.cart-badge{background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+/* Hero */
+.hero{background:linear-gradient(135deg,var(--bg2),var(--bg3));border-bottom:1px solid var(--border);padding:3rem 2rem 2.5rem;text-align:center}
+.hero-eyebrow{font-family:var(--ffm);color:var(--blue);font-size:.75rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:.8rem}
+.hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;line-height:1.15;margin-bottom:.8rem}
+.hero h1 span{background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--text2);max-width:600px;margin:0 auto 1.5rem;line-height:1.6}
+.hero-stats{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat strong{display:block;font-size:1.5rem;font-weight:700;color:var(--blue)}
+.hero-stat span{font-size:.75rem;color:var(--text3)}
+/* Filters */
+.filters{background:var(--bg2);border-bottom:1px solid var(--border);padding:1.2rem 2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;position:sticky;top:60px;z-index:90}
+.search-wrap{position:relative;flex:1;min-width:220px;max-width:320px}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.55rem .8rem .55rem 2.4rem;border-radius:8px;font-family:var(--ff);font-size:.85rem;outline:none;transition:.2s}
+.search-wrap input:focus{border-color:var(--blue)}
+.search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.9rem}
+.cat-pills{display:flex;gap:.5rem;flex-wrap:wrap}
+.pill{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:.35rem .9rem;border-radius:20px;font-size:.78rem;cursor:pointer;transition:.2s;white-space:nowrap}
+.pill.active,.pill:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.sort-select{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:.5rem .8rem;border-radius:8px;font-family:var(--ff);font-size:.78rem;outline:none;cursor:pointer}
+/* Grid */
+.main{max-width:1400px;margin:0 auto;padding:2rem}
+.results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.results-count{color:var(--text2);font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem}
+/* Card */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:.3s;cursor:pointer;position:relative;display:flex;flex-direction:column}
+.card:hover{border-color:var(--blue);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,87,255,.15)}
+.card.featured{border-color:rgba(0,87,255,.3)}
+.card-bar{height:3px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.card-top{padding:1.2rem 1.2rem .8rem;flex:1}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;background:rgba(0,87,255,.12);border:1px solid rgba(0,87,255,.2)}
+.card-name{font-weight:700;font-size:1rem;margin-bottom:.4rem}
+.card-desc{color:var(--text2);font-size:.82rem;line-height:1.5;margin-bottom:.8rem}
+.card-tags{display:flex;gap:.4rem;flex-wrap:wrap}
+.tag{background:var(--bg3);color:var(--text3);font-size:.68rem;padding:.2rem .6rem;border-radius:4px;font-family:var(--ffm)}
+.badges{position:absolute;top:.8rem;right:.8rem;display:flex;gap:.3rem;flex-direction:column;align-items:flex-end}
+.badge{font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;letter-spacing:.5px}
+.badge.hot{background:var(--red);color:#fff}
+.badge.new{background:var(--green);color:#000}
+.badge.popular{background:var(--orange);color:#000}
+.badge.beta{background:var(--purple);color:#fff}
+.card-footer{padding:.8rem 1.2rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.price-brl{font-weight:800;font-size:1.05rem;color:var(--text)}
+.price-period{font-size:.7rem;color:var(--text3);margin-top:.1rem}
+.add-btn{background:var(--blue);color:#fff;border:none;padding:.4rem 1rem;border-radius:7px;font-family:var(--ff);font-weight:600;font-size:.78rem;cursor:pointer;transition:.2s;white-space:nowrap}
+.add-btn:hover{background:#0043cc}
+.add-btn.added{background:var(--green);color:#000}
+/* Cart Drawer */
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;opacity:0;pointer-events:none;transition:.3s}
+.cart-overlay.open{opacity:1;pointer-events:all}
+.cart-drawer{position:fixed;right:0;top:0;bottom:0;width:360px;max-width:100vw;background:var(--bg2);border-left:1px solid var(--border2);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:.35s cubic-bezier(.4,0,.2,1)}
+.cart-overlay.open .cart-drawer{transform:none}
+.cart-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cart-header h3{font-weight:700}
+.close-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem}
+.cart-item{display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--border)}
+.cart-item-icon{font-size:1.4rem;width:38px;text-align:center}
+.cart-item-info{flex:1}
+.cart-item-name{font-size:.85rem;font-weight:600}
+.cart-item-price{font-size:.78rem;color:var(--text2);font-family:var(--ffm)}
+.cart-item-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.85rem;padding:.3rem}
+.cart-item-remove:hover{color:var(--red)}
+.cart-empty{text-align:center;padding:3rem 0;color:var(--text3)}
+.cart-empty .emoji{font-size:2.5rem;margin-bottom:.5rem}
+.cart-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:.3rem}
+.cart-total .lbl{color:var(--text2);font-size:.85rem}
+.cart-total .val{font-weight:700;font-size:1rem}
+.cart-total .usd{color:var(--text3);font-size:.75rem}
+.checkout-btn{width:100%;background:var(--blue);color:#fff;border:none;padding:.85rem;border-radius:10px;font-family:var(--ff);font-weight:700;font-size:.95rem;cursor:pointer;margin-top:1rem;transition:.2s}
+.checkout-btn:hover{background:#0043cc}
+/* Checkout Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;padding:1rem}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:480px;padding:2rem;max-height:90vh;overflow-y:auto}
+.modal h3{font-weight:700;font-size:1.15rem;margin-bottom:1.5rem}
+.pay-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem}
+.pay-tab{flex:1;padding:.6rem;border-radius:8px;border:2px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;text-align:center;font-family:var(--ff);font-size:.82rem;font-weight:600;transition:.2s}
+.pay-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(0,87,255,.08)}
+.pix-panel,.card-panel{display:none}
+.pix-panel.show,.card-panel.show{display:block}
+.pix-amount{background:var(--bg3);border-radius:10px;padding:1.2rem;text-align:center;margin-bottom:1rem}
+.pix-amount .big{font-size:2rem;font-weight:800;color:var(--green)}
+.pix-amount .disc{font-size:.75rem;color:var(--green);margin-top:.2rem}
+.pix-key{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:.8rem;font-family:var(--ffm);font-size:.8rem;color:var(--text2);margin-bottom:1rem;word-break:break-all}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:.4rem}
+.form-group input,.form-group select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.6rem .8rem;border-radius:8px;font-family:var(--ff);font-size:.85rem;outline:none;transition:.2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.modal-total{display:flex;justify-content:space-between;margin:1rem 0;padding:.8rem;background:var(--bg3);border-radius:8px}
+.confirm-btn{width:100%;background:var(--green);color:#000;border:none;padding:.85rem;border-radius:10px;font-family:var(--ff);font-weight:800;font-size:.95rem;cursor:pointer;transition:.2s;margin-top:.5rem}
+.confirm-btn:hover{background:#00b87a}
+.modal-close{float:right;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.8rem;margin-top:-1rem;margin-right:-1rem}
+/* Toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(4rem);background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.7rem 1.4rem;border-radius:10px;font-size:.85rem;z-index:500;opacity:0;transition:.3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Footer */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:2rem;text-align:center;color:var(--text3);font-size:.8rem;margin-top:4rem}
+/* Empty state */
+.no-results{text-align:center;padding:4rem 2rem;color:var(--text2)}
+.no-results .emoji{font-size:3rem;margin-bottom:1rem}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;padding:1rem;overflow-y:auto}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;position:relative}
+.modal-close-btn{position:sticky;top:.8rem;left:100%;margin-right:.8rem;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:10;float:right;margin-top:.8rem}
+.modal-close-btn:hover{color:var(--text)}
+.detail-header{padding:2rem 2rem 1.2rem;clear:both}
+.detail-icon-wrap{font-size:2.8rem;width:60px;height:60px;background:rgba(0,87,255,.12);border:1px solid rgba(0,87,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.detail-name{font-size:1.4rem;font-weight:800;margin-bottom:.5rem}
+.detail-meta{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.detail-price{font-size:1.1rem;font-weight:700;color:var(--blue)}
+.detail-body{padding:0 2rem 1.5rem}
+#detail-video-wrap{margin-bottom:1.5rem}
+.video-thumb{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;aspect-ratio:16/9;background:#000}
+.video-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:.2s}
+.video-thumb:hover img{opacity:.8}
+.play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:rgba(0,87,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;transition:.2s;pointer-events:none}
+.video-thumb:hover .play-btn{transform:translate(-50%,-50%) scale(1.1)}
+.video-label{position:absolute;bottom:.8rem;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font-size:.75rem;padding:.2rem .8rem;border-radius:20px;font-weight:600;white-space:nowrap;pointer-events:none}
+.detail-desc{color:var(--text2);line-height:1.7;margin-bottom:1.5rem;font-size:.9rem}
+.detail-body h4{font-size:.78rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:.7rem;font-family:var(--ffm)}
+.detail-body ul{list-style:none;margin-bottom:1.5rem}
+.detail-body ul li{padding:.45rem 0;color:var(--text2);font-size:.88rem;display:flex;gap:.6rem;align-items:flex-start;border-bottom:1px solid var(--border)}
+.detail-body ul li::before{content:"→";color:var(--blue);font-weight:700;flex-shrink:0}
+.detail-body ul.usecases li::before{content:"✓";color:var(--green)}
+.detail-body code{display:block;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:.5rem .8rem;font-family:var(--ffm);font-size:.78rem;color:var(--cyan);margin-bottom:1.5rem}
+.detail-footer{padding:1.2rem 2rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.8rem}
+.confirm-btn{background:var(--blue);color:#fff;border:none;padding:.65rem 1.4rem;border-radius:8px;cursor:pointer;font-family:var(--ff);font-weight:700;font-size:.9rem;transition:.2s}
+.confirm-btn:hover{background:#0043cc}
+.confirm-btn.added{background:rgba(0,214,143,.15);color:var(--green);border:1px solid rgba(0,214,143,.4)}
+
+/* Responsive */
+@media(max-width:900px){
+  .topbar-right .tb-links{display:none}
+  .hero{padding:2.5rem 1.2rem}
+  .hero h1{font-size:1.8rem}
+  .filters{padding:1rem;flex-wrap:wrap;gap:.5rem}
+  .search-wrap{min-width:100%;max-width:100%}
+}
+@media(max-width:640px){
+  .topbar{padding:0 1rem}
+  .hero{padding:2rem 1rem}
+  .hero h1{font-size:1.5rem}
+  .filters{padding:.8rem}
+  .main{padding:.8rem}
+  .grid{grid-template-columns:1fr 1fr}
+  .cart-drawer{width:100vw}
+  .modal{width:96vw!important;max-width:none!important;margin:0 auto}
+  .pay-tabs{flex-direction:column}
+}
+@media(max-width:420px){
+  .grid{grid-template-columns:1fr}
+  .hero-stats{flex-direction:column;gap:.5rem;align-items:center}
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+
+<script>
+// Inicializa tenantId e userId a partir do NexiaAuth após login
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof NexiaAuth !== 'undefined') {
+    NexiaAuth.onChange(user => {
+      if (user) {
+        const p = (typeof NexiaAuth !== 'undefined' && NexiaAuth.getProfile ? NexiaAuth.getProfile() : null);
+        window._nexiaTenantId = p?.tenantSlug || 'nexia';
+        window._nexiaUserId   = user.uid;
+      }
+    });
+  }
+});
+</script>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <div class="splash-logo">✦ NEXIA STORE</div>
+  <div class="splash-sub">MÓDULOS & EXTENSÕES</div>
+</div>
+
+<!-- Topbar -->
+<header class="topbar">
+  <div class="topbar-logo">✦ NEXIA STORE</div>
+  <nav class="topbar-nav">
+    <button class="lang-btn active" onclick="setLang('pt')">PT</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 <span data-t="cart"></span>
+      <span class="cart-badge" id="cart-count">0</span>
+    </button>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-eyebrow" data-t="eyebrow"></div>
+  <h1><span data-t="h1a"></span> <span data-t="h1b"></span></h1>
+  <p data-t="heroSub"></p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>224+</strong><span data-t="modules"></span></div>
+    <div class="hero-stat"><strong>7</strong><span data-t="categories"></span></div>
+    <div class="hero-stat"><strong>15.284</strong><span data-t="agents"></span></div>
+    <div class="hero-stat"><strong>R$19.290</strong><span data-t="mrr"></span></div>
+  </div>
+</section>
+
+<!-- ── NEXIA AI SEARCH ── -->
+<div style="background:linear-gradient(135deg,rgba(0,87,255,.08),rgba(168,85,247,.06));border-bottom:1px solid rgba(0,87,255,.15);padding:20px 5%">
+  <div style="max-width:900px;margin:0 auto">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,87,255,.9);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+      <span>✦</span> NEXIA AI — Diga o que você precisa fazer
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div style="flex:1;position:relative">
+        <input type="text" id="ai-search-input"
+          placeholder="Ex: 'Quero cobrar meus clientes automaticamente', 'Preciso de um chatbot no WhatsApp', 'Quero emitir nota fiscal'..."
+          style="width:100%;padding:14px 18px 14px 46px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid rgba(0,87,255,.3);color:#E8F0FF;font-size:14px;font-family:'Sora',sans-serif;outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='rgba(0,87,255,.6)'"
+          onblur="this.style.borderColor='rgba(0,87,255,.3)'"
+          onkeydown="if(event.key==='Enter') aiSearchModules()">
+        <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px">🤖</span>
+      </div>
+      <button onclick="aiSearchModules()" style="padding:14px 24px;border-radius:12px;background:linear-gradient(135deg,#0057FF,#7C3AED);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;font-family:'Sora',sans-serif;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        ✦ Buscar com IA
+      </button>
+    </div>
+    <div id="ai-search-result" style="display:none;margin-top:14px;background:rgba(0,0,0,.3);border:1px solid rgba(0,87,255,.2);border-radius:10px;padding:14px"></div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters" id="filters-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="..." data-t-ph="searchPh" oninput="filterModules()">
+  </div>
+  <div class="cat-pills" id="cat-pills"></div>
+  <select class="sort-select" id="sort-select" onchange="filterModules()">
+    <option value="popular" data-t="sortPopular"></option>
+    <option value="price-asc" data-t="sortPriceAsc"></option>
+    <option value="price-desc" data-t="sortPriceDesc"></option>
+    <option value="name" data-t="sortName"></option>
+  </select>
+</div>
+
+<!-- Main -->
+<main class="main">
+  <div class="results-bar">
+    <div class="results-count" id="results-count"></div>
+  </div>
+  <div class="grid" id="modules-grid"></div>
+  <div class="no-results" id="no-results" style="display:none">
+    <div class="emoji">🔍</div>
+    <p data-t="noResults"></p>
+  </div>
+</main>
+
+<footer>
+  <p>NEXIA OS v12 — Store &copy; 2026 | <span data-t="footerRights"></span></p>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCartOnOverlay(event)">
+  <div class="cart-drawer">
+    <div class="cart-header">
+      <h3>🛒 <span data-t="cartTitle"></span></h3>
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items-list"></div>
+    <div class="cart-footer" id="cart-footer" style="display:none">
+      <div class="cart-total">
+        <span class="lbl" data-t="total"></span>
+        <div>
+          <div class="val" id="cart-total-brl"></div>
+          <div class="usd" id="cart-total-usd"></div>
+        </div>
+      </div>
+      <button class="checkout-btn" onclick="openCheckout()" data-t="checkoutBtn"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCheckout()">✕ <span data-t="close"></span></button>
+    <h3 data-t="checkoutTitle"></h3>
+    <div class="pay-tabs">
+      <button class="pay-tab active" id="tab-pix" onclick="switchTab('pix')" data-t="tabPix"></button>
+      <button class="pay-tab" id="tab-card" onclick="switchTab('card')" data-t="tabCard"></button>
+    </div>
+    <!-- PIX -->
+    <div class="pix-panel show" id="panel-pix">
+      <div class="pix-amount">
+        <div class="big" id="pix-amount-val"></div>
+        <div class="disc" data-t="pixDisc"></div>
+      </div>
+      <div class="pix-key">PIX: <strong>nexia@pagamento.pix.br</strong></div>
+      <p style="font-size:.78rem;color:var(--text3);margin-bottom:1rem" data-t="pixInstr"></p>
+      <button class="confirm-btn" onclick="confirmPix()" data-t="pixBtn"></button>
+    </div>
+    <!-- Card -->
+    <div class="card-panel" id="panel-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label data-t="cardName"></label>
+          <input type="text" id="card-name" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label data-t="cardEmail"></label>
+          <input type="email" id="card-email" placeholder="email@empresa.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-t="cardNum"></label>
+        <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19" oninput="maskCard(this)">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-t="cardExpiry"></label>
+          <input type="text" id="card-expiry" placeholder="MM/AA" maxlength="5" oninput="maskExpiry(this)">
+        </div>
+        <div class="form-group">
+          <label>CVV</label>
+          <input type="text" id="card-cvv" placeholder="123" maxlength="3">
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-t="installments"></label>
+        <select id="installments-select"></select>
+      </div>
+      <div class="modal-total">
+        <span data-t="total"></span>
+        <strong id="card-total-val"></strong>
+      </div>
+      <button class="confirm-btn" onclick="confirmCard()" data-t="cardBtn"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// i18n
+// ═══════════════════════════════════════════════════════════════
+const I18N = {
+  pt:{
+    cart:'Carrinho',eyebrow:'NEXIA OS v12 · EXTENSÕES & MÓDULOS',
+    h1a:'Expanda o poder do',h1b:'NEXIA OS',
+    heroSub:'224+ módulos prontos. Clique num módulo para ver detalhes, demo em vídeo e API.',
+    modules:'Módulos',categories:'Categorias',agents:'Agentes Ativos',mrr:'MRR',
+    searchPh:'Buscar módulos, tags, categorias...',
+    sortPopular:'Mais Popular',sortPriceAsc:'Menor Preço',sortPriceDesc:'Maior Preço',sortName:'Nome A-Z',
+    noResults:'Nenhum módulo encontrado. Tente outra busca.',
+    resultsOf:'de',resultsModules:'módulos',
+    cartTitle:'Meu Carrinho',cartEmpty:'Carrinho vazio',cartEmptySub:'Adicione módulos para começar',
+    total:'Total',checkoutBtn:'Finalizar Compra →',
+    checkoutTitle:'Checkout Seguro',tabPix:'PIX (5% off)',tabCard:'Cartão de Crédito',
+    pixDisc:'5% de desconto no PIX',pixInstr:'Copie a chave PIX, acesse seu banco e realize o pagamento. A ativação é automática em até 5 minutos.',
+    pixBtn:'Já Paguei via PIX ✓',
+    cardName:'Nome no Cartão',cardEmail:'E-mail',cardNum:'Número do Cartão',
+    cardExpiry:'Validade',installments:'Parcelas',cardBtn:'Pagar Agora →',
+    close:'Fechar',
+    footerRights:'Todos os direitos reservados.',
+    addedToCart:'adicionado ao carrinho!',removedFromCart:'removido do carrinho',
+    checkoutSuccess:'✅ Compra confirmada! Ativação em até 5 min.',
+    monthLabel:'/mês',perMonth:'por mês',
+    catAll:'Todos',catCortex:'CORTEX IA',catAutomacao:'Automação',catAnalytics:'Analytics',
+    catComunicacao:'Comunicação',catSeguranca:'Segurança',catFinanceiro:'Financeiro',catInfra:'Infraestrutura',
+    catSaude:'Saúde',catEducacao:'Educação',catJuridico:'Jurídico',catLogistica:'Logística',catRh:'RH',
+    catEventos:'Eventos & Reservas',catTurismo:'Turismo',catLeiloes:'Leilões & Imóveis',catVarejo:'Varejo',catImoveis:'Imóveis',catAgro:'Agronegócio',catConstrucao:'Construção',catManufatura:'Manufatura',catMarketing:'Marketing',catContabilidade:'Contabilidade',catFinanceiroAdv:'Financeiro Avançado',catCondominios:'Condomínios',catFitness:'Academias',catBeleza:'Beleza & Estética',catPet:'Pet & Vet',catOdontologia:'Odontologia',catEstetica:'Clínicas Estéticas',catFoodtech:'Food Tech',catSeguros:'Seguros',catEnergia:'Energia',catTelecom:'Telecomunicações',catMarketplaces:'Marketplaces',
+    detailFeatures:'O que está incluído',detailUsecases:'Para quem é',detailEndpoint:'API Endpoint',
+    watchDemo:'▶ Ver Demo',addToCart:'+ Adicionar ao Carrinho',removeFromCart:'✓ Remover'
+  },
+  en:{
+    cart:'Cart',eyebrow:'NEXIA OS v12 · EXTENSIONS & MODULES',
+    h1a:'Expand the power of',h1b:'NEXIA OS',
+    heroSub:'224+ modules ready. Click any module to see details, video demo and API.',
+    modules:'Modules',categories:'Categories',agents:'Active Agents',mrr:'MRR',
+    searchPh:'Search modules, tags, categories...',
+    sortPopular:'Most Popular',sortPriceAsc:'Lowest Price',sortPriceDesc:'Highest Price',sortName:'Name A-Z',
+    noResults:'No modules found. Try another search.',
+    resultsOf:'of',resultsModules:'modules',
+    cartTitle:'My Cart',cartEmpty:'Cart is empty',cartEmptySub:'Add modules to get started',
+    total:'Total',checkoutBtn:'Checkout →',
+    checkoutTitle:'Secure Checkout',tabPix:'PIX (5% off)',tabCard:'Credit Card',
+    pixDisc:'5% discount with PIX',pixInstr:'Copy the PIX key, open your bank app and make the payment. Activation is automatic within 5 minutes.',
+    pixBtn:'I Paid via PIX ✓',
+    cardName:'Name on Card',cardEmail:'Email',cardNum:'Card Number',
+    cardExpiry:'Expiry',installments:'Installments',cardBtn:'Pay Now →',
+    close:'Close',
+    footerRights:'All rights reserved.',
+    addedToCart:'added to cart!',removedFromCart:'removed from cart',
+    checkoutSuccess:'✅ Purchase confirmed! Activation within 5 min.',
+    monthLabel:'/mo',perMonth:'per month',
+    catAll:'All',catCortex:'CORTEX AI',catAutomacao:'Automation',catAnalytics:'Analytics',
+    catComunicacao:'Communication',catSeguranca:'Security',catFinanceiro:'Financial',catInfra:'Infrastructure',
+    catSaude:'Health',catEducacao:'Education',catJuridico:'Legal',catLogistica:'Logistics',catRh:'HR',
+    catEventos:'Events & Bookings',catTurismo:'Tourism',catLeiloes:'Auctions & Real Estate',catVarejo:'Retail',catImoveis:'Real Estate',catAgro:'Agribusiness',catConstrucao:'Construction',catManufatura:'Manufacturing',catMarketing:'Marketing',catContabilidade:'Accounting',catFinanceiroAdv:'Advanced Finance',catCondominios:'Condominiums',catFitness:'Gyms',catBeleza:'Beauty & Aesthetics',catPet:'Pet & Vet',catOdontologia:'Dentistry',catEstetica:'Aesthetic Clinics',catFoodtech:'Food Tech',catSeguros:'Insurance',catEnergia:'Energy',catTelecom:'Telecom',catMarketplaces:'Marketplaces',
+    addBtn:'+ Add',inCartBtn:'✓ Added',checkout:'Checkout',
+    detailFeatures:"What's included",detailUsecases:"Who it's for",detailEndpoint:'API Endpoint',
+    watchDemo:'▶ Watch Demo',addToCart:'+ Add to Cart',removeFromCart:'✓ Remove'
+  },
+  es:{
+    cart:'Carrito',eyebrow:'NEXIA OS v12 · EXTENSIONES & MÓDULOS',
+    h1a:'Expande el poder de',h1b:'NEXIA OS',
+    heroSub:'224+ módulos listos para activar en tu tenant. Paga una vez, úsalos para siempre.',
+    modules:'Módulos',categories:'Categorías',agents:'Agentes Activos',mrr:'MRR',
+    searchPh:'Buscar módulos, etiquetas, categorías...',
+    sortPopular:'Más Popular',sortPriceAsc:'Menor Precio',sortPriceDesc:'Mayor Precio',sortName:'Nombre A-Z',
+    noResults:'No se encontraron módulos. Intenta otra búsqueda.',
+    resultsOf:'de',resultsModules:'módulos',
+    cartTitle:'Mi Carrito',cartEmpty:'Carrito vacío',cartEmptySub:'Agrega módulos para comenzar',
+    total:'Total',checkoutBtn:'Finalizar Compra →',
+    checkoutTitle:'Pago Seguro',tabPix:'PIX (5% off)',tabCard:'Tarjeta de Crédito',
+    pixDisc:'5% de descuento con PIX',pixInstr:'Copia la clave PIX, abre tu banco y realiza el pago. La activación es automática en hasta 5 minutos.',
+    pixBtn:'Ya Pagué vía PIX ✓',
+    cardName:'Nombre en la Tarjeta',cardEmail:'Correo',cardNum:'Número de Tarjeta',
+    cardExpiry:'Vencimiento',installments:'Cuotas',cardBtn:'Pagar Ahora →',
+    close:'Cerrar',
+    footerRights:'Todos los derechos reservados.',
+    addedToCart:'agregado al carrito!',removedFromCart:'removido del carrito',
+    checkoutSuccess:'✅ ¡Compra confirmada! Activación en hasta 5 min.',
+    monthLabel:'/mes',perMonth:'por mes',
+    catAll:'Todos',catCortex:'CORTEX IA',catAutomacao:'Automatización',catAnalytics:'Analytics',
+    catComunicacao:'Comunicación',catSeguranca:'Seguridad',catFinanceiro:'Financiero',catInfra:'Infraestructura',
+    catSaude:'Salud',catEducacao:'Educación',catJuridico:'Jurídico',catLogistica:'Logística',catRh:'RRHH',
+    catEventos:'Eventos & Reservas',catTurismo:'Turismo',catLeiloes:'Subastas & Inmobiliario',catVarejo:'Retail',catImoveis:'Inmobiliario',catAgro:'Agronegocio',catConstrucao:'Construcción',catManufatura:'Manufactura',catMarketing:'Marketing',catContabilidade:'Contabilidad',catFinanceiroAdv:'Finanzas Avanzadas',catCondominios:'Condominios',catFitness:'Gimnasios',catBeleza:'Belleza & Estética',catPet:'Pet & Vet',catOdontologia:'Odontología',catEstetica:'Clínicas Estéticas',catFoodtech:'Food Tech',catSeguros:'Seguros',catEnergia:'Energía',catTelecom:'Telecomunicaciones',catMarketplaces:'Marketplaces'
+  }
+};
+
+let LANG = 'pt';
+function t(k){ return (I18N[LANG]||I18N.pt)[k] || k; }
+
+function setLang(l){
+  LANG = l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.textContent===l.toUpperCase()));
+  applyI18n();
+  rebuildCatPills();
+  filterModules();
+}
+
+function applyI18n(){
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const k = el.getAttribute('data-t');
+    el.textContent = t(k);
+  });
+  document.querySelectorAll('[data-t-ph]').forEach(el=>{
+    el.placeholder = t(el.getAttribute('data-t-ph'));
+  });
+  document.querySelectorAll('[data-t] option').forEach(el=>{
+    const k = el.getAttribute('data-t');
+    if(k) el.textContent = t(k);
+  });
+  // sort options
+  document.querySelectorAll('#sort-select option').forEach(opt=>{
+    const k = opt.getAttribute('data-t');
+    if(k) opt.textContent = t(k);
+  });
+  updateCartUI();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULES DATA — 30 módulos hardcoded (sem mock)
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// MODULES DATA — 224 módulos genéricos (sem nomes de clientes)
+// ═══════════════════════════════════════════════════════════════
+const MODULES = [
+// ── IA & CORTEX ──────────────────────────────────────────────────────────────
+{id:'cortex-copilot',icon:'🧠',name:'CORTEX Co-Pilot',cat:'cortex',
+ desc:{pt:'IA conversacional integrada ao admin. Chat com contexto do tenant, análises em tempo real e sugestões preditivas.',en:'Conversational AI in your admin. Tenant-context chat, real-time analysis and predictive suggestions.',es:'IA conversacional integrada al admin. Chat con contexto del tenant, análisis en tiempo real y sugerencias predictivas.'},
+ tags:['claude','nlp','chat'],price:297,badge:'hot',featured:true,pop:99},
+
+{id:'cortex-sdr',icon:'📞',name:'CORTEX SDR',cat:'cortex',
+ desc:{pt:'Recuperação de carrinho abandonado com IA. Disparo automático via WhatsApp, e-mail e SMS com copy personalizado por perfil.',en:'AI-powered abandoned cart recovery. Automatic dispatch via WhatsApp, email and SMS with profile-personalized copy.',es:'Recuperación de carrito abandonado con IA. Envío automático por WhatsApp, email y SMS con copy personalizado.'},
+ tags:['whatsapp','recovery','nlp'],price:197,badge:'hot',pop:88},
+
+{id:'cortex-vision',icon:'👁️',name:'CORTEX Vision',cat:'cortex',
+ desc:{pt:'Análise de imagens e documentos escaneados. Extrai dados de notas fiscais, RGs, CNPJs e contratos automaticamente.',en:'Image and scanned document analysis. Extracts data from invoices, IDs, tax numbers and contracts automatically.',es:'Análisis de imágenes y documentos escaneados. Extrae datos de facturas, documentos y contratos automáticamente.'},
+ tags:['vision','ocr','documentos'],price:227,badge:'beta',pop:68},
+
+{id:'cortex-voice',icon:'🎙️',name:'CORTEX Voice Clone',cat:'cortex',
+ desc:{pt:'Clona a voz de qualquer locutor para mensagens automáticas via ElevenLabs. 3 minutos de áudio são suficientes.',en:'Clone any voice for automated messages via ElevenLabs. Just 3 minutes of audio required.',es:'Clona la voz de cualquier locutor para mensajes automáticos via ElevenLabs. Solo 3 minutos de audio.'},
+ tags:['elevenlabs','voice','ia'],price:297,badge:'new',pop:71},
+
+{id:'cortex-predictive',icon:'🔮',name:'CORTEX Predictive',cat:'cortex',
+ desc:{pt:'Alertas preditivos com ML. Motor treinado em dados históricos do tenant para antecipar eventos críticos.',en:'Predictive alerts with ML. Engine trained on tenant historical data to anticipate critical events.',es:'Alertas predictivas con ML. Motor entrenado con datos históricos del tenant para anticipar eventos críticos.'},
+ tags:['ml','previsao','alertas'],price:247,badge:'beta',pop:61},
+
+{id:'multi-model',icon:'🤖',name:'Multi-Model Engine',cat:'cortex',
+ desc:{pt:'Orquestrador de múltiplos modelos de IA: Claude, GPT-4, Gemini e Groq. Roteamento automático por custo/qualidade.',en:'Multi-AI model orchestrator: Claude, GPT-4, Gemini and Groq. Automatic routing by cost/quality.',es:'Orquestador de múltiples modelos IA: Claude, GPT-4, Gemini y Groq. Enrutamiento automático por costo/calidad.'},
+ tags:['llm','orquestrador','api'],price:347,badge:'hot',featured:true,pop:87},
+
+{id:'rag-engine',icon:'📚',name:'RAG Engine',cat:'cortex',
+ desc:{pt:'Retrieval Augmented Generation com base de conhecimento do tenant. Upload de PDFs, URLs e texto livre.',en:'Retrieval Augmented Generation with tenant knowledge base. Upload PDFs, URLs and free text.',es:'Retrieval Augmented Generation con base de conocimiento del tenant. Carga de PDFs, URLs y texto libre.'},
+ tags:['rag','embeddings','ia'],price:297,badge:'new',pop:75},
+
+{id:'swarm-control',icon:'🐝',name:'Swarm Control',cat:'cortex',
+ desc:{pt:'Painel de controle de agentes autônomos em paralelo. Crie, configure e monitore swarms de agentes em tempo real.',en:'Autonomous agent control panel. Create, configure and monitor parallel agent swarms in real time.',es:'Panel de control de agentes autónomos en paralelo. Crea, configura y monitorea enjambres en tiempo real.'},
+ tags:['agentes','swarm','autonomo'],price:397,badge:'beta',pop:62},
+
+{id:'cortex-tutor',icon:'🧑‍🏫',name:'Tutor IA Adaptativo',cat:'cortex',
+ desc:{pt:'Tutor personalizado por IA que adapta conteúdo ao ritmo e nível de cada usuário. Ideal para plataformas de ensino.',en:'AI-powered personal tutor that adapts content to each user\'s pace and level.',es:'Tutor personalizado IA que adapta el contenido al ritmo y nivel de cada usuario.'},
+ tags:['tutor','educacao','ia'],price:247,badge:'new',pop:83},
+
+{id:'cortex-sentiment',icon:'💭',name:'Análise de Sentimento',cat:'cortex',
+ desc:{pt:'Análise de sentimento em tempo real de textos, reviews, tickets e mensagens. Dashboard com tendências e alertas.',en:'Real-time sentiment analysis of texts, reviews, tickets and messages. Dashboard with trends and alerts.',es:'Análisis de sentimiento en tiempo real de textos, reseñas, tickets y mensajes. Dashboard con tendencias.'},
+ tags:['nlp','sentimento','analytics'],price:177,pop:74},
+
+{id:'cortex-translate',icon:'🌐',name:'Tradutor IA Contextual',cat:'cortex',
+ desc:{pt:'Tradução automática contextual de conteúdo com preservação de tom e termos técnicos do negócio.',en:'Contextual automatic content translation preserving tone and business technical terms.',es:'Traducción automática contextual preservando tono y términos técnicos del negocio.'},
+ tags:['traducao','nlp','multilingual'],price:127,pop:72},
+
+{id:'cortex-summarizer',icon:'📝',name:'Sumarizador IA',cat:'cortex',
+ desc:{pt:'Sumariza reuniões, documentos, e-mails e artigos longos automaticamente. Gera bullet points e action items.',en:'Automatically summarizes meetings, documents, emails and long articles. Generates bullet points and action items.',es:'Resume reuniones, documentos, emails y artículos largos automáticamente. Genera bullet points y action items.'},
+ tags:['resumo','ia','produtividade'],price:97,pop:80},
+
+{id:'cortex-due-diligence',icon:'⚖️',name:'Due Diligence IA',cat:'cortex',
+ desc:{pt:'Análise automática de editais, contratos e documentos jurídicos em PDF. Extrai riscos, cláusulas críticas e gera relatório.',en:'Automatic analysis of legal documents and PDFs. Extracts risks, critical clauses and generates report.',es:'Análisis automático de documentos jurídicos PDF. Extrae riesgos, cláusulas críticas y genera informe.'},
+ tags:['pdf','juridico','extracao'],price:397,badge:'new',pop:72},
+
+{id:'cortex-code',icon:'💻',name:'Code Assistant IA',cat:'cortex',
+ desc:{pt:'Assistente de código integrado ao painel. Gera, revisa e explica código em mais de 30 linguagens.',en:'Code assistant integrated to the dashboard. Generates, reviews and explains code in 30+ languages.',es:'Asistente de código integrado al panel. Genera, revisa y explica código en más de 30 lenguajes.'},
+ tags:['codigo','ia','dev'],price:197,pop:85},
+
+{id:'cortex-image-gen',icon:'🎨',name:'Geração de Imagens IA',cat:'cortex',
+ desc:{pt:'Gera imagens profissionais para marketing, produtos e apresentações via API de IA generativa.',en:'Generates professional images for marketing, products and presentations via generative AI API.',es:'Genera imágenes profesionales para marketing, productos y presentaciones via API de IA generativa.'},
+ tags:['imagens','ia','marketing'],price:147,badge:'hot',pop:78},
+
+// ── AUTOMAÇÃO ──────────────────────────────────────────────────────────────
+{id:'nexia-flow',icon:'⚡',name:'NEXIA Flow',cat:'automacao',
+ desc:{pt:'Motor de automações low-code. Crie fluxos com gatilhos, condições e ações sem escrever código.',en:'Low-code automation engine. Create flows with triggers, conditions and actions without writing code.',es:'Motor de automatizaciones low-code. Crea flujos con disparadores, condiciones y acciones sin escribir código.'},
+ tags:['workflow','nocode','triggers'],price:147,badge:'popular',featured:true,pop:91},
+
+{id:'nexia-broadcast',icon:'📢',name:'NEXIA Broadcast',cat:'automacao',
+ desc:{pt:'Disparos em massa para WhatsApp, Email e SMS com segmentação por tags, histórico e relatórios de entrega.',en:'Mass broadcasts for WhatsApp, Email and SMS with tag segmentation, history and delivery reports.',es:'Envíos masivos para WhatsApp, Email y SMS con segmentación, historial e informes de entrega.'},
+ tags:['whatsapp','email','sms'],price:127,badge:'popular',pop:85},
+
+{id:'nexia-chatbot',icon:'🤖',name:'Chatbot Builder',cat:'automacao',
+ desc:{pt:'Construtor visual de chatbots sem código. Fluxos com IA, botões rápidos e escalada para humano.',en:'Visual no-code chatbot builder. AI flows, quick replies and human handoff.',es:'Constructor visual de chatbots sin código. Flujos con IA, respuestas rápidas y escalada a humano.'},
+ tags:['chatbot','ia','nocode'],price:197,badge:'popular',pop:84},
+
+{id:'nexia-pipeline',icon:'🚰',name:'Data Pipeline',cat:'automacao',
+ desc:{pt:'Sincronização automática de dados entre sistemas. ETL visual sem código com connectors prontos.',en:'Automatic data sync between systems. Visual no-code ETL with ready-made connectors.',es:'Sincronización automática de datos entre sistemas. ETL visual sin código con conectores listos.'},
+ tags:['etl','sync','integracao'],price:247,badge:'new',pop:66},
+
+{id:'checkin-qr',icon:'📲',name:'Check-in QR Offline',cat:'automacao',
+ desc:{pt:'Scanner QR offline-first para check-in de eventos, locais e espaços. Sincroniza ao reconectar. PWA instalável.',en:'Offline-first QR scanner for event, venue and space check-in. Syncs when reconnected. Installable PWA.',es:'Escáner QR offline-first para check-in de eventos y espacios. Sincroniza al reconectar. PWA instalable.'},
+ tags:['qr','pwa','checkin'],price:97,pop:77},
+
+{id:'mini-site',icon:'🌐',name:'Mini-Site Automático',cat:'automacao',
+ desc:{pt:'Gera automaticamente um mini-site por cliente/evento em subdomínio personalizado. Editor inline simples.',en:'Automatically generates a mini-site per client/event on a custom subdomain. Simple inline editor.',es:'Genera automáticamente un mini-sitio por cliente/evento en subdominio personalizado.'},
+ tags:['site','subdominio','builder'],price:177,badge:'new',pop:68},
+
+{id:'catraca-iot',icon:'🔐',name:'NEXIA Sentinel IoT',cat:'automacao',
+ desc:{pt:'Gerenciamento de fechaduras, catracas e acessos smart. Dashboard em tempo real com logs de acesso.',en:'Smart lock, turnstile and access management. Real-time dashboard with access logs.',es:'Gestión de cerraduras, torniquetes y accesos smart. Dashboard en tiempo real con registros de acceso.'},
+ tags:['iot','acesso','hardware'],price:227,badge:'beta',pop:55},
+
+{id:'nexia-scheduler',icon:'📅',name:'Agendamento Inteligente',cat:'automacao',
+ desc:{pt:'Agendamento online 24h com confirmação automática, lembretes sequenciais e fila de espera.',en:'24h online scheduling with automatic confirmation, sequential reminders and waitlist.',es:'Agendamiento online 24h con confirmación automática, recordatorios secuenciales y lista de espera.'},
+ tags:['agenda','agendamento','whatsapp'],price:147,badge:'hot',pop:88},
+
+{id:'nexia-approval',icon:'✅',name:'Fluxo de Aprovações',cat:'automacao',
+ desc:{pt:'Workflow digital de aprovação multi-nível com prazo por etapa, assinatura digital e liberação automática.',en:'Multi-level digital approval workflow with per-stage deadlines, digital signature and automatic release.',es:'Workflow de aprobación multinivel con plazo por etapa, firma digital y liberación automática.'},
+ tags:['aprovacao','workflow','assinatura'],price:197,pop:71},
+
+{id:'nexia-contracts',icon:'📜',name:'Gestão de Contratos',cat:'automacao',
+ desc:{pt:'Criação, assinatura digital e versionamento de contratos. Templates prontos com cláusulas inteligentes.',en:'Contract creation, digital signature and versioning. Ready templates with smart clauses.',es:'Creación, firma digital y versionado de contratos. Plantillas listas con cláusulas inteligentes.'},
+ tags:['contratos','assinatura','digital'],price:227,pop:76},
+
+{id:'nexia-nps',icon:'⭐',name:'NPS & Pesquisas',cat:'automacao',
+ desc:{pt:'Sistema de NPS, eNPS e pesquisas customizadas com análise de sentimento e relatórios automáticos.',en:'NPS, eNPS and custom surveys with sentiment analysis and automatic reports.',es:'NPS, eNPS y encuestas personalizadas con análisis de sentimiento e informes automáticos.'},
+ tags:['nps','pesquisa','feedback'],price:97,pop:73},
+
+{id:'nexia-overbooking',icon:'🔒',name:'Anti-Overbooking',cat:'automacao',
+ desc:{pt:'Trava instantânea de disponibilidade no primeiro clique. Impossível ter dois clientes na mesma vaga.',en:'Instant availability lock on first click. No double bookings possible.',es:'Bloqueo instantáneo de disponibilidad en el primer clic. Imposible tener dos clientes en la misma plaza.'},
+ tags:['reserva','calendario','trava'],price:127,badge:'hot',pop:89},
+
+{id:'nexia-badge',icon:'🏷️',name:'Credenciais & Badges',cat:'automacao',
+ desc:{pt:'Geração e impressão em massa de crachás personalizados com QR Code único por participante.',en:'Mass generation and printing of personalized badges with unique QR Code per participant.',es:'Generación e impresión masiva de credenciales personalizadas con código QR único por participante.'},
+ tags:['badge','evento','qrcode'],price:127,pop:72},
+
+{id:'nexia-gift-list',icon:'🎁',name:'Lista de Desejos Online',cat:'automacao',
+ desc:{pt:'Lista de desejos integrada a qualquer evento ou campanha. Pagamento via PIX e cartão, entrega digital.',en:'Wish list integrated with any event or campaign. Payment via PIX and card, digital delivery.',es:'Lista de deseos integrada a cualquier evento o campaña. Pago via PIX y tarjeta, entrega digital.'},
+ tags:['lista','pagamento','evento'],price:97,pop:81},
+
+{id:'nexia-sos',icon:'🆘',name:'Botão SOS Mobile',cat:'automacao',
+ desc:{pt:'Botão SOS para usuários no campo ou exterior. Funciona sem internet via SMS. Envia GPS e dados cadastrais.',en:'SOS button for field users or travelers abroad. Works offline via SMS. Sends GPS and profile data.',es:'Botón SOS para usuarios en campo o exterior. Funciona sin internet via SMS. Envía GPS y datos del perfil.'},
+ tags:['sos','offline','emergencia'],price:197,badge:'hot',pop:79},
+
+{id:'nexia-dispatch',icon:'🛠️',name:'Dispatch de Operações',cat:'automacao',
+ desc:{pt:'Central de operações para abertura de chamados com geolocalização e dispatch para técnicos via GPS.',en:'Operations center for ticket opening with geolocation and GPS-based technician dispatch.',es:'Central de operaciones para apertura de tickets con geolocalización y dispatch de técnicos via GPS.'},
+ tags:['ops','dispatch','gps'],price:247,pop:66},
+
+{id:'nexia-nocode-forms',icon:'📋',name:'Formulários No-Code',cat:'automacao',
+ desc:{pt:'Construtor de formulários dinâmicos com lógica condicional, upload de arquivos e integração ao CRM.',en:'Dynamic form builder with conditional logic, file uploads and CRM integration.',es:'Constructor de formularios dinámicos con lógica condicional, carga de archivos e integración al CRM.'},
+ tags:['formularios','nocode','crm'],price:87,pop:77},
+
+{id:'nexia-docs-gen',icon:'📄',name:'Gerador de Documentos',cat:'automacao',
+ desc:{pt:'Gera documentos PDF personalizados a partir de templates e dados do sistema. Proposta, orçamento, laudo.',en:'Generates personalized PDF documents from templates and system data. Proposal, quote, report.',es:'Genera documentos PDF personalizados desde plantillas y datos del sistema. Propuesta, presupuesto, informe.'},
+ tags:['pdf','templates','documentos'],price:147,pop:75},
+
+// ── ANALYTICS ──────────────────────────────────────────────────────────────
+{id:'cortex-analytics',icon:'📊',name:'CORTEX Analytics',cat:'analytics',
+ desc:{pt:'Dashboard de analytics avançado com gráficos em tempo real. Funil, coorte, retenção e LTV por tenant.',en:'Advanced analytics dashboard with real-time charts. Funnel, cohort, retention and LTV per tenant.',es:'Dashboard de analíticas avanzado con gráficas en tiempo real. Embudo, cohorte, retención y LTV por tenant.'},
+ tags:['dashboard','kpis','chartjs'],price:197,badge:'popular',featured:true,pop:86},
+
+{id:'heatmap-ocupacao',icon:'🗺️',name:'Heatmap de Ocupação',cat:'analytics',
+ desc:{pt:'Visualização de ocupação em tempo real por zona. Cores dinâmicas: livre, moderado, lotado. Integra com IoT.',en:'Real-time occupancy visualization by zone. Dynamic colors: free, moderate, full. IoT integration.',es:'Visualización de ocupación en tiempo real por zona. Colores dinámicos: libre, moderado, lleno.'},
+ tags:['mapa','ocupacao','visual'],price:127,pop:64},
+
+{id:'lead-scoring',icon:'🏆',name:'Lead Scoring IA',cat:'analytics',
+ desc:{pt:'Score automático de leads baseado em comportamento, cargo e engajamento. Prioriza o funil de vendas.',en:'Automatic lead scoring based on behavior, role and engagement. Prioritizes the sales funnel.',es:'Puntuación automática de leads basada en comportamiento, cargo y participación.'},
+ tags:['leads','ml','funil'],price:247,badge:'hot',pop:82},
+
+{id:'relatorios-agendados',icon:'📄',name:'Relatórios Agendados',cat:'analytics',
+ desc:{pt:'Gera e envia relatórios PDF/Excel automaticamente por e-mail. Cron configurável, templates personalizados.',en:'Generates and sends PDF/Excel reports automatically by email. Configurable cron, custom templates.',es:'Genera y envía informes PDF/Excel automáticamente por correo. Cron configurable, plantillas personalizadas.'},
+ tags:['pdf','excel','agendamento'],price:97,pop:71},
+
+{id:'crm-deep',icon:'🔍',name:'CRM Deep Analytics',cat:'analytics',
+ desc:{pt:'Análise profunda do pipeline: velocidade, objeções mais comuns e previsão de fechamento com 85% de acurácia.',en:'Deep pipeline analysis: velocity, common objections and closing forecast with 85% accuracy.',es:'Análisis profundo del pipeline: velocidad, objeciones comunes y previsión de cierre con 85% de precisión.'},
+ tags:['crm','pipeline','ml'],price:297,badge:'new',pop:78},
+
+{id:'mrr-dashboard',icon:'💰',name:'MRR Dashboard',cat:'analytics',
+ desc:{pt:'Painel de receita recorrente, churn, LTV e cohort analysis. Exporta para Excel e PDF em um clique.',en:'Recurring revenue panel, churn, LTV and cohort analysis. One-click export to Excel and PDF.',es:'Panel de ingresos recurrentes, churn, LTV y análisis de cohortes. Exportación en un clic.'},
+ tags:['saas','mrr','financeiro'],price:127,badge:'popular',pop:77},
+
+{id:'nexia-bi',icon:'📈',name:'BI Self-Service',cat:'analytics',
+ desc:{pt:'Business intelligence self-service com drag-and-drop de métricas, filtros avançados e compartilhamento.',en:'Self-service business intelligence with metric drag-and-drop, advanced filters and sharing.',es:'Business intelligence self-service con drag-and-drop de métricas, filtros avanzados y compartición.'},
+ tags:['bi','dashboard','selfservice'],price:347,badge:'new',pop:70},
+
+{id:'nexia-ab-test',icon:'🔬',name:'A/B Testing',cat:'analytics',
+ desc:{pt:'Plataforma de A/B testing para páginas, e-mails e fluxos. Resultados estatísticos automáticos.',en:'A/B testing platform for pages, emails and flows. Automatic statistical results.',es:'Plataforma de A/B testing para páginas, emails y flujos. Resultados estadísticos automáticos.'},
+ tags:['abtest','conversao','experimentos'],price:177,pop:68},
+
+{id:'nexia-attribution',icon:'🎯',name:'Atribuição de Conversão',cat:'analytics',
+ desc:{pt:'Multi-touch attribution para entender quais canais geram receita. Integra Google Ads, Meta e UTMs.',en:'Multi-touch attribution to understand which channels generate revenue. Integrates Google Ads, Meta and UTMs.',es:'Atribución multi-touch para entender qué canales generan ingresos. Integra Google Ads, Meta y UTMs.'},
+ tags:['atribuicao','marketing','ads'],price:197,pop:73},
+
+{id:'nexia-cohort',icon:'👥',name:'Análise de Coorte',cat:'analytics',
+ desc:{pt:'Analise o comportamento de grupos de usuários ao longo do tempo. Retenção, engajamento e receita por coorte.',en:'Analyze user group behavior over time. Retention, engagement and revenue by cohort.',es:'Analiza el comportamiento de grupos de usuarios en el tiempo. Retención, participación e ingresos por cohorte.'},
+ tags:['cohorte','retencao','saas'],price:147,pop:65},
+
+// ── COMUNICAÇÃO ──────────────────────────────────────────────────────────────
+{id:'pabx-cloud',icon:'☎️',name:'PABX Cloud WebRTC',cat:'comunicacao',
+ desc:{pt:'Softphone no browser com WebRTC. Ramais, transferência e gravação de chamadas integrado ao CRM.',en:'In-browser softphone with WebRTC. Extensions, transfer and call recording integrated to CRM.',es:'Softphone en el navegador con WebRTC. Extensiones, transferencia y grabación integrada al CRM.'},
+ tags:['voip','webrtc','crm'],price:297,badge:'new',pop:60},
+
+{id:'whatsapp-api',icon:'💬',name:'WhatsApp Business API',cat:'comunicacao',
+ desc:{pt:'Integração oficial com WhatsApp Business API. Templates aprovados, chatbot e inbox compartilhada.',en:'Official WhatsApp Business API integration. Approved templates, chatbot and shared inbox.',es:'Integración oficial WhatsApp Business API. Plantillas aprobadas, chatbot e inbox compartido.'},
+ tags:['whatsapp','api','chatbot'],price:197,badge:'popular',pop:90},
+
+{id:'emailjs-pro',icon:'✉️',name:'Email Transacional Pro',cat:'comunicacao',
+ desc:{pt:'Disparos transacionais e marketing com domínio próprio, DKIM, SPF e rastreamento de abertura/clique.',en:'Transactional and marketing emails with custom domain, DKIM, SPF and open/click tracking.',es:'Emails transaccionales y marketing con dominio propio, DKIM, SPF y rastreo de apertura/clic.'},
+ tags:['email','transacional','dkim'],price:87,pop:75},
+
+{id:'sms-gateway',icon:'📱',name:'SMS Gateway',cat:'comunicacao',
+ desc:{pt:'Envio de SMS via Twilio/Vonage. OTP, confirmações e alertas críticos com fallback automático.',en:'SMS sending via Twilio/Vonage. OTP, confirmations and critical alerts with automatic fallback.',es:'Envío de SMS via Twilio/Vonage. OTP, confirmaciones y alertas críticas con fallback automático.'},
+ tags:['sms','twilio','otp'],price:67,pop:69},
+
+{id:'nexia-inbox',icon:'📥',name:'Inbox Omnichannel',cat:'comunicacao',
+ desc:{pt:'Caixa de entrada unificada de WhatsApp, e-mail, Instagram e chat do site. Atendimento em equipe.',en:'Unified inbox for WhatsApp, email, Instagram and site chat. Team-based support.',es:'Bandeja de entrada unificada de WhatsApp, email, Instagram y chat del sitio. Atención en equipo.'},
+ tags:['omnichannel','inbox','atendimento'],price:247,badge:'hot',featured:true,pop:92},
+
+{id:'nexia-video',icon:'🎥',name:'Videochamada WebRTC',cat:'comunicacao',
+ desc:{pt:'Sala de vídeo WebRTC criptografada para teleconsultas, reuniões e suporte. Gravação com consentimento.',en:'Encrypted WebRTC video room for teleconsultations, meetings and support. Recording with consent.',es:'Sala de video WebRTC cifrada para teleconsultas, reuniones y soporte. Grabación con consentimiento.'},
+ tags:['video','webrtc','telemedicina'],price:197,pop:78},
+
+{id:'nexia-push',icon:'🔔',name:'Push Notifications',cat:'comunicacao',
+ desc:{pt:'Notificações push para web e mobile. Segmentação por comportamento, automação de campanhas.',en:'Push notifications for web and mobile. Behavioral segmentation, campaign automation.',es:'Notificaciones push para web y mobile. Segmentación por comportamiento, automatización de campañas.'},
+ tags:['push','notificacao','mobile'],price:77,pop:70},
+
+{id:'nexia-livechat',icon:'💬',name:'Live Chat Widget',cat:'comunicacao',
+ desc:{pt:'Widget de chat ao vivo para seu site. Roteamento automático, horários de atendimento e chatbot de fallback.',en:'Live chat widget for your site. Automatic routing, business hours and fallback chatbot.',es:'Widget de chat en vivo para tu sitio. Enrutamiento automático, horarios de atención y chatbot de fallback.'},
+ tags:['chat','widget','suporte'],price:97,pop:74},
+
+// ── SEGURANÇA ──────────────────────────────────────────────────────────────
+{id:'nexia-shield',icon:'🛡️',name:'NEXIA Shield',cat:'seguranca',
+ desc:{pt:'Dashboard de segurança com detecção de anomalias, brute-force e acesso suspeito. Alerta em tempo real.',en:'Security dashboard with anomaly detection, brute-force and suspicious access. Real-time alerts.',es:'Dashboard de seguridad con detección de anomalías, brute-force y acceso sospechoso. Alertas en tiempo real.'},
+ tags:['seguranca','ids','alertas'],price:247,badge:'hot',featured:true,pop:83},
+
+{id:'lgpd-compliance',icon:'📋',name:'LGPD Compliance',cat:'seguranca',
+ desc:{pt:'Módulo de conformidade LGPD. Audit trail, consentimento, direito ao esquecimento e relatórios DPA.',en:'LGPD compliance module. Audit trail, consent, right to be forgotten and DPA reports.',es:'Módulo de cumplimiento LGPD. Audit trail, consentimiento, derecho al olvido e informes DPA.'},
+ tags:['lgpd','compliance','audit'],price:147,badge:'popular',pop:78},
+
+{id:'2fa-module',icon:'🔑',name:'2FA Avançado',cat:'seguranca',
+ desc:{pt:'Autenticação de dois fatores com TOTP, WebAuthn e recuperação por e-mail. Configurável por papel.',en:'Two-factor authentication with TOTP, WebAuthn and email recovery. Configurable by role.',es:'Autenticación de dos factores con TOTP, WebAuthn y recuperación por correo. Configurable por rol.'},
+ tags:['2fa','totp','webauthn'],price:97,pop:80},
+
+{id:'pki-scanner',icon:'🔏',name:'PKI Scanner ICP-Brasil',cat:'seguranca',
+ desc:{pt:'Validação de certificados digitais ICP-Brasil (A1/A3). Lê e-CPF, e-CNPJ e assina contratos.',en:'ICP-Brasil digital certificate validation (A1/A3). Reads e-CPF, e-CNPJ and signs contracts.',es:'Validación de certificados digitales ICP-Brasil (A1/A3). Lee e-CPF, e-CNPJ y firma contratos.'},
+ tags:['pki','sha256','icp-brasil'],price:197,pop:66},
+
+{id:'nexia-backup',icon:'💾',name:'NEXIA Backup',cat:'seguranca',
+ desc:{pt:'Backup automático diário do Firestore com versionamento e restauração em 1 clique. Retenção de 30 dias.',en:'Daily automatic Firestore backup with versioning and 1-click restore. 30-day retention.',es:'Backup automático diario de Firestore con versionado y restauración en 1 clic. Retención de 30 días.'},
+ tags:['backup','firestore','recovery'],price:67,pop:74},
+
+{id:'nexia-waf',icon:'🚧',name:'WAF & Rate Limit',cat:'seguranca',
+ desc:{pt:'Web Application Firewall com rate limiting, bloqueio de IPs e proteção contra bots e scrapers.',en:'Web Application Firewall with rate limiting, IP blocking and protection against bots and scrapers.',es:'Web Application Firewall con rate limiting, bloqueo de IPs y protección contra bots y scrapers.'},
+ tags:['waf','seguranca','bots'],price:127,pop:69},
+
+{id:'nexia-dpo',icon:'🔐',name:'DPO as a Service',cat:'seguranca',
+ desc:{pt:'Adequação LGPD completa: mapeamento de dados, RIPD, políticas de privacidade e gestão de DSAR.',en:'Complete LGPD compliance: data mapping, DPIA, privacy policies and DSAR management.',es:'Adecuación LGPD completa: mapeo de datos, DPIA, políticas de privacidad y gestión de DSAR.'},
+ tags:['lgpd','privacidade','dpo'],price:497,badge:'hot',pop:84},
+
+{id:'nexia-pentest',icon:'🔓',name:'Pentest Automatizado',cat:'seguranca',
+ desc:{pt:'Scanner de vulnerabilidades automático com relatório de riscos, CVSS e plano de remediação.',en:'Automatic vulnerability scanner with risk report, CVSS scores and remediation plan.',es:'Escáner de vulnerabilidades automático con informe de riesgos, CVSS y plan de remediación.'},
+ tags:['pentest','vulnerabilidade','seguranca'],price:347,badge:'new',pop:65},
+
+// ── FINANCEIRO ──────────────────────────────────────────────────────────────
+{id:'nexia-pay-split',icon:'💸',name:'NEXIA Pay Split',cat:'financeiro',
+ desc:{pt:'Divisão automática de comissões e repasses via Mercado Pago. Por percentual ou valor fixo.',en:'Automatic commission split and transfers via Mercado Pago. By percentage or fixed amount.',es:'División automática de comisiones y traspasos via Mercado Pago. Por porcentaje o monto fijo.'},
+ tags:['pagamento','mp','comissao'],price:197,badge:'hot',pop:84},
+
+{id:'precificacao-dinamica',icon:'📈',name:'Precificação Dinâmica',cat:'financeiro',
+ desc:{pt:'Ajuste automático de preços por demanda, horário e ocupação. Maximiza receita dentro de faixas configuradas.',en:'Automatic price adjustment by demand, time and occupancy. Maximizes revenue within configured ranges.',es:'Ajuste automático de precios por demanda, horario y ocupación. Maximiza ingresos dentro de rangos.'},
+ tags:['precos','dinamico','yield'],price:247,badge:'new',pop:67},
+
+{id:'nfe-modulo',icon:'🧾',name:'NF-e & NFS-e',cat:'financeiro',
+ desc:{pt:'Emissão automática de notas fiscais eletrônicas. Integra com SEFAZ via API REST. Arquivamento automático.',en:'Automatic electronic invoice issuance. Integrates with SEFAZ via REST API. Automatic archiving.',es:'Emisión automática de facturas electrónicas. Integra con SEFAZ via API REST. Archivo automático.'},
+ tags:['nfe','fiscal','sefaz'],price:177,pop:73},
+
+{id:'nexia-cobranca',icon:'🔄',name:'Cobrança Automática',cat:'financeiro',
+ desc:{pt:'Régua de cobrança automatizada: boleto, PIX, cartão recorrente e alertas de inadimplência multicanal.',en:'Automated billing: boleto, PIX, recurring card and multichannel delinquency alerts.',es:'Cobro automatizado: boleto, PIX, tarjeta recurrente y alertas de morosidad multicanal.'},
+ tags:['cobranca','inadimplencia','recorrente'],price:167,badge:'hot',pop:88},
+
+{id:'nexia-split-adv',icon:'💳',name:'Split Marketplace',cat:'financeiro',
+ desc:{pt:'Pagamentos marketplace com split multi-nível: plataforma, vendedor, parceiro e imposto por transação.',en:'Marketplace payments with multi-level split: platform, seller, partner and tax per transaction.',es:'Pagos marketplace con split multinivel: plataforma, vendedor, socio e impuesto por transacción.'},
+ tags:['marketplace','split','pagamento'],price:347,badge:'hot',pop:77},
+
+{id:'nexia-conciliacao',icon:'📊',name:'Conciliação Financeira',cat:'financeiro',
+ desc:{pt:'Conciliação automática de extratos bancários (OFX/CSV) com lançamentos do sistema via IA.',en:'Automatic bank statement (OFX/CSV) reconciliation with system entries via AI.',es:'Conciliación automática de extractos bancarios (OFX/CSV) con asientos del sistema via IA.'},
+ tags:['financeiro','conciliacao','banco'],price:197,pop:73},
+
+{id:'nexia-assinatura',icon:'♻️',name:'Assinaturas & Planos',cat:'financeiro',
+ desc:{pt:'Gestão completa de planos recorrentes: upgrade, downgrade, trial, coupon e relatório de churn.',en:'Complete recurring plan management: upgrade, downgrade, trial, coupon and churn report.',es:'Gestión completa de planes recurrentes: upgrade, downgrade, trial, cupón e informe de churn.'},
+ tags:['assinatura','recorrente','saas'],price:227,badge:'new',pop:80},
+
+{id:'nexia-orcamento',icon:'📃',name:'Orçamentos & Propostas',cat:'financeiro',
+ desc:{pt:'Geração de orçamentos e propostas comerciais em PDF com aprovação online e controle de validade.',en:'Generation of quotes and commercial proposals in PDF with online approval and validity control.',es:'Generación de presupuestos y propuestas comerciales en PDF con aprobación online y control de vigencia.'},
+ tags:['orcamento','proposta','pdf'],price:127,pop:76},
+
+// ── INFRA ──────────────────────────────────────────────────────────────────
+{id:'firestore-manager',icon:'🔥',name:'Firestore Manager',cat:'infra',
+ desc:{pt:'Interface visual para gerenciar coleções Firestore. CRUD, queries, índices e migração em lote.',en:'Visual Firestore management interface. CRUD, queries, indexes and batch migration.',es:'Interfaz visual para gestionar colecciones Firestore. CRUD, queries, índices y migración en lote.'},
+ tags:['firebase','nosql','crud'],price:97,pop:70},
+
+{id:'nexia-cdn',icon:'🌍',name:'CDN & Asset Manager',cat:'infra',
+ desc:{pt:'Gerenciamento de assets de mídia com CDN global. Upload, otimização automática e entrega rápida.',en:'Media asset management with global CDN. Upload, automatic optimization and fast delivery.',es:'Gestión de assets de medios con CDN global. Carga, optimización automática y entrega rápida.'},
+ tags:['cdn','storage','media'],price:87,pop:72},
+
+{id:'nexia-api-gw',icon:'🔗',name:'API Gateway',cat:'infra',
+ desc:{pt:'Gateway de APIs externas com autenticação, rate limit, retry e logs. Conecte qualquer sistema.',en:'External API gateway with authentication, rate limit, retry and logs. Connect any system.',es:'Gateway de APIs externas con autenticación, rate limit, retry y logs. Conecta cualquier sistema.'},
+ tags:['api','gateway','integracao'],price:247,badge:'new',pop:69},
+
+{id:'nexia-webhooks',icon:'🪝',name:'Webhooks Manager',cat:'infra',
+ desc:{pt:'Gerenciamento centralizado de webhooks de entrada e saída com retry automático e logs.',en:'Centralized management of inbound and outbound webhooks with automatic retry and logs.',es:'Gestión centralizada de webhooks de entrada y salida con retry automático y logs.'},
+ tags:['webhooks','eventos','integracao'],price:77,pop:67},
+
+{id:'nexia-queues',icon:'🗂️',name:'Filas & Jobs',cat:'infra',
+ desc:{pt:'Sistema de filas e jobs em background para tarefas pesadas. Prioridade, retry e monitoramento.',en:'Queue and background job system for heavy tasks. Priority, retry and monitoring.',es:'Sistema de colas y jobs en background para tareas pesadas. Prioridad, retry y monitoreo.'},
+ tags:['filas','jobs','background'],price:117,pop:63},
+
+{id:'nexia-observability',icon:'👁️',name:'Observability Suite',cat:'infra',
+ desc:{pt:'Logs, traces e métricas centralizados. Alertas automáticos de erros e degradação de performance.',en:'Centralized logs, traces and metrics. Automatic error and performance degradation alerts.',es:'Logs, traces y métricas centralizados. Alertas automáticas de errores y degradación de rendimiento.'},
+ tags:['logs','traces','monitoring'],price:147,pop:71},
+
+{id:'nexia-multi-tenant',icon:'🏢',name:'Multi-Tenant Manager',cat:'infra',
+ desc:{pt:'Gestão avançada de tenants: provisionamento, configurações isoladas, billing e monitoramento de uso.',en:'Advanced tenant management: provisioning, isolated settings, billing and usage monitoring.',es:'Gestión avanzada de tenants: aprovisionamiento, configuraciones aisladas, billing y monitoreo de uso.'},
+ tags:['multitenancy','saas','admin'],price:297,badge:'hot',pop:86},
+
+{id:'nexia-env',icon:'⚙️',name:'Config & Secrets Manager',cat:'infra',
+ desc:{pt:'Gestão segura de variáveis de ambiente e secrets por tenant. Rotação automática e auditoria.',en:'Secure management of environment variables and secrets per tenant. Automatic rotation and audit.',es:'Gestión segura de variables de entorno y secrets por tenant. Rotación automática y auditoría.'},
+ tags:['config','secrets','env'],price:97,pop:68},
+
+// ── SAÚDE ──────────────────────────────────────────────────────────────────
+{id:'health-triagem',icon:'🩺',name:'Triagem Inteligente',cat:'saude',
+ desc:{pt:'IA que realiza triagem de pacientes via chat, classifica urgência pelo protocolo Manchester e direciona ao especialista.',en:'AI patient triage via chat, classifies urgency by Manchester protocol and routes to specialist.',es:'IA que realiza triaje de pacientes vía chat, clasifica urgencia por protocolo Manchester y dirige al especialista.'},
+ tags:['saude','triagem','ia'],price:397,badge:'new',pop:74},
+
+{id:'health-prontuario',icon:'📋',name:'Prontuário Digital IA',cat:'saude',
+ desc:{pt:'Prontuário eletrônico com ditado por voz e estruturação SOAP automática. LGPD e CFM compliant.',en:'Electronic health record with voice dictation and automatic SOAP structuring. LGPD and CFM compliant.',es:'Historia clínica con dictado por voz y estructuración SOAP automática. Conforme LGPD y CFM.'},
+ tags:['saude','prontuario','voz'],price:497,badge:'hot',pop:82},
+
+{id:'health-telemedicina',icon:'🖥️',name:'Telemedicina',cat:'saude',
+ desc:{pt:'Plataforma de teleconsulta com sala virtual WebRTC, prescrição digital e envio automático à farmácia.',en:'Teleconsultation platform with WebRTC virtual room, digital prescription and automatic pharmacy dispatch.',es:'Plataforma de teleconsulta con sala virtual WebRTC, receta digital y envío automático a farmacia.'},
+ tags:['saude','telemedicina','video'],price:597,badge:'hot',featured:true,pop:91},
+
+{id:'health-agendamento',icon:'📅',name:'Agenda Médica IA',cat:'saude',
+ desc:{pt:'Agendamento 24h com IA. Otimiza agenda por especialidade, reduz no-shows com lembretes sequenciais.',en:'24h AI scheduling. Optimizes by specialty, reduces no-shows with sequential reminders.',es:'Agendamiento 24h con IA. Optimiza agenda por especialidad, reduce ausencias con recordatorios.'},
+ tags:['saude','agenda','whatsapp'],price:297,pop:79},
+
+{id:'health-exames',icon:'🔬',name:'Laudo IA',cat:'saude',
+ desc:{pt:'Análise automatizada de exames laboratoriais. Gera pré-laudo, alerta valores críticos e compara histórico.',en:'Automated lab exam analysis. Generates pre-report, alerts critical values and compares history.',es:'Análisis automatizado de exámenes de laboratorio. Genera pre-informe, alerta valores críticos.'},
+ tags:['saude','laudo','diagnostico'],price:697,badge:'new',pop:68},
+
+{id:'health-farmacia',icon:'💊',name:'Farmácia Inteligente',cat:'saude',
+ desc:{pt:'Estoque farmacêutico com pedidos automáticos, alerta de vencimento e verificação de interações por IA.',en:'Pharmaceutical inventory with automatic orders, expiry alerts and AI drug interaction verification.',es:'Inventario farmacéutico con pedidos automáticos, alertas de vencimiento y verificación de interacciones IA.'},
+ tags:['saude','farmacia','estoque'],price:397,pop:71},
+
+{id:'health-faturamento',icon:'💰',name:'Faturamento TISS',cat:'saude',
+ desc:{pt:'Faturamento automático de guias TISS para convênios. Reduz glosas e acelera reembolso com validação IA.',en:'Automatic TISS billing for health insurers. Reduces rejections and accelerates reimbursement with AI validation.',es:'Facturación automática TISS para aseguradoras. Reduce rechazos y acelera reembolso con validación IA.'},
+ tags:['saude','faturamento','tiss'],price:497,badge:'new',pop:77},
+
+{id:'health-chatbot',icon:'🤖',name:'Assistente Saúde 24h',cat:'saude',
+ desc:{pt:'Chatbot de saúde com triagem sintomática, orientações clínicas e agendamento. Disponível 24h no WhatsApp.',en:'Health chatbot with symptom triage, clinical guidance and scheduling. Available 24h on WhatsApp.',es:'Chatbot de salud con triaje sintomático, orientaciones clínicas y agendamiento. Disponible 24h.'},
+ tags:['saude','chatbot','whatsapp'],price:247,pop:85},
+
+{id:'health-gestao-clinica',icon:'🏥',name:'ERP Clínico',cat:'saude',
+ desc:{pt:'ERP clínico completo: recepção, agenda, financeiro, estoque de insumos e relatórios em um painel.',en:'Complete clinic ERP: reception, scheduling, financials, supply inventory and reports in one dashboard.',es:'ERP clínico completo: recepción, agenda, financiero, inventario de insumos e informes en un panel.'},
+ tags:['saude','clinica','erp'],price:347,pop:85},
+
+{id:'health-nutricao',icon:'🥗',name:'Nutrição Digital',cat:'saude',
+ desc:{pt:'Plano alimentar personalizado por IA com base em exames, objetivos e restrições. App de acompanhamento.',en:'AI-personalized meal plan based on exams, goals and restrictions. Tracking app.',es:'Plan alimentario personalizado por IA basado en exámenes, objetivos y restricciones. App de seguimiento.'},
+ tags:['saude','nutricao','ia'],price:247,badge:'new',pop:72},
+
+{id:'health-mental',icon:'🧘',name:'Saúde Mental Digital',cat:'saude',
+ desc:{pt:'Plataforma de saúde mental: terapia online, diário emocional e assistente IA de suporte 24h.',en:'Mental health platform: online therapy, emotional journal and 24h AI support assistant.',es:'Plataforma de salud mental: terapia online, diario emocional y asistente IA de soporte 24h.'},
+ tags:['saude','mental','terapia'],price:497,featured:true,pop:86},
+
+{id:'health-vacina',icon:'💉',name:'Carteira de Vacinação',cat:'saude',
+ desc:{pt:'Registro digital de vacinas com alertas de dose, integração RNDS e carteira compartilhável por QR.',en:'Digital vaccine record with dose alerts, RNDS integration and QR-shareable card.',es:'Registro digital de vacunas con alertas de dosis, integración RNDS y tarjeta compartible por QR.'},
+ tags:['saude','vacina','rnds'],price:197,pop:67},
+
+// ── EDUCAÇÃO ──────────────────────────────────────────────────────────────
+{id:'edu-lms',icon:'🎓',name:'LMS NEXIA',cat:'educacao',
+ desc:{pt:'Plataforma de cursos online completa: vídeos, quizzes, certificados e gamificação integrada.',en:'Complete online course platform: videos, quizzes, certificates and integrated gamification.',es:'Plataforma de cursos online completa: videos, quizzes, certificados y gamificación integrada.'},
+ tags:['educacao','lms','cursos'],price:397,badge:'hot',featured:true,pop:88},
+
+{id:'edu-avaliacao',icon:'📝',name:'Avaliação Automática',cat:'educacao',
+ desc:{pt:'Criação e correção automática de provas dissertativas e de múltipla escolha alinhadas à BNCC.',en:'Automatic creation and grading of essay and multiple-choice tests aligned with BNCC.',es:'Creación y corrección automática de exámenes alineados con estándares educativos nacionales.'},
+ tags:['educacao','avaliacao','correcao'],price:247,pop:76},
+
+{id:'edu-conteudo',icon:'📚',name:'Gerador de Conteúdo Edu',cat:'educacao',
+ desc:{pt:'Gera planos de aula, slides, resumos e exercícios diferenciados a partir de tema e série escolar.',en:'Generates lesson plans, slides, summaries and differentiated exercises from topic and school grade.',es:'Genera planes de clase, presentaciones, resúmenes y ejercicios desde el tema y grado escolar.'},
+ tags:['educacao','conteudo','plano-aula'],price:197,pop:81},
+
+{id:'edu-matricula',icon:'🏫',name:'Matrícula Digital',cat:'educacao',
+ desc:{pt:'Processo de matrícula 100% digital: documentos, assinatura de contrato e pagamento integrados.',en:'100% digital enrollment: documents, contract signing and integrated payment.',es:'Proceso de matrícula 100% digital: documentos, firma de contrato y pago integrados.'},
+ tags:['educacao','matricula','digital'],price:297,pop:72},
+
+{id:'edu-certificado',icon:'🏆',name:'Certificadora Digital',cat:'educacao',
+ desc:{pt:'Emissão de certificados com hash em blockchain. Validação pública por QR code. Anti-fraude.',en:'Certificate issuance with blockchain hash. Public QR code validation. Anti-fraud.',es:'Emisión de certificados con hash en blockchain. Validación pública por código QR. Anti-fraude.'},
+ tags:['educacao','certificado','blockchain'],price:197,badge:'new',pop:69},
+
+{id:'edu-financeiro',icon:'💳',name:'Financeiro Escolar',cat:'educacao',
+ desc:{pt:'Gestão de mensalidades, bolsas, inadimplência e negociação automática de parcelamentos por IA.',en:'School tuition management, scholarships, delinquency and AI-powered automatic installment negotiation.',es:'Gestión de mensualidades, becas, morosidad y negociación automática de cuotas por IA.'},
+ tags:['educacao','financeiro','cobranca'],price:347,pop:78},
+
+{id:'edu-comunicacao',icon:'📢',name:'Comunicação Escolar',cat:'educacao',
+ desc:{pt:'Plataforma de comunicação escola-aluno-responsável com app, WhatsApp, boletim digital e mural.',en:'School-student-parent communication platform with app, WhatsApp, digital report card and bulletin.',es:'Plataforma de comunicación escuela-alumno-tutor con app, WhatsApp, boletín digital y tablón.'},
+ tags:['educacao','comunicacao','app'],price:197,pop:84},
+
+{id:'edu-vestibular',icon:'🏛️',name:'Prep Vestibular IA',cat:'educacao',
+ desc:{pt:'Preparatório ENEM com simulados, cronograma personalizado e correção de redação com notas por competência.',en:'ENEM/SAT prep with practice tests, personalized schedule and essay correction with competency grades.',es:'Preparatorio de examen de ingreso con simulacros, cronograma personalizado y corrección de redacción.'},
+ tags:['educacao','vestibular','enem'],price:197,pop:88},
+
+{id:'edu-idiomas',icon:'🌐',name:'Idiomas com IA',cat:'educacao',
+ desc:{pt:'Ensino de idiomas com conversação por IA nativo, correção fonética em tempo real e trilha adaptativa.',en:'Language learning with native AI conversation, real-time phonetic correction and adaptive track.',es:'Aprendizaje de idiomas con conversación IA nativo, corrección fonética en tiempo real y ruta adaptativa.'},
+ tags:['educacao','idiomas','conversacao'],price:247,badge:'hot',pop:91},
+
+{id:'edu-escola-pais',icon:'👨‍👩‍👧',name:'Portal Pais & Escola',cat:'educacao',
+ desc:{pt:'App dos responsáveis com boletim, frequência, agenda, reuniões e chat direto com professores.',en:'Parent app with grades, attendance, calendar, meetings and direct chat with teachers.',es:'App de tutores con notas, asistencia, agenda, reuniones y chat directo con profesores.'},
+ tags:['educacao','pais','comunicacao'],price:147,pop:80},
+
+{id:'edu-ecommerce-cursos',icon:'🛒',name:'Loja de Cursos',cat:'educacao',
+ desc:{pt:'Plataforma de venda de cursos online com checkout, afiliados, upsell e área do aluno.',en:'Online course sales platform with checkout, affiliates, upsell and student area.',es:'Plataforma de venta de cursos online con checkout, afiliados, upsell y área del alumno.'},
+ tags:['educacao','cursos','ecommerce'],price:297,badge:'hot',pop:93},
+
+{id:'edu-biblioteca',icon:'📖',name:'Biblioteca Digital',cat:'educacao',
+ desc:{pt:'Acervo digital com empréstimo de e-books e pesquisa semântica por IA. Recomendações personalizadas.',en:'Digital library with e-book lending and AI semantic search. Personalized recommendations.',es:'Biblioteca digital con préstamo de libros y búsqueda semántica IA. Recomendaciones personalizadas.'},
+ tags:['educacao','biblioteca','ebooks'],price:147,pop:69},
+
+// ── JURÍDICO ──────────────────────────────────────────────────────────────
+{id:'legal-contratos',icon:'📜',name:'Gerador de Contratos IA',cat:'juridico',
+ desc:{pt:'Gera contratos jurídicos personalizados com cláusulas validadas. Mais de 80 modelos prontos.',en:'Generates personalized legal contracts with validated clauses. Over 80 ready templates.',es:'Genera contratos jurídicos personalizados con cláusulas validadas. Más de 80 plantillas listas.'},
+ tags:['juridico','contratos','ia'],price:497,badge:'hot',featured:true,pop:90},
+
+{id:'legal-peticao',icon:'⚖️',name:'Peticionador IA',cat:'juridico',
+ desc:{pt:'Gera petições iniciais, contestações e recursos com pesquisa automática de jurisprudência STJ/STF.',en:'Generates initial petitions, contestations and appeals with automatic STJ/STF case law research.',es:'Genera peticiones iniciales, contestaciones y recursos con búsqueda automática de jurisprudencia.'},
+ tags:['juridico','peticao','jurisprudencia'],price:597,badge:'new',pop:85},
+
+{id:'legal-due-diligence',icon:'🔍',name:'Due Diligence Legal',cat:'juridico',
+ desc:{pt:'Análise automatizada de contratos e documentos societários. Mapa de riscos com semáforo visual.',en:'Automated analysis of contracts and corporate documents. Risk map with visual traffic light.',es:'Análisis automatizado de contratos y documentos societarios. Mapa de riesgos con semáforo visual.'},
+ tags:['juridico','due-diligence','analise'],price:697,pop:79},
+
+{id:'legal-compliance',icon:'🛡️',name:'Compliance Jurídico',cat:'juridico',
+ desc:{pt:'Monitor de compliance com alertas de vencimento, renovações e obrigações regulatórias por área.',en:'Compliance monitor with alerts for deadlines, renewals and regulatory obligations by area.',es:'Monitor de compliance con alertas de vencimiento, renovaciones y obligaciones regulatorias por área.'},
+ tags:['juridico','compliance','regulatorio'],price:447,pop:73},
+
+{id:'legal-trabalhista',icon:'👷',name:'Trabalhista IA',cat:'juridico',
+ desc:{pt:'Cálculos trabalhistas automáticos: rescisão, FGTS, férias, horas extras e risco de ação trabalhista.',en:'Automatic labor calculations: termination, FGTS, vacation, overtime and labor claim risk.',es:'Cálculos laborales automáticos: liquidación, FGTS, vacaciones, horas extra y riesgo de reclamación.'},
+ tags:['juridico','trabalhista','calculo'],price:397,pop:81},
+
+{id:'legal-protocolo',icon:'📨',name:'Protocolo Eletrônico',cat:'juridico',
+ desc:{pt:'Protocolo de petições nos principais tribunais (ESAJ, PJe) com rastreamento automático de andamentos.',en:'Electronic filing at major courts (ESAJ, PJe) with automatic process tracking.',es:'Protocolo electrónico en principales tribunales (ESAJ, PJe) con seguimiento automático de avances.'},
+ tags:['juridico','protocolo','tribunal'],price:347,pop:76},
+
+{id:'legal-honorarios',icon:'💼',name:'Gestão de Honorários',cat:'juridico',
+ desc:{pt:'Controle de honorários (fixo, horário, êxito), emissão de NFS-e e alerta de inadimplência.',en:'Honorarium management (fixed, hourly, success fee), NFS-e issuance and delinquency alerts.',es:'Control de honorarios (fijo, por hora, éxito), emisión de NFS-e y alertas de incumplimiento.'},
+ tags:['juridico','honorarios','financeiro'],price:297,pop:74},
+
+{id:'legal-licitacao',icon:'🏗️',name:'Monitor de Licitações',cat:'juridico',
+ desc:{pt:'Monitoramento automático de editais em portais públicos com alertas e análise de oportunidades por IA.',en:'Automatic monitoring of public tender notices with alerts and AI opportunity analysis.',es:'Monitoreo automático de licitaciones en portales públicos con alertas y análisis IA de oportunidades.'},
+ tags:['juridico','licitacao','governo'],price:347,badge:'new',pop:78},
+
+{id:'legal-societario',icon:'🏢',name:'Societário Digital',cat:'juridico',
+ desc:{pt:'Gestão societária: alterações contratuais, atas de reunião e acompanhamento na Junta Comercial.',en:'Corporate management: contractual amendments, meeting minutes and board registration tracking.',es:'Gestión societaria: modificaciones contractuales, actas de reunión y seguimiento en Junta Comercial.'},
+ tags:['juridico','societario','contrato'],price:447,pop:71},
+
+// ── LOGÍSTICA ──────────────────────────────────────────────────────────────
+{id:'log-rastreamento',icon:'📦',name:'Rastreamento Unificado',cat:'logistica',
+ desc:{pt:'Rastreamento unificado de encomendas de 20+ transportadoras em tempo real. Notifica destinatário.',en:'Unified parcel tracking from 20+ carriers in real time. Automatically notifies recipient.',es:'Rastreo unificado de envíos de 20+ transportistas en tiempo real. Notifica al destinatario.'},
+ tags:['logistica','rastreamento','transportadora'],price:247,badge:'hot',featured:true,pop:92},
+
+{id:'log-roteirizacao',icon:'🗺️',name:'Roteirizador IA',cat:'logistica',
+ desc:{pt:'Otimização de rotas de entrega com IA e trânsito em tempo real. Reduz km e custo em até 35%.',en:'AI-powered delivery route optimization with real-time traffic. Reduces km and cost by up to 35%.',es:'Optimización de rutas de entrega con IA y tráfico en tiempo real. Reduce km y costo hasta 35%.'},
+ tags:['logistica','rotas','otimizacao'],price:397,badge:'new',pop:86},
+
+{id:'log-estoque',icon:'🏭',name:'WMS Inteligente',cat:'logistica',
+ desc:{pt:'Gestão de armazém com endereçamento, picking otimizado e inventário cíclico automático.',en:'Warehouse management with slotting, optimized picking and automatic cyclic inventory.',es:'Gestión de almacén con ubicaciones, picking optimizado e inventario cíclico automático.'},
+ tags:['logistica','estoque','wms'],price:497,pop:78},
+
+{id:'log-frete',icon:'🚚',name:'Cotação de Frete IA',cat:'logistica',
+ desc:{pt:'Cotação em 20+ transportadoras em < 3s. Seleção por custo, prazo ou equilíbrio. Contrato com 1 clique.',en:'Quote from 20+ carriers in < 3s. Selection by cost, time or balance. 1-click contract.',es:'Cotización en 20+ transportistas en < 3s. Selección por costo, plazo o equilibrio. Contrato en 1 clic.'},
+ tags:['logistica','frete','cotacao'],price:297,pop:88},
+
+{id:'log-nfe-saida',icon:'🧾',name:'NF-e Logística',cat:'logistica',
+ desc:{pt:'Emissão em massa de NF-e de saída com DANFE, XML e integração com transportadoras.',en:'Bulk NF-e issuance with DANFE, XML and carrier integration.',es:'Emisión masiva de NF-e de salida con DANFE, XML e integración con transportistas.'},
+ tags:['logistica','nfe','fiscal'],price:347,pop:82},
+
+{id:'log-iot',icon:'📡',name:'IoT Logístico',cat:'logistica',
+ desc:{pt:'Monitoramento de frotas e cargas com IoT: temperatura, localização e condições da carga em tempo real.',en:'Fleet and cargo monitoring with IoT: temperature, location and cargo conditions in real time.',es:'Monitoreo de flotas y cargas con IoT: temperatura, ubicación y condiciones en tiempo real.'},
+ tags:['logistica','iot','frota'],price:597,badge:'new',pop:70},
+
+{id:'log-devolucao',icon:'↩️',name:'Logística Reversa',cat:'logistica',
+ desc:{pt:'Gestão de devoluções com etiqueta automática, rastreamento e decisão inteligente de destinação.',en:'Return management with automatic label, tracking and intelligent destination decision.',es:'Gestión de devoluciones con etiqueta automática, rastreo y decisión inteligente de destino.'},
+ tags:['logistica','reversa','devolucao'],price:297,pop:75},
+
+{id:'log-demand-planning',icon:'📈',name:'Demand Planning IA',cat:'logistica',
+ desc:{pt:'Previsão de demanda por SKU (3, 6, 12 meses) com sazonalidade e geração automática de plano de compras.',en:'Demand forecast by SKU (3, 6, 12 months) with seasonality and automatic purchase plan generation.',es:'Previsión de demanda por SKU (3, 6, 12 meses) con estacionalidad y plan de compras automático.'},
+ tags:['logistica','demanda','previsao'],price:497,badge:'new',pop:76},
+
+{id:'log-last-mile',icon:'🛵',name:'Last Mile Manager',cat:'logistica',
+ desc:{pt:'Gestão de entregas de última milha com motoristas autônomos, hubs e rastreamento ao vivo.',en:'Last mile delivery management with gig drivers, hubs and live tracking.',es:'Gestión de entregas de última milla con conductores autónomos, hubs y rastreo en vivo.'},
+ tags:['logistica','lastmile','delivery'],price:397,badge:'new',pop:82},
+
+{id:'log-tms',icon:'🏎️',name:'TMS Inteligente',cat:'logistica',
+ desc:{pt:'Sistema de gerenciamento de transporte com planejamento, execução, CIOT e MDF-e automáticos.',en:'Transportation management system with planning, execution, automatic CIOT and MDF-e.',es:'Sistema de gestión de transporte con planificación, ejecución, CIOT y MDF-e automáticos.'},
+ tags:['logistica','tms','transporte'],price:597,pop:73},
+
+// ── RH ────────────────────────────────────────────────────────────────────
+{id:'rh-recrutamento',icon:'🎯',name:'Recrutamento IA',cat:'rh',
+ desc:{pt:'Triagem automática de currículos, ranking por fit técnico/cultural e agendamento de entrevistas por IA.',en:'Automatic resume screening, ranking by technical/cultural fit and AI-powered interview scheduling.',es:'Cribado automático de CVs, ranking por fit técnico/cultural y programación de entrevistas por IA.'},
+ tags:['rh','recrutamento','ia'],price:397,badge:'hot',featured:true,pop:89},
+
+{id:'rh-onboarding',icon:'🤝',name:'Onboarding Digital',cat:'rh',
+ desc:{pt:'Integração 100% digital: documentos, treinamentos, checklist e buddy virtual IA 24h.',en:'100% digital onboarding: documents, training, checklist and 24h AI virtual buddy.',es:'Integración 100% digital: documentos, capacitaciones, checklist y buddy virtual IA 24h.'},
+ tags:['rh','onboarding','integracao'],price:297,badge:'new',pop:83},
+
+{id:'rh-folha',icon:'💵',name:'Folha de Pagamento IA',cat:'rh',
+ desc:{pt:'Folha com cálculo automático de INSS, IRRF, FGTS, holerite digital e arquivos eSocial.',en:'Payroll with automatic INSS, IRRF, FGTS calculation, digital payslip and eSocial files.',es:'Nómina con cálculo automático de INSS, IRRF, FGTS, recibo digital y archivos eSocial.'},
+ tags:['rh','folha','esocial'],price:497,pop:77},
+
+{id:'rh-ponto',icon:'🕐',name:'Ponto Digital IA',cat:'rh',
+ desc:{pt:'Controle de ponto com reconhecimento facial, geolocalização e detecção de anomalias por IA.',en:'Time tracking with facial recognition, geolocation and AI anomaly detection.',es:'Control de asistencia con reconocimiento facial, geolocalización y detección de anomalías IA.'},
+ tags:['rh','ponto','reconhecimento-facial'],price:247,pop:88},
+
+{id:'rh-desempenho',icon:'📊',name:'Avaliação de Desempenho',cat:'rh',
+ desc:{pt:'Ciclos 360°, PDI automático, OKRs e feedback contínuo por IA. Nine-Box de talentos automático.',en:'360° reviews, automatic IDP, OKRs and continuous AI feedback. Automatic nine-box.',es:'Ciclos 360°, PDI automático, OKRs y feedback continuo IA. Nine-Box de talentos automático.'},
+ tags:['rh','desempenho','okr'],price:347,pop:80},
+
+{id:'rh-beneficios',icon:'🎁',name:'Gestão de Benefícios',cat:'rh',
+ desc:{pt:'Plataforma de benefícios flexíveis: VR/VA, plano de saúde, wellbeing e gestão em painel único.',en:'Flexible benefits platform: meal/food vouchers, health plan, wellbeing and single panel management.',es:'Plataforma de beneficios flexibles: VR/VA, plan de salud, bienestar y gestión en panel único.'},
+ tags:['rh','beneficios','flexivel'],price:297,pop:82},
+
+{id:'rh-clima',icon:'😊',name:'Clima Organizacional IA',cat:'rh',
+ desc:{pt:'Pesquisas de clima, eNPS e pulso semanal com análise de sentimento e alertas de turnover.',en:'Climate surveys, eNPS and weekly pulse with sentiment analysis and turnover risk alerts.',es:'Encuestas de clima, eNPS y pulso semanal con análisis de sentimiento y alertas de rotación.'},
+ tags:['rh','clima','enps'],price:247,badge:'new',pop:76},
+
+{id:'rh-treinamento',icon:'🎓',name:'T&D Corporativo',cat:'rh',
+ desc:{pt:'Trilhas de desenvolvimento com microlearning, gamificação e certificado interno por competência.',en:'Development tracks with microlearning, gamification and internal competency certification.',es:'Rutas de desarrollo con microlearning, gamificación y certificación interna por competencia.'},
+ tags:['rh','treinamento','elearning'],price:297,pop:79},
+
+{id:'rh-offboarding',icon:'🚪',name:'Offboarding Inteligente',cat:'rh',
+ desc:{pt:'Desligamento automatizado: devolução de equipamentos, revogação de acessos e entrevista de saída por IA.',en:'Automated offboarding: equipment return, access revocation and AI exit interview.',es:'Desvinculación automatizada: devolución de equipos, revocación de accesos y entrevista de salida IA.'},
+ tags:['rh','offboarding','desligamento'],price:247,pop:68},
+
+{id:'rh-cargos',icon:'🗂️',name:'Cargos & Salários',cat:'rh',
+ desc:{pt:'Plano de cargos com faixas salariais, benchmarking de mercado e análise de equidade salarial.',en:'Job structure with salary bands, market benchmarking and pay equity analysis.',es:'Plan de cargos con bandas salariales, benchmarking de mercado y análisis de equidad salarial.'},
+ tags:['rh','cargos','remuneracao'],price:347,pop:74},
+
+{id:'rh-saude-ocu',icon:'⛑️',name:'Saúde Ocupacional',cat:'rh',
+ desc:{pt:'Gestão de PCMSO, ASOs, laudos e afastamentos com integração ao e-Social e agendamento automático.',en:'PCMSO management, medical exams, certificates and leaves with e-Social integration.',es:'Gestión de PCMSO, exámenes médicos, certificados y ausencias con integración e-Social.'},
+ tags:['rh','saude-ocupacional','esocial'],price:397,pop:71},
+
+{id:'rh-workforce',icon:'📐',name:'Workforce Planning IA',cat:'rh',
+ desc:{pt:'Previsão de headcount por área (6-24 meses), gap de habilidades e mapa de risco de talentos.',en:'Headcount forecast by area (6-24 months), skills gap and talent risk map.',es:'Previsión de headcount por área (6-24 meses), brecha de habilidades y mapa de riesgo de talento.'},
+ tags:['rh','workforce','planejamento'],price:447,badge:'new',pop:69},
+
+{id:'rh-comunicacao',icon:'📣',name:'Comunicação Interna',cat:'rh',
+ desc:{pt:'Intranet social com feed de comunicados, reconhecimento entre pares e enquetes de engajamento.',en:'Social intranet with announcement feed, peer recognition and engagement polls.',es:'Intranet social con feed de comunicados, reconocimiento entre compañeros y encuestas de participación.'},
+ tags:['rh','comunicacao','intranet'],price:247,pop:80},
+
+// ── EVENTOS & RESERVAS ─────────────────────────────────────────────────────
+{id:'ev-matchmaking',icon:'🤝',name:'Matchmaking de Eventos',cat:'eventos',
+ desc:{pt:'Conecta participantes de perfis complementares durante eventos. IA agenda reuniões bilaterais automáticas.',en:'Connects participants with complementary profiles during events. AI auto-schedules bilateral meetings.',es:'Conecta participantes de perfiles complementarios en eventos. IA agenda reuniones bilaterales.'},
+ tags:['evento','networking','ia'],price:497,badge:'hot',featured:true,pop:85},
+
+{id:'ev-rooming',icon:'🏨',name:'Rooming List Visual',cat:'eventos',
+ desc:{pt:'Gestão visual de distribuição de acomodações para grupos. Drag-and-drop com regras de restrição.',en:'Visual accommodation distribution for groups. Drag-and-drop with restriction rules.',es:'Gestión visual de distribución de alojamiento para grupos. Drag-and-drop con reglas de restricción.'},
+ tags:['hotel','hospedagem','grupo'],price:197,pop:73},
+
+{id:'ev-reservas',icon:'📆',name:'Motor de Reservas',cat:'eventos',
+ desc:{pt:'Sistema completo de reservas online para espaços, salas e equipamentos com pagamento integrado.',en:'Complete online booking system for spaces, rooms and equipment with integrated payment.',es:'Sistema completo de reservas online para espacios, salas y equipos con pago integrado.'},
+ tags:['reserva','espaco','pagamento'],price:177,badge:'popular',pop:86},
+
+{id:'ev-accreditation',icon:'🎟️',name:'Credenciamento & Acesso',cat:'eventos',
+ desc:{pt:'Sistema de credenciamento com múltiplas modalidades: QR, NFC, facial. Relatório em tempo real.',en:'Credentialing system with multiple modalities: QR, NFC, facial. Real-time report.',es:'Sistema de acreditación con múltiples modalidades: QR, NFC, facial. Informe en tiempo real.'},
+ tags:['evento','acesso','nfc'],price:247,pop:78},
+
+{id:'ev-vendas',icon:'🎫',name:'Venda de Ingressos',cat:'eventos',
+ desc:{pt:'Plataforma de venda de ingressos com lotes, descontos, meia-entrada e check-in mobile.',en:'Ticket sales platform with batches, discounts, half-price and mobile check-in.',es:'Plataforma de venta de entradas con lotes, descuentos, media entrada y check-in mobile.'},
+ tags:['ingressos','evento','ecommerce'],price:197,badge:'new',pop:82},
+
+{id:'ev-program',icon:'📋',name:'Programação de Eventos',cat:'eventos',
+ desc:{pt:'Gestão de programação com palestrantes, salas, horários e app do participante integrado.',en:'Event schedule management with speakers, rooms, times and integrated participant app.',es:'Gestión de programación con ponentes, salas, horarios y app del participante integrado.'},
+ tags:['evento','programa','agenda'],price:127,pop:74},
+
+{id:'ev-patrocinadores',icon:'💼',name:'Portal de Patrocinadores',cat:'eventos',
+ desc:{pt:'Portal self-service para patrocinadores enviarem materiais, leads e métricas de visibilidade.',en:'Self-service portal for sponsors to submit materials, leads and visibility metrics.',es:'Portal self-service para patrocinadores para enviar materiales, leads y métricas de visibilidad.'},
+ tags:['evento','patrocinio','leads'],price:157,pop:65},
+
+{id:'ev-expositores',icon:'🏪',name:'Gestão de Expositores',cat:'eventos',
+ desc:{pt:'Portal para expositores gerenciarem montagem, credenciais, orçamentos e serviços do evento.',en:'Portal for exhibitors to manage setup, credentials, quotes and event services.',es:'Portal para expositores para gestionar montaje, credenciales, presupuestos y servicios del evento.'},
+ tags:['evento','expositor','feira'],price:197,pop:70},
+
+// ── LEILÕES ────────────────────────────────────────────────────────────────
+{id:'leilao-scraper',icon:'🕷️',name:'Monitor de Leilões',cat:'leiloes',
+ desc:{pt:'Rastreamento automático de novos leilões em 12+ portais. Filtros por tipo, localidade e valor.',en:'Automatic auction tracking on 12+ portals. Filters by type, location and value.',es:'Rastreo automático de nuevas subastas en 12+ portales. Filtros por tipo, localidad y valor.'},
+ tags:['leilao','scraper','monitor'],price:297,badge:'hot',pop:81},
+
+{id:'leilao-bid',icon:'🎯',name:'Licitante Automático',cat:'leiloes',
+ desc:{pt:'Lance automático em leilões judiciais com teto configurável e estratégia de bid otimizada por IA.',en:'Automatic bidding in judicial auctions with configurable ceiling and AI-optimized bid strategy.',es:'Lance automático en subastas judiciales con techo configurable y estrategia de puja optimizada por IA.'},
+ tags:['leilao','automatico','bid'],price:347,badge:'hot',pop:79},
+
+{id:'leilao-blockchain',icon:'⛓️',name:'Contratos Blockchain',cat:'leiloes',
+ desc:{pt:'Registro imutável de contratos de arrematação em blockchain pública (Polygon). Hash SHA-256.',en:'Immutable auction contract registration on public blockchain (Polygon). SHA-256 hash.',es:'Registro inmutable de contratos de remate en blockchain pública (Polygon). Hash SHA-256.'},
+ tags:['blockchain','contrato','hash'],price:347,badge:'new',pop:68},
+
+{id:'leilao-due',icon:'📋',name:'Análise de Edital IA',cat:'leiloes',
+ desc:{pt:'Análise automática de editais de leilão em PDF. Extrai riscos, ônus, pendências e gera relatório.',en:'Automatic auction notice analysis in PDF. Extracts risks, encumbrances, pending issues and generates report.',es:'Análisis automático de edictos de subasta en PDF. Extrae riesgos, gravámenes, pendencias y genera informe.'},
+ tags:['leilao','edital','analise'],price:397,badge:'new',pop:72},
+
+{id:'leilao-avaliacao',icon:'🏠',name:'Avaliação de Imóveis',cat:'leiloes',
+ desc:{pt:'Avaliação automática de imóveis com comparativos de mercado, histórico e estimativa de VOI.',en:'Automatic property valuation with market comparatives, history and VOI estimate.',es:'Valoración automática de propiedades con comparativos de mercado, historial y estimación de VOI.'},
+ tags:['imovel','avaliacao','mercado'],price:247,pop:69},
+
+// ── TURISMO ──────────────────────────────────────────────────────────────
+{id:'tour-grupos',icon:'✈️',name:'Gestão de Grupos de Viagem',cat:'turismo',
+ desc:{pt:'Plataforma completa para agências: pax, roteiros, rooming, documentos e comunicação com o grupo.',en:'Complete platform for travel agencies: pax, itineraries, rooming, documents and group communication.',es:'Plataforma completa para agencias: pax, itinerarios, rooming, documentos y comunicación con el grupo.'},
+ tags:['turismo','grupo','agencia'],price:297,badge:'hot',featured:true,pop:84},
+
+{id:'tour-voos',icon:'🛫',name:'Monitor de Voos IA',cat:'turismo',
+ desc:{pt:'Alertas preditivos de atrasos e cancelamentos. IA analisa padrões e notifica grupo com antecedência.',en:'Predictive delay and cancellation alerts. AI analyzes patterns and notifies group in advance.',es:'Alertas predictivas de retrasos y cancelaciones. IA analiza patrones y notifica al grupo con anticipación.'},
+ tags:['voo','aviacao','alertas'],price:197,badge:'new',pop:73},
+
+{id:'tour-hotel',icon:'🏨',name:'Integração Hoteleira',cat:'turismo',
+ desc:{pt:'Integração com sistemas de hotéis para reservas de grupo, rooming automático e check-in antecipado.',en:'Integration with hotel systems for group bookings, automatic rooming and early check-in.',es:'Integración con sistemas de hoteles para reservas de grupo, rooming automático y check-in anticipado.'},
+ tags:['hotel','reserva','grupo'],price:247,pop:68},
+
+{id:'tour-passageiro',icon:'👤',name:'App do Passageiro',cat:'turismo',
+ desc:{pt:'App mobile para passageiros: roteiro, documentos, chat com guia, SOS e pontos de interesse.',en:'Mobile app for passengers: itinerary, documents, guide chat, SOS and points of interest.',es:'App mobile para pasajeros: itinerario, documentos, chat con guía, SOS y puntos de interés.'},
+ tags:['turismo','app','passageiro'],price:197,pop:77},
+
+{id:'tour-guia',icon:'🗺️',name:'Painel do Guia',cat:'turismo',
+ desc:{pt:'Painel do guia turístico com lista de pax, chamadas, notificações e gerenciamento de emergências.',en:'Tour guide dashboard with pax list, calls, notifications and emergency management.',es:'Panel del guía turístico con lista de pax, llamadas, notificaciones y gestión de emergencias.'},
+ tags:['turismo','guia','operacional'],price:147,pop:65},
+
+{id:'tour-seguro',icon:'🔒',name:'Gestão de Seguros de Viagem',cat:'turismo',
+ desc:{pt:'Cotação e emissão de seguros de viagem integrada ao roteiro. Acionamento digital em caso de sinistro.',en:'Travel insurance quoting and issuance integrated with itinerary. Digital claim filing.',es:'Cotización y emisión de seguros de viaje integrada al itinerario. Reclamo digital en caso de siniestro.'},
+ tags:['turismo','seguro','viagem'],price:127,pop:60},
+
+// ── VAREJO ──────────────────────────────────────────────────────────────
+{id:'retail-pdv',icon:'🏪',name:'PDV Mobile',cat:'varejo',
+ desc:{pt:'Ponto de venda mobile com leitor de código de barras, TEF integrado e fechamento automático de caixa.',en:'Mobile POS with barcode reader, integrated TEF and automatic cash close.',es:'Punto de venta mobile con lector de código de barras, TEF integrado y cierre automático de caja.'},
+ tags:['pdv','varejo','tef'],price:197,badge:'hot',pop:87},
+
+{id:'retail-estoque',icon:'📦',name:'Controle de Estoque',cat:'varejo',
+ desc:{pt:'Estoque multi-loja com transferência entre filiais, inventário cíclico e pedido de reposição automático.',en:'Multi-store inventory with inter-branch transfers, cyclic inventory and automatic replenishment order.',es:'Inventario multi-tienda con transferencias entre sucursales, inventario cíclico y pedido de reposición.'},
+ tags:['varejo','estoque','multifilial'],price:197,pop:82},
+
+{id:'retail-fidelidade',icon:'⭐',name:'Programa de Fidelidade',cat:'varejo',
+ desc:{pt:'Programa de pontos e cashback com cartão digital, resgate automatizado e relatório de engajamento.',en:'Points and cashback program with digital card, automated redemption and engagement report.',es:'Programa de puntos y cashback con tarjeta digital, canje automatizado e informe de participación.'},
+ tags:['fidelidade','varejo','cashback'],price:147,pop:79},
+
+{id:'retail-ecommerce',icon:'🛒',name:'E-commerce Integrado',cat:'varejo',
+ desc:{pt:'Loja online sincronizada com PDV: estoque, preços e pedidos em tempo real. Checkout otimizado.',en:'Online store synced with POS: inventory, prices and orders in real time. Optimized checkout.',es:'Tienda online sincronizada con PDV: inventario, precios y pedidos en tiempo real. Checkout optimizado.'},
+ tags:['ecommerce','varejo','loja'],price:297,badge:'new',pop:85},
+
+{id:'retail-cardapio',icon:'🍽️',name:'Cardápio Digital',cat:'varejo',
+ desc:{pt:'Cardápio digital com QR code, pedido na mesa e integração com cozinha. Sem app para o cliente.',en:'Digital menu with QR code, table ordering and kitchen integration. No app required for customers.',es:'Menú digital con código QR, pedido en mesa e integración con cocina. Sin app para el cliente.'},
+ tags:['restaurante','cardapio','pedido'],price:97,pop:88},
+
+{id:'retail-entrega',icon:'🛵',name:'Delivery Manager',cat:'varejo',
+ desc:{pt:'Gestão de delivery próprio com app de entregador, rastreamento ao vivo e prova de entrega digital.',en:'Own delivery management with driver app, live tracking and digital proof of delivery.',es:'Gestión de delivery propio con app de repartidor, rastreo en vivo y prueba de entrega digital.'},
+ tags:['delivery','varejo','entregador'],price:177,pop:81},
+
+{id:'retail-crm',icon:'👥',name:'CRM de Varejo',cat:'varejo',
+ desc:{pt:'CRM específico para varejo: histórico de compras, preferências, aniversário e campanha segmentada.',en:'Retail-specific CRM: purchase history, preferences, birthday and segmented campaign.',es:'CRM específico para varejo: historial de compras, preferencias, cumpleaños y campaña segmentada.'},
+ tags:['varejo','crm','clientes'],price:147,pop:75},
+
+// ── IMÓVEIS ──────────────────────────────────────────────────────────────
+{id:'imobi-crm',icon:'🏠',name:'CRM Imobiliário',cat:'imoveis',
+ desc:{pt:'CRM específico para imobiliárias: funil de vendas, locação e acompanhamento de negociações.',en:'Real estate-specific CRM: sales funnel, rental and negotiation tracking.',es:'CRM específico para inmobiliarias: embudo de ventas, alquiler y seguimiento de negociaciones.'},
+ tags:['imovel','crm','vendas'],price:247,badge:'hot',featured:true,pop:86},
+
+{id:'imobi-anuncio',icon:'📸',name:'Publicador de Anúncios',cat:'imoveis',
+ desc:{pt:'Publica imóveis em múltiplos portais (ZAP, OLX, Viva Real) com 1 cadastro e fotos otimizadas.',en:'Publishes properties on multiple portals (ZAP, OLX, Viva Real) with 1 registration and optimized photos.',es:'Publica propiedades en múltiples portales con 1 registro y fotos optimizadas.'},
+ tags:['imovel','portais','anuncio'],price:197,pop:83},
+
+{id:'imobi-tour',icon:'🎬',name:'Tour Virtual 360°',cat:'imoveis',
+ desc:{pt:'Tour virtual 360° com hotspots interativos e integração ao anúncio. Aumenta conversão em 40%.',en:'360° virtual tour with interactive hotspots and listing integration. Increases conversion by 40%.',es:'Tour virtual 360° con hotspots interactivos e integración al anuncio. Aumenta conversión 40%.'},
+ tags:['imovel','tour','virtual'],price:197,badge:'new',pop:77},
+
+{id:'imobi-proposta',icon:'📝',name:'Propostas & Contratos',cat:'imoveis',
+ desc:{pt:'Geração e gestão de propostas, contratos de compra/venda e locação com assinatura digital.',en:'Generation and management of proposals, purchase/sale and rental contracts with digital signature.',es:'Generación y gestión de propuestas, contratos de compra/venta y alquiler con firma digital.'},
+ tags:['imovel','contrato','assinatura'],price:227,pop:74},
+
+{id:'imobi-financiamento',icon:'💳',name:'Simulador de Financiamento',cat:'imoveis',
+ desc:{pt:'Simulador de financiamento imobiliário com comparação de bancos, tabelas e capacidade de pagamento.',en:'Real estate financing simulator with bank comparison, tables and payment capacity.',es:'Simulador de financiamiento inmobiliario con comparación de bancos, tablas y capacidad de pago.'},
+ tags:['imovel','financiamento','simulador'],price:127,pop:71},
+
+{id:'imobi-gestao',icon:'🔑',name:'Gestão de Locação',cat:'imoveis',
+ desc:{pt:'Gestão completa de imóveis alugados: boletos, reajustes, vistorias e comunicação com inquilinos.',en:'Complete rental property management: boletos, adjustments, inspections and tenant communication.',es:'Gestión completa de inmuebles alquilados: recibos, reajustes, inspecciones y comunicación con inquilinos.'},
+ tags:['imovel','locacao','gestao'],price:197,pop:80},
+
+// ── AGRO ────────────────────────────────────────────────────────────────
+{id:'agro-campo',icon:'🌾',name:'Monitoramento de Campo',cat:'agro',
+ desc:{pt:'Monitoramento remoto de lavouras com sensores IoT, dados de satélite e alertas por WhatsApp.',en:'Remote crop monitoring with IoT sensors, satellite data and WhatsApp alerts.',es:'Monitoreo remoto de cultivos con sensores IoT, datos de satélite y alertas por WhatsApp.'},
+ tags:['agro','iot','lavoura'],price:397,badge:'hot',featured:true,pop:82},
+
+{id:'agro-financeiro',icon:'💰',name:'Financeiro Rural',cat:'agro',
+ desc:{pt:'Gestão financeira rural: CPR, custo de produção, receitas e fluxo de caixa da safra.',en:'Rural financial management: CPR, production cost, revenues and harvest cash flow.',es:'Gestión financiera rural: CPR, costo de producción, ingresos y flujo de caja de la cosecha.'},
+ tags:['agro','financeiro','safra'],price:297,pop:74},
+
+{id:'agro-estoque',icon:'🏗️',name:'Estoque Agrícola',cat:'agro',
+ desc:{pt:'Controle de insumos, sementes, defensivos e máquinas com rastreabilidade e alerta de vencimento.',en:'Control of inputs, seeds, pesticides and machinery with traceability and expiry alerts.',es:'Control de insumos, semillas, agroquímicos y maquinaria con trazabilidad y alertas de vencimiento.'},
+ tags:['agro','estoque','insumos'],price:197,pop:68},
+
+{id:'agro-rastreabilidade',icon:'🔍',name:'Rastreabilidade Agrícola',cat:'agro',
+ desc:{pt:'Rastreabilidade de produção do campo à prateleira. QR code de origem para consumidor final.',en:'Production traceability from field to shelf. Origin QR code for end consumer.',es:'Trazabilidad de producción del campo al estante. Código QR de origen para el consumidor final.'},
+ tags:['agro','rastreabilidade','qualidade'],price:247,badge:'new',pop:65},
+
+{id:'agro-maquinas',icon:'🚜',name:'Gestão de Máquinas',cat:'agro',
+ desc:{pt:'Controle de frota agrícola: horas trabalhadas, manutenção preventiva e custo por hectare.',en:'Agricultural fleet control: hours worked, preventive maintenance and cost per hectare.',es:'Control de flota agrícola: horas trabajadas, mantenimiento preventivo y costo por hectárea.'},
+ tags:['agro','maquinas','frota'],price:197,pop:63},
+
+// ── CONSTRUÇÃO ──────────────────────────────────────────────────────────────
+{id:'obra-gestao',icon:'🏗️',name:'Gestão de Obras',cat:'construcao',
+ desc:{pt:'Gestão completa de obras: cronograma, medições, diário de obra digital e controle de custo.',en:'Complete construction project management: schedule, measurements, digital site diary and cost control.',es:'Gestión completa de obras: cronograma, mediciones, diario de obra digital y control de costos.'},
+ tags:['obra','construcao','gestao'],price:397,badge:'hot',featured:true,pop:84},
+
+{id:'obra-orcamento',icon:'📊',name:'Orçamento de Obra',cat:'construcao',
+ desc:{pt:'Orçamentação de obras com composição de preços, SINAPI atualizado e exportação para planilha.',en:'Construction cost estimation with price composition, updated SINAPI and spreadsheet export.',es:'Presupuestación de obras con composición de precios, SINAPI actualizado y exportación a planilla.'},
+ tags:['obra','orcamento','sinapi'],price:297,pop:77},
+
+{id:'obra-materiais',icon:'🧱',name:'Compras de Materiais',cat:'construcao',
+ desc:{pt:'Solicitação e aprovação de compras de materiais com cotação automática em fornecedores.',en:'Material purchase request and approval with automatic supplier quoting.',es:'Solicitud y aprobación de compras de materiales con cotización automática en proveedores.'},
+ tags:['obra','materiais','compras'],price:197,pop:71},
+
+{id:'obra-seguranca',icon:'⛑️',name:'Segurança do Trabalho',cat:'construcao',
+ desc:{pt:'DDS digital, APR, PPE por função e relatório de incidentes com integração ao eSocial.',en:'Digital DDS, APR, PPE by role and incident report with e-Social integration.',es:'DDS digital, APR, EPP por función e informe de incidentes con integración eSocial.'},
+ tags:['obra','seguranca','esocial'],price:247,pop:68},
+
+// ── MANUFATURA ──────────────────────────────────────────────────────────────
+{id:'mfg-chao',icon:'🏭',name:'Chão de Fábrica Digital',cat:'manufatura',
+ desc:{pt:'Sistema de apontamento de produção com ordens de fabricação, paradas e eficiência OEE.',en:'Production tracking system with work orders, downtime and OEE efficiency.',es:'Sistema de registro de producción con órdenes de fabricación, paradas y eficiencia OEE.'},
+ tags:['manufatura','producao','oee'],price:397,badge:'hot',featured:true,pop:83},
+
+{id:'mfg-qualidade',icon:'✅',name:'Controle de Qualidade',cat:'manufatura',
+ desc:{pt:'Inspeção de qualidade com checklists digitais, não-conformidades e análise de causa raiz.',en:'Quality inspection with digital checklists, non-conformities and root cause analysis.',es:'Inspección de calidad con checklists digitales, no conformidades y análisis de causa raíz.'},
+ tags:['manufatura','qualidade','qa'],price:247,pop:75},
+
+{id:'mfg-manutencao',icon:'🔧',name:'Manutenção Industrial',cat:'manufatura',
+ desc:{pt:'CMMS para manutenção preventiva e corretiva: ordens de serviço, peças e histórico por máquina.',en:'CMMS for preventive and corrective maintenance: work orders, parts and history by machine.',es:'CMMS para mantenimiento preventivo y correctivo: órdenes de servicio, piezas e historial por máquina.'},
+ tags:['manufatura','manutencao','cmms'],price:297,badge:'new',pop:78},
+
+{id:'mfg-planejamento',icon:'📅',name:'Planejamento de Produção',cat:'manufatura',
+ desc:{pt:'MRP simplificado: planejamento de ordens, capacidade e compras com base na demanda.',en:'Simplified MRP: order planning, capacity and purchasing based on demand.',es:'MRP simplificado: planificación de órdenes, capacidad y compras basadas en la demanda.'},
+ tags:['manufatura','mrp','planejamento'],price:347,pop:70},
+
+// ── MARKETING DIGITAL ────────────────────────────────────────────────────
+{id:'mkt-social',icon:'📱',name:'Social Media IA',cat:'marketing',
+ desc:{pt:'Geração de posts para Instagram, LinkedIn e TikTok com IA. Calendário editorial e agendamento.',en:'AI post generation for Instagram, LinkedIn and TikTok. Editorial calendar and scheduling.',es:'Generación de posts para Instagram, LinkedIn y TikTok con IA. Calendario editorial y programación.'},
+ tags:['marketing','social','ia'],price:147,badge:'hot',featured:true,pop:91},
+
+{id:'mkt-seo',icon:'🔎',name:'SEO Automático',cat:'marketing',
+ desc:{pt:'Auditoria SEO automatizada, geração de meta tags, schema e sugestões de conteúdo por IA.',en:'Automated SEO audit, meta tag generation, schema and AI content suggestions.',es:'Auditoría SEO automatizada, generación de meta tags, schema y sugerencias de contenido IA.'},
+ tags:['marketing','seo','ia'],price:127,pop:78},
+
+{id:'mkt-email-mkt',icon:'📧',name:'Email Marketing IA',cat:'marketing',
+ desc:{pt:'Campanhas de email marketing com IA: segmentação, assunto otimizado e envio no melhor horário.',en:'AI email marketing campaigns: segmentation, optimized subject line and best-time sending.',es:'Campañas de email marketing con IA: segmentación, asunto optimizado y envío en mejor horario.'},
+ tags:['marketing','email','ia'],price:107,pop:82},
+
+{id:'mkt-ads',icon:'📣',name:'Automação de Anúncios',cat:'marketing',
+ desc:{pt:'Criação e otimização automática de anúncios no Google Ads e Meta. ROI em tempo real.',en:'Automatic ad creation and optimization on Google Ads and Meta. Real-time ROI.',es:'Creación y optimización automática de anuncios en Google Ads y Meta. ROI en tiempo real.'},
+ tags:['marketing','ads','roas'],price:247,badge:'new',pop:86},
+
+{id:'mkt-influencer',icon:'🌟',name:'Influencer Manager',cat:'marketing',
+ desc:{pt:'Busca, contratação e monitoramento de influenciadores com métricas de engajamento e ROI.',en:'Influencer discovery, contracting and monitoring with engagement metrics and ROI.',es:'Búsqueda, contratación y monitoreo de influencers con métricas de participación y ROI.'},
+ tags:['marketing','influencer','ugc'],price:197,pop:72},
+
+{id:'mkt-landing',icon:'🎯',name:'Landing Pages IA',cat:'marketing',
+ desc:{pt:'Criação de landing pages por IA em minutos. Testes A/B automáticos e integração com CRM.',en:'AI-powered landing page creation in minutes. Automatic A/B testing and CRM integration.',es:'Creación de landing pages con IA en minutos. A/B testing automático e integración con CRM.'},
+ tags:['marketing','landingpage','ia'],price:127,pop:80},
+
+// ── CONTABILIDADE ─────────────────────────────────────────────────────────
+{id:'cont-lancamentos',icon:'📒',name:'Lançamentos Contábeis IA',cat:'contabilidade',
+ desc:{pt:'Lançamentos contábeis automáticos a partir de notas fiscais e extratos. Plano de contas configurável.',en:'Automatic bookkeeping entries from invoices and statements. Configurable chart of accounts.',es:'Asientos contables automáticos desde facturas y extractos. Plan de cuentas configurable.'},
+ tags:['contabilidade','lancamentos','ia'],price:247,badge:'new',pop:77},
+
+{id:'cont-imposto',icon:'📊',name:'Gestão Tributária',cat:'contabilidade',
+ desc:{pt:'Apuração automática de impostos (IRPJ, CSLL, PIS, COFINS, ICMS). Geração de guias e DARF.',en:'Automatic tax computation (IRPJ, CSLL, PIS, COFINS, ICMS). Guide and DARF generation.',es:'Cálculo automático de impuestos. Generación de guías y declaraciones.'},
+ tags:['contabilidade','impostos','fiscal'],price:347,badge:'hot',pop:84},
+
+{id:'cont-folha-cont',icon:'💵',name:'Integração Folha-Contábil',cat:'contabilidade',
+ desc:{pt:'Integra folha de pagamento com contabilidade: provisionamentos, encargos e lançamentos automáticos.',en:'Integrates payroll with accounting: provisions, charges and automatic entries.',es:'Integra nómina con contabilidad: provisiones, cargas y asientos automáticos.'},
+ tags:['contabilidade','folha','integracao'],price:197,pop:71},
+
+{id:'cont-spedecf',icon:'📤',name:'SPED & ECF',cat:'contabilidade',
+ desc:{pt:'Geração automática de SPED Contábil, SPED Fiscal e ECF. Validação prévia e transmissão.',en:'Automatic generation of SPED Contábil, SPED Fiscal and ECF. Pre-validation and transmission.',es:'Generación automática de SPED Contábil, SPED Fiscal y ECF. Validación previa y transmisión.'},
+ tags:['contabilidade','sped','ecf'],price:297,pop:69},
+
+{id:'cont-clientes',icon:'👥',name:'Gestão Multi-Cliente Contábil',cat:'contabilidade',
+ desc:{pt:'Painel unificado para escritórios contábeis gerenciarem múltiplos clientes com status e alertas.',en:'Unified panel for accounting firms to manage multiple clients with status and alerts.',es:'Panel unificado para estudios contables para gestionar múltiples clientes con estado y alertas.'},
+ tags:['contabilidade','escritorio','multicliente'],price:197,pop:73},
+
+{id:'tax-monitor',icon:'⏰',name:'Monitor de Obrigações Fiscais',cat:'contabilidade',
+ desc:{pt:'Calendário automático de obrigações fiscais com alertas antecipados e controle de entrega.',en:'Automatic fiscal obligation calendar with advance alerts and delivery control.',es:'Calendario automático de obligaciones fiscales con alertas anticipadas y control de entrega.'},
+ tags:['contabilidade','fiscal','calendario'],price:127,pop:74},
+
+// ── FINANCEIRO AVANÇADO ──────────────────────────────────────────────────
+{id:'fin-dre',icon:'📑',name:'DRE & Balanço Automático',cat:'financeiro-adv',
+ desc:{pt:'DRE e Balanço Patrimonial gerados automaticamente dos lançamentos. Exporta para contador.',en:'P&L and Balance Sheet generated automatically from entries. Exports to accountant.',es:'P&L y Balance General generados automáticamente de los asientos. Exporta al contador.'},
+ tags:['financeiro','dre','contabil'],price:247,badge:'new',pop:78},
+
+{id:'fin-fluxo',icon:'💹',name:'Fluxo de Caixa IA',cat:'financeiro-adv',
+ desc:{pt:'Projeção de fluxo de caixa com IA para os próximos 30, 60 e 90 dias. Alertas de risco de liquidez.',en:'AI cash flow projection for the next 30, 60 and 90 days. Liquidity risk alerts.',es:'Proyección de flujo de caja con IA para los próximos 30, 60 y 90 días. Alertas de riesgo de liquidez.'},
+ tags:['financeiro','fluxo','projecao'],price:197,pop:82},
+
+{id:'fin-cmv',icon:'📦',name:'Gestão de CMV',cat:'financeiro-adv',
+ desc:{pt:'Controle de custo de mercadorias vendidas com margem por produto, SKU e canal de venda.',en:'Cost of goods sold management with margin by product, SKU and sales channel.',es:'Control de costo de mercancías vendidas con margen por producto, SKU y canal de venta.'},
+ tags:['financeiro','cmv','margem'],price:167,pop:73},
+
+{id:'fin-investimentos',icon:'💎',name:'Gestão de Investimentos',cat:'financeiro-adv',
+ desc:{pt:'Controle de aplicações financeiras, rentabilidade, benchmark e relatório para sócios.',en:'Financial investment control, profitability, benchmark and partner report.',es:'Control de inversiones financieras, rentabilidad, benchmark e informe para socios.'},
+ tags:['financeiro','investimentos','carteira'],price:247,pop:67},
+
+{id:'fin-cartoes-corp',icon:'💳',name:'Cartões Corporativos',cat:'financeiro-adv',
+ desc:{pt:'Gestão de cartões corporativos com políticas de uso, aprovação de gastos e prestação de contas.',en:'Corporate card management with usage policies, expense approval and expense reporting.',es:'Gestión de tarjetas corporativas con políticas de uso, aprobación de gastos y rendición de cuentas.'},
+ tags:['financeiro','cartao','despesas'],price:197,pop:75},
+
+// ── CONDOMÍNIOS ──────────────────────────────────────────────────────────────
+{id:'condo-gestao',icon:'🏘️',name:'Gestão de Condomínios',cat:'condominios',
+ desc:{pt:'ERP de condomínios: boletos, assembleias, chamados, reservas de área e app do morador.',en:'Condominium ERP: boletos, assemblies, tickets, area bookings and resident app.',es:'ERP de condominios: recibos, asambleas, tickets, reservas de área y app del residente.'},
+ tags:['condominio','gestao','app'],price:247,badge:'hot',featured:true,pop:85},
+
+{id:'condo-acesso',icon:'🔐',name:'Controle de Acesso Condominial',cat:'condominios',
+ desc:{pt:'Acesso por QR, facial e biometria para moradores, visitantes e prestadores de serviços.',en:'Access by QR, facial and biometric for residents, visitors and service providers.',es:'Acceso por QR, facial y biometría para residentes, visitantes y prestadores de servicios.'},
+ tags:['condominio','acesso','seguranca'],price:197,pop:79},
+
+{id:'condo-financeiro',icon:'💰',name:'Financeiro Condominial',cat:'condominios',
+ desc:{pt:'Gestão financeira do condomínio: previsão orçamentária, DRE, fundo de reserva e cobrança.',en:'Condominium financial management: budget forecast, P&L, reserve fund and delinquent billing.',es:'Gestión financiera del condominio: presupuesto, P&L, fondo de reserva y cobro de morosos.'},
+ tags:['condominio','financeiro','cobranca'],price:197,pop:75},
+
+// ── ACADEMIAS & FITNESS ──────────────────────────────────────────────────
+{id:'fit-gestao',icon:'💪',name:'Gestão de Academia',cat:'fitness',
+ desc:{pt:'ERP para academias: matrículas, mensalidades, controle de acesso e app do aluno.',en:'Gym ERP: enrollments, monthly fees, access control and student app.',es:'ERP para gimnasios: matrículas, mensualidades, control de acceso y app del alumno.'},
+ tags:['academia','fitness','gestao'],price:247,badge:'hot',featured:true,pop:87},
+
+{id:'fit-treino',icon:'🏋️',name:'Plano de Treino IA',cat:'fitness',
+ desc:{pt:'Geração de planos de treino personalizados por IA com base em objetivos, limitações e evolução.',en:'AI-powered personalized workout plan generation based on goals, limitations and progress.',es:'Generación de planes de entrenamiento personalizados por IA basados en objetivos y evolución.'},
+ tags:['academia','treino','ia'],price:147,badge:'new',pop:82},
+
+{id:'fit-avaliacao',icon:'📏',name:'Avaliação Física Digital',cat:'fitness',
+ desc:{pt:'Anamnese e avaliação física digital com laudos automáticos e evolução do aluno no tempo.',en:'Digital anamnesis and physical assessment with automatic reports and student progress over time.',es:'Anamnesis y evaluación física digital con informes automáticos y evolución del alumno en el tiempo.'},
+ tags:['academia','avaliacao','saude'],price:127,pop:75},
+
+// ── BELEZA & ESTÉTICA ────────────────────────────────────────────────────
+{id:'beauty-agenda',icon:'💅',name:'Agenda de Salão',cat:'beleza',
+ desc:{pt:'Sistema de agendamento para salões, barbearias e clínicas de estética. App cliente e lembretes.',en:'Scheduling system for salons, barbershops and aesthetic clinics. Client app and reminders.',es:'Sistema de agendamiento para salones, barberías y clínicas estéticas. App cliente y recordatorios.'},
+ tags:['beleza','agenda','salao'],price:97,badge:'hot',featured:true,pop:90},
+
+{id:'beauty-comissao',icon:'💸',name:'Comissões de Equipe',cat:'beleza',
+ desc:{pt:'Controle de comissões por serviço e produto para profissionais de beleza. Fechamento automático.',en:'Commission control by service and product for beauty professionals. Automatic closing.',es:'Control de comisiones por servicio y producto para profesionales de belleza. Cierre automático.'},
+ tags:['beleza','comissao','equipe'],price:77,pop:78},
+
+{id:'beauty-fidelidade',icon:'⭐',name:'Fidelidade & Pacotes',cat:'beleza',
+ desc:{pt:'Programa de fidelidade com pacotes de sessões, vouchers e cashback para salões e clínicas.',en:'Loyalty program with session packages, vouchers and cashback for salons and clinics.',es:'Programa de fidelidad con paquetes de sesiones, vouchers y cashback para salones y clínicas.'},
+ tags:['beleza','fidelidade','pacotes'],price:107,pop:74},
+
+// ── PET & VETERINÁRIO ───────────────────────────────────────────────────
+{id:'pet-prontuario',icon:'🐾',name:'Prontuário Veterinário',cat:'pet',
+ desc:{pt:'Prontuário eletrônico veterinário com histórico, vacinas, exames e prescrições digitais.',en:'Electronic veterinary record with history, vaccines, exams and digital prescriptions.',es:'Historia clínica veterinaria electrónica con historial, vacunas, exámenes y recetas digitales.'},
+ tags:['pet','veterinario','prontuario'],price:197,badge:'new',pop:76},
+
+{id:'pet-agendamento',icon:'📅',name:'Agenda Veterinária',cat:'pet',
+ desc:{pt:'Agendamento de consultas, banho, tosa e cirurgias com confirmação automática e lembretes.',en:'Scheduling of consultations, bath, grooming and surgeries with automatic confirmation and reminders.',es:'Agendamiento de consultas, baño, peluquería y cirugías con confirmación automática y recordatorios.'},
+ tags:['pet','agenda','veterinario'],price:127,pop:72},
+
+// ── ODONTOLOGIA ──────────────────────────────────────────────────────────
+{id:'odonto-prontuario',icon:'🦷',name:'Prontuário Odontológico',cat:'odontologia',
+ desc:{pt:'Prontuário odontológico com odontograma digital, plano de tratamento e orçamento integrado.',en:'Dental record with digital odontogram, treatment plan and integrated quote.',es:'Historia clínica dental con odontograma digital, plan de tratamiento y presupuesto integrado.'},
+ tags:['odonto','prontuario','ia'],price:297,badge:'hot',featured:true,pop:83},
+
+{id:'odonto-imagem',icon:'📸',name:'Radiografia IA',cat:'odontologia',
+ desc:{pt:'Análise de radiografias odontológicas por IA com detecção de cáries, lesões e perdas ósseas.',en:'AI dental X-ray analysis with detection of cavities, lesions and bone loss.',es:'Análisis de radiografías dentales por IA con detección de caries, lesiones y pérdidas óseas.'},
+ tags:['odonto','radiografia','ia'],price:397,badge:'new',pop:71},
+
+{id:'odonto-financeiro',icon:'💳',name:'Financeiro Odontológico',cat:'odontologia',
+ desc:{pt:'Gestão financeira para clínicas: mensalidades, parcelamentos, convênios e inadimplência.',en:'Financial management for dental clinics: installments, plans, insurance and delinquency.',es:'Gestión financiera para clínicas: cuotas, planes, convenios y morosidad.'},
+ tags:['odonto','financeiro','convenios'],price:197,pop:77},
+
+// ── CLÍNICAS ESTÉTICAS ────────────────────────────────────────────────────
+{id:'est-prontuario',icon:'💆',name:'Prontuário Estético',cat:'estetica',
+ desc:{pt:'Prontuário digital para clínicas estéticas com fotos antes/depois, consentimentos e histórico.',en:'Digital record for aesthetic clinics with before/after photos, consents and history.',es:'Historia digital para clínicas estéticas con fotos antes/después, consentimientos e historial.'},
+ tags:['estetica','prontuario','fotos'],price:197,badge:'new',pop:79},
+
+{id:'est-financeiro',icon:'💰',name:'Gestão Financeira Estética',cat:'estetica',
+ desc:{pt:'Controle financeiro para clínicas estéticas: pacotes, sessões, parcelas e inadimplência.',en:'Financial control for aesthetic clinics: packages, sessions, installments and delinquency.',es:'Control financiero para clínicas estéticas: paquetes, sesiones, cuotas y morosidad.'},
+ tags:['estetica','financeiro','pacotes'],price:147,pop:73},
+
+// ── FOOD TECH ─────────────────────────────────────────────────────────────
+{id:'food-gestao',icon:'🍕',name:'Gestão de Restaurante',cat:'foodtech',
+ desc:{pt:'ERP para restaurantes: cozinha digital (KDS), mesas, delivery e fechamento de caixa.',en:'Restaurant ERP: digital kitchen (KDS), tables, delivery and cash close.',es:'ERP para restaurantes: cocina digital (KDS), mesas, delivery y cierre de caja.'},
+ tags:['restaurante','kds','gestao'],price:247,badge:'hot',featured:true,pop:88},
+
+{id:'food-ifood',icon:'🛵',name:'Integração iFood/Rappi',cat:'foodtech',
+ desc:{pt:'Integração com iFood, Rappi e Uber Eats. Pedidos sincronizados, impressão automática e métricas.',en:'Integration with iFood, Rappi and Uber Eats. Synced orders, automatic printing and metrics.',es:'Integración con iFood, Rappi y Uber Eats. Pedidos sincronizados, impresión automática y métricas.'},
+ tags:['restaurante','ifood','delivery'],price:127,pop:85},
+
+{id:'food-cardapio-ia',icon:'🤖',name:'Cardápio com IA',cat:'foodtech',
+ desc:{pt:'IA que analisa clima, hora e histórico para sugerir pratos em destaque e combos rentáveis.',en:'AI that analyzes weather, time and history to suggest featured dishes and profitable combos.',es:'IA que analiza clima, hora e historial para sugerir platos destacados y combos rentables.'},
+ tags:['restaurante','ia','cardapio'],price:107,pop:72},
+
+{id:'food-financeiro',icon:'💰',name:'DRE de Restaurante',cat:'foodtech',
+ desc:{pt:'DRE específico para restaurante com CMV, custo de mão de obra, ocupação e break-even.',en:'Restaurant-specific P&L with CMV, labor cost, occupancy and break-even.',es:'P&L específico para restaurante con CMV, costo laboral, ocupación y break-even.'},
+ tags:['restaurante','financeiro','dre'],price:147,pop:76},
+
+// ── SEGUROS ──────────────────────────────────────────────────────────────
+{id:'seg-cotacao',icon:'📋',name:'Cotação de Seguros IA',cat:'seguros',
+ desc:{pt:'Cotação automática em múltiplas seguradoras. Comparativo e recomendação por perfil de risco.',en:'Automatic quoting across multiple insurers. Comparison and recommendation by risk profile.',es:'Cotización automática en múltiples aseguradoras. Comparativo y recomendación por perfil de riesgo.'},
+ tags:['seguros','cotacao','ia'],price:247,badge:'hot',featured:true,pop:82},
+
+{id:'seg-sinistro',icon:'🔑',name:'Gestão de Sinistros',cat:'seguros',
+ desc:{pt:'Abertura e acompanhamento de sinistros com documentos digitais, vistoria por foto e IA de análise.',en:'Claim opening and tracking with digital documents, photo inspection and AI analysis.',es:'Apertura y seguimiento de siniestros con documentos digitales, inspección por foto y análisis IA.'},
+ tags:['seguros','sinistro','ia'],price:297,pop:75},
+
+{id:'seg-carteira',icon:'💼',name:'Gestão de Carteira de Seguros',cat:'seguros',
+ desc:{pt:'Painel do corretor para gestão de apólices, vencimentos, renovações e comissões.',en:'Broker dashboard for policy management, expiries, renewals and commissions.',es:'Panel del corredor para gestión de pólizas, vencimientos, renovaciones y comisiones.'},
+ tags:['seguros','apolice','corretor'],price:197,pop:70},
+
+// ── ENERGIA ──────────────────────────────────────────────────────────────
+{id:'energia-solar',icon:'☀️',name:'Monitoramento Solar',cat:'energia',
+ desc:{pt:'Monitoramento de sistemas fotovoltaicos com produção, consumo e alertas de queda de geração.',en:'Photovoltaic system monitoring with production, consumption and generation drop alerts.',es:'Monitoreo de sistemas fotovoltaicos con producción, consumo y alertas de caída de generación.'},
+ tags:['energia','solar','iot'],price:197,badge:'new',pop:74},
+
+{id:'energia-gestao',icon:'⚡',name:'Gestão de Energia',cat:'energia',
+ desc:{pt:'Controle de consumo elétrico por unidade com análise de fatura, demanda e oportunidades de economia.',en:'Electricity consumption control by unit with bill analysis, demand and savings opportunities.',es:'Control de consumo eléctrico por unidad con análisis de factura, demanda y oportunidades de ahorro.'},
+ tags:['energia','consumo','economia'],price:247,pop:67},
+
+// ── TELECOMUNICAÇÕES ─────────────────────────────────────────────────────
+{id:'tel-ivr',icon:'📟',name:'URA Inteligente',cat:'telecom',
+ desc:{pt:'URA com IA conversacional. Resolve chamadas sem agente, integra ao CRM e escala quando necessário.',en:'IVR with conversational AI. Resolves calls without agent, integrates to CRM and escalates when needed.',es:'IVR con IA conversacional. Resuelve llamadas sin agente, integra al CRM y escala cuando es necesario.'},
+ tags:['telecom','ura','ia'],price:347,badge:'hot',pop:81},
+
+{id:'tel-discagem',icon:'📞',name:'Discador Preditivo',cat:'telecom',
+ desc:{pt:'Discador preditivo para contact centers. Maximiza tempo de fala e reduz tempo ocioso de agentes.',en:'Predictive dialer for contact centers. Maximizes talk time and reduces agent idle time.',es:'Marcador predictivo para contact centers. Maximiza tiempo de habla y reduce tiempo ocioso de agentes.'},
+ tags:['telecom','discador','callcenter'],price:297,pop:74},
+
+{id:'tel-gravacao',icon:'🎙️',name:'Gravação & Transcrição',cat:'telecom',
+ desc:{pt:'Gravação de chamadas com transcrição automática e análise de sentimento por IA.',en:'Call recording with automatic transcription and AI sentiment analysis.',es:'Grabación de llamadas con transcripción automática y análisis de sentimiento IA.'},
+ tags:['telecom','gravacao','transcricao'],price:197,pop:77},
+
+// ── MARKETPLACES ─────────────────────────────────────────────────────────
+{id:'mkt-hub',icon:'🔗',name:'Hub de Marketplaces',cat:'marketplaces',
+ desc:{pt:'Integração com Mercado Livre, Shopee, Amazon e mais. Sincroniza estoque, pedidos e preços.',en:'Integration with Mercado Livre, Shopee, Amazon and more. Syncs inventory, orders and prices.',es:'Integración con Mercado Libre, Shopee, Amazon y más. Sincroniza inventario, pedidos y precios.'},
+ tags:['marketplace','ml','shopee'],price:197,badge:'hot',featured:true,pop:90},
+
+{id:'mkt-precificador',icon:'📈',name:'Precificador de Marketplace',cat:'marketplaces',
+ desc:{pt:'Reprecificação automática para ganhar o Buy Box. Regras por margem mínima e concorrente.',en:'Automatic repricing to win the Buy Box. Rules by minimum margin and competitor.',es:'Reprecificación automática para ganar el Buy Box. Reglas por margen mínimo y competidor.'},
+ tags:['marketplace','preco','buybox'],price:147,badge:'new',pop:81},
+
+{id:'mkt-anuncio-ia',icon:'✍️',name:'Anúncios IA Marketplace',cat:'marketplaces',
+ desc:{pt:'Criação automática de títulos, descrições e ficha técnica de produtos otimizados por IA.',en:'Automatic creation of AI-optimized product titles, descriptions and spec sheets.',es:'Creación automática de títulos, descripciones y ficha técnica de productos optimizados por IA.'},
+ tags:['marketplace','anuncio','ia'],price:107,pop:77}
+
+];
+
+const CATS = ['all','cortex','automacao','analytics','comunicacao','seguranca','financeiro','infra','saude','educacao','juridico','logistica','rh','eventos','turismo','leiloes','varejo','imoveis','agro','construcao','manufatura','marketing','contabilidade','financeiro-adv','condominios','fitness','beleza','pet','odontologia','estetica','foodtech','seguros','energia','telecom','marketplaces'];
+const CAT_KEYS = {
+  all:'catAll',cortex:'catCortex',automacao:'catAutomacao',analytics:'catAnalytics',
+  comunicacao:'catComunicacao',seguranca:'catSeguranca',financeiro:'catFinanceiro',infra:'catInfra',
+  saude:'catSaude',educacao:'catEducacao',juridico:'catJuridico',logistica:'catLogistica',rh:'catRh',
+  eventos:'catEventos',turismo:'catTurismo',leiloes:'catLeiloes',varejo:'catVarejo',imoveis:'catImoveis',
+  agro:'catAgro',construcao:'catConstrucao',manufatura:'catManufatura',marketing:'catMarketing',
+  contabilidade:'catContabilidade','financeiro-adv':'catFinanceiroAdv',condominios:'catCondominios',
+  fitness:'catFitness',beleza:'catBeleza',pet:'catPet',odontologia:'catOdontologia',
+  estetica:'catEstetica',foodtech:'catFoodtech',seguros:'catSeguros',energia:'catEnergia',
+  telecom:'catTelecom',marketplaces:'catMarketplaces'
+};
+
+// ═══════════════════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════════════════
+let cart = [];
+let activeCat = 'all';
+let filtered = [...MODULES];
+
+// ═══════════════════════════════════════════════════════════════
+// Render
+// ═══════════════════════════════════════════════════════════════
+function rebuildCatPills(){
+  const c = document.getElementById('cat-pills');
+  c.innerHTML = CATS.map(cat=>`
+    <button class="pill${activeCat===cat?' active':''}" onclick="setCat('${cat}')">${t(CAT_KEYS[cat])}</button>
+  `).join('');
+}
+
+function setCat(cat){
+  activeCat = cat;
+  rebuildCatPills();
+  filterModules();
+}
+
+function filterModules(){
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  const sort = document.getElementById('sort-select').value;
+  filtered = MODULES.filter(m=>{
+    const matchCat = activeCat==='all' || m.cat===activeCat;
+    const desc = m.desc[LANG]||m.desc.pt;
+    const matchQ = !q || m.name.toLowerCase().includes(q) || desc.toLowerCase().includes(q) ||
+      m.tags.some(tag=>tag.includes(q)) || t(CAT_KEYS[m.cat]).toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  if(sort==='price-asc') filtered.sort((a,b)=>a.price-b.price);
+  else if(sort==='price-desc') filtered.sort((a,b)=>b.price-a.price);
+  else if(sort==='name') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  else filtered.sort((a,b)=>b.pop-a.pop);
+  renderGrid();
+}
+
+function renderGrid(){
+  const grid = document.getElementById('modules-grid');
+  const noRes = document.getElementById('no-results');
+  const count = document.getElementById('results-count');
+  count.textContent = `${filtered.length} ${t('resultsOf')} ${MODULES.length} ${t('resultsModules')}`;
+  if(!filtered.length){
+    grid.innerHTML='';
+    noRes.style.display='block';
+    noRes.querySelector('p').textContent=t('noResults');
+    return;
+  }
+  noRes.style.display='none';
+  grid.innerHTML = filtered.map(m=>{
+    const inCart = cart.some(c=>c.id===m.id);
+    const desc = m.desc[LANG]||m.desc.pt;
+    return `<div class="card${m.featured?' featured':''}" id="card-${m.id}" onclick="openDetail('${m.id}')" style="cursor:pointer">
+      ${m.featured?'<div class="card-bar"></div>':''}
+      <div class="card-top">
+        <div class="card-icon">${m.icon}</div>
+        ${m.badge?`<div class="badges"><span class="badge ${m.badge}">${m.badge.toUpperCase()}</span></div>`:''}
+        <div class="card-name">${m.name}</div>
+        <div class="card-desc">${desc}</div>
+        <div class="card-tags">${m.tags.map(tag=>`<span class="tag">${tag}</span>`).join('')}</div>
+      </div>
+      <div class="card-footer">
+        <div>
+          <div class="price-brl">R$ ${m.price}${t('monthLabel')}</div>
+          <div class="price-period">${t('perMonth')}</div>
+        </div>
+        <button class="add-btn${inCart?' added':''}" onclick="event.stopPropagation();toggleCart('${m.id}')">
+          ${inCart?'✓ '+t('cart'):'+ '+t('cart')}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Cart
+// ═══════════════════════════════════════════════════════════════
+function toggleCart(id){
+  const idx = cart.findIndex(c=>c.id===id);
+  const m = MODULES.find(m=>m.id===id);
+  if(idx>=0){
+    cart.splice(idx,1);
+    toast(`${m.name} ${t('removedFromCart')}`);
+  } else {
+    cart.push({...m});
+    toast(`${m.name} ${t('addedToCart')}`);
+  }
+  updateCartBadge();
+  renderGrid();
+  if(document.getElementById('cart-overlay').classList.contains('open')) renderCartItems();
+}
+
+function updateCartBadge(){
+  document.getElementById('cart-count').textContent = cart.length;
+}
+
+function openCart(){
+  document.getElementById('cart-overlay').classList.add('open');
+  renderCartItems();
+}
+function closeCart(){document.getElementById('cart-overlay').classList.remove('open')}
+function closeCartOnOverlay(e){if(e.target===document.getElementById('cart-overlay'))closeCart();}
+
+function renderCartItems(){
+  const list = document.getElementById('cart-items-list');
+  const footer = document.getElementById('cart-footer');
+  if(!cart.length){
+    list.innerHTML=`<div class="cart-empty"><div class="emoji">🛒</div><p>${t('cartEmpty')}</p><small>${t('cartEmptySub')}</small></div>`;
+    footer.style.display='none';
+    return;
+  }
+  footer.style.display='block';
+  list.innerHTML = cart.map(m=>`
+    <div class="cart-item">
+      <div class="cart-item-icon">${m.icon}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${m.name}</div>
+        <div class="cart-item-price">R$ ${m.price}${t('monthLabel')}</div>
+      </div>
+      <button class="cart-item-remove" onclick="event.stopPropagation();toggleCart('${m.id}')">✕</button>
+    </div>
+  `).join('');
+  const total = cart.reduce((s,m)=>s+m.price,0);
+  const usd = (total/5.2).toFixed(2);
+  document.getElementById('cart-total-brl').textContent = `R$ ${total}${t('monthLabel')}`;
+  document.getElementById('cart-total-usd').textContent = `≈ USD ${usd}`;
+  updateCartUI();
+}
+
+function updateCartUI(){
+  updateCartBadge();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Checkout
+// ═══════════════════════════════════════════════════════════════
+function openCheckout(){
+  const total = cart.reduce((s,m)=>s+m.price,0);
+  const pixTotal = (total*0.95).toFixed(2);
+  document.getElementById('pix-amount-val').textContent = `R$ ${pixTotal}`;
+  document.getElementById('card-total-val').textContent = `R$ ${total}${t('monthLabel')}`;
+  // installments
+  const sel = document.getElementById('installments-select');
+  sel.innerHTML = Array.from({length:12},(_,i)=>{
+    const n = i+1;
+    const v = (total/n).toFixed(2);
+    return `<option value="${n}">${n}x de R$ ${v}</option>`;
+  }).join('');
+  document.getElementById('checkout-modal').classList.add('open');
+}
+function closeCheckout(){document.getElementById('checkout-modal').classList.remove('open')}
+function switchTab(tab){
+  document.getElementById('panel-pix').className='pix-panel'+(tab==='pix'?' show':'');
+  document.getElementById('panel-card').className='card-panel'+(tab==='card'?' show':'');
+  document.getElementById('tab-pix').className='pay-tab'+(tab==='pix'?' active':'');
+  document.getElementById('tab-card').className='pay-tab'+(tab==='card'?' active':'');
+}
+async function confirmPix(){
+  const pixTotal = parseFloat(document.getElementById('pix-amount-val')?.textContent?.replace('R$ ','') || '0');
+  const tenantId = window._nexiaTenantId || new URLSearchParams(location.search).get('tenant') || 'nexia';
+  const modules  = cart.map(m=>({id:m.id, name:m.name||m.id, price:m.price||0}));
+  const btn = document.querySelector('#panel-pix .confirm-btn');
+  if(btn){btn.disabled=true;btn.textContent='Processando...';}
+  try {
+    const res = await fetch('/api/payment', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        tenantId, action:'store_purchase', method:'PIX',
+        amount: pixTotal, modules,
+        description:'NEXIA Store — ' + modules.map(m=>m.name).catch(e => console.warn("[NEXIA] fetch failed:", e.message)).join(', ')
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Pagamento não processado');
+    // Ativa módulos no Firestore após compra
+    await fetch('/api/tenant', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId, action:'activate_modules', moduleIds: modules.map(m=>m.id).catch(e => console.warn("[NEXIA] fetch failed:", e.message)) })
+    }).catch(()=>{});
+    closeCheckout(); closeCart();
+    cart=[]; updateCartBadge(); renderGrid();
+    toast(t('checkoutSuccess'));
+  } catch(e) {
+    toast('❌ Erro no pagamento: ' + e.message);
+  } finally {
+    if(btn){btn.disabled=false; btn.textContent=t('pixBtn')||'Já Paguei via PIX ✓';}
+  }
+}
+async function confirmCard(){
+  const name=document.getElementById('card-name').value.trim();
+  const num=document.getElementById('card-number').value.trim();
+  const exp=document.getElementById('card-expiry').value.trim();
+  const cvv=document.getElementById('card-cvv').value.trim();
+  const email=document.getElementById('card-email')?.value?.trim()||'';
+  const inst=parseInt(document.getElementById('installments-select')?.value||'1');
+  if(!name||num.length<19||exp.length<5||cvv.length<3){
+    toast('⚠️ Preencha todos os campos do cartão'); return;
+  }
+  const total = cart.reduce((s,m)=>s+(m.price||0),0);
+  const tenantId = window._nexiaTenantId || new URLSearchParams(location.search).get('tenant') || 'nexia';
+  const modules  = cart.map(m=>({id:m.id, name:m.name||m.id, price:m.price||0}));
+  const btn = document.querySelector('#panel-card .confirm-btn');
+  if(btn){btn.disabled=true;btn.textContent='Processando...';}
+  try {
+    const res = await fetch('/api/payment', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        tenantId, action:'store_purchase', method:'card',
+        amount: total, installments: inst,
+        cardHolder: name, cardLastFour: num.replace(/\s/g,'').catch(e => console.warn("[NEXIA] fetch failed:", e.message)).slice(-4),
+        payerEmail: email, modules,
+        description:'NEXIA Store — ' + modules.map(m=>m.name).join(', ')
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Pagamento não processado');
+    await fetch('/api/tenant', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId, action:'activate_modules', moduleIds: modules.map(m=>m.id).catch(e => console.warn("[NEXIA] fetch failed:", e.message)) })
+    }).catch(()=>{});
+    closeCheckout(); closeCart();
+    cart=[]; updateCartBadge(); renderGrid();
+    toast(t('checkoutSuccess'));
+  } catch(e) {
+    toast('❌ Erro no pagamento: ' + e.message);
+  } finally {
+    if(btn){btn.disabled=false; btn.innerHTML='<i class="ri-secure-payment-line"></i> Pagar Agora →';}
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Utils
+// ═══════════════════════════════════════════════════════════════
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+function maskCard(el){
+  let v=el.value.replace(/\D/g,'').substring(0,16);
+  el.value=v.replace(/(.{4})/g,'$1 ').trim();
+}
+function maskExpiry(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>=3)v=v.substring(0,2)+'/'+v.substring(2,4);
+  el.value=v;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// DETAIL MODAL + VIDEO PLAYER
+// ═══════════════════════════════════════════════════════════════
+function openDetail(id){
+  const m = MODULES.find(m=>m.id===id);
+  if(!m) return;
+  const inCart = cart.some(c=>c.id===id);
+  const detail = m.detail?.[LANG]||m.detail?.pt||m.desc?.[LANG]||m.desc?.pt||'';
+
+  document.getElementById('detail-icon').textContent = m.icon;
+  document.getElementById('detail-name').textContent = m.name;
+  document.getElementById('detail-badge-modal').innerHTML = m.badge
+    ? `<span class="badge ${m.badge}">${m.badge.toUpperCase()}</span>` : '';
+  document.getElementById('detail-price').textContent = `R$ ${m.price}${t('monthLabel')}`;
+  document.getElementById('detail-tags').innerHTML = m.tags.map(tag=>`<span class="tag">${tag}</span>`).join('');
+  document.getElementById('detail-desc').textContent = detail;
+
+  // Features
+  const features = m.features || [];
+  document.getElementById('detail-features').innerHTML = features.length
+    ? `<h4>${t('detailFeatures')}</h4><ul>${features.map(f=>`<li>${f.pt||f}</li>`).join('')}</ul>` : '';
+
+  // Use cases
+  const usecases = m.usecases || [];
+  document.getElementById('detail-usecases').innerHTML = usecases.length
+    ? `<h4>${t('detailUsecases')}</h4><ul class="usecases">${usecases.map(u=>`<li>${u.pt||u}</li>`).join('')}</ul>` : '';
+
+  // API endpoint
+  document.getElementById('detail-endpoint').innerHTML = m.apiEndpoint
+    ? `<h4>${t('detailEndpoint')}</h4><code>${m.apiEndpoint}</code>` : '';
+
+  // Video thumbnail
+  const vw = document.getElementById('detail-video-wrap');
+  if(m.video){
+    vw.style.display = 'block';
+    vw.innerHTML = `<div class="video-thumb" onclick="loadVideo('${m.video}',this)">
+      <img src="https://img.youtube.com/vi/${m.video}/hqdefault.jpg" alt="Demo ${m.name}" loading="lazy">
+      <div class="play-btn">&#9654;</div>
+      <div class="video-label">${t('watchDemo')}</div>
+    </div>`;
+  } else {
+    vw.style.display = 'none';
+    vw.innerHTML = '';
+  }
+
+  // Cart button
+  const btn = document.getElementById('detail-cart-btn');
+  btn.textContent = inCart ? t('removeFromCart') : t('addToCart');
+  btn.className = 'confirm-btn' + (inCart ? ' added' : '');
+  btn.onclick = () => { toggleCart(id); refreshDetailCartBtn(id); };
+
+  document.getElementById('detail-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function refreshDetailCartBtn(id){
+  const inCart = cart.some(c=>c.id===id);
+  const btn = document.getElementById('detail-cart-btn');
+  if(btn){
+    btn.textContent = inCart ? t('removeFromCart') : t('addToCart');
+    btn.className = 'confirm-btn' + (inCart ? ' added' : '');
+  }
+}
+
+function closeDetail(){
+  document.getElementById('detail-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  // Kill iframe to stop video
+  const iframe = document.querySelector('#detail-video-wrap iframe');
+  if(iframe) iframe.src = '';
+}
+
+function loadVideo(vid, thumb){
+  thumb.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="width:100%;height:100%;border-radius:10px;"></iframe>`;
+  thumb.style.cursor = 'default';
+  thumb.onclick = null;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(()=>document.getElementById('splash').remove(),500);
+  },1200);
+  applyI18n();
+  rebuildCatPills();
+  filterModules();
+  // ESC closes modal
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeDetail();
+  });
+});
+
+// ── NEXIA AI SEMANTIC SEARCH ──
+const AI_INTENT_MAP = [
+  { keywords:['cobrar','cobrança','fatura','boleto','pagar','pagamento','pix','cartão','financeiro','mensalidade'], modules:['nexia-pay','cobranca-automatica','nfe-engine','financial-dashboard'], label:'💰 Cobrança & Pagamentos' },
+  { keywords:['whatsapp','chatbot','chat','bot','atendimento','suporte','mensagem','automação','automatizar'], modules:['whatsapp-bot','cortex-chat','ai-support','crm-kanban'], label:'🤖 Automação de Atendimento' },
+  { keywords:['nota fiscal','nfe','nf-e','imposto','contabil','fiscal'], modules:['nfe-engine','financial-dashboard','cobranca-automatica'], label:'📄 Fiscal & NF-e' },
+  { keywords:['site','landing','página','homepage','builder','criar site','web'], modules:['site-builder','nexia-studio','landing-pro'], label:'🌐 Criação de Sites' },
+  { keywords:['crm','lead','funil','cliente','vendas','pipeline','oportunidade'], modules:['crm-kanban','lead-score','sales-ai'], label:'📊 CRM & Vendas' },
+  { keywords:['relatório','dashboard','gráfico','análise','métricas','kpi','dados'], modules:['analytics-pro','financial-dashboard','ai-insights'], label:'📈 Analytics & Relatórios' },
+  { keywords:['imóvel','leilão','investimento','jurídico','edital'], modules:['nexia-auction','legal-ai','risk-analyzer'], label:'🏠 Imóveis & Leilões' },
+  { keywords:['viagem','passageiro','excursão','grupo','hotel','voo','tour'], modules:['rooming-list','checkin-qr','flight-radar','group-manager'], label:'✈️ Gestão de Viagens' },
+  { keywords:['evento','festa','salão','reserva','espaço','booking','agenda'], modules:['nexia-booking','dynamic-pricing','contract-generator'], label:'🎉 Eventos & Espaços' },
+  { keywords:['instagram','redes sociais','social','post','conteúdo','marketing'], modules:['social-ai','content-scheduler','cortex-chat'], label:'📱 Marketing Digital' },
+  { keywords:['agendamento','agenda','calendário','horário','compromisso'], modules:['smart-scheduler','crm-kanban'], label:'📅 Agendamento' },
+  { keywords:['estoque','produto','inventário','controle','loja'], modules:['inventory-ai','financial-dashboard'], label:'📦 Estoque & Produtos' },
+  { keywords:['funcionário','time','equipe','rh','recursos humanos','colaborador'], modules:['hr-module','team-manager','payroll-ai'], label:'👥 Gestão de Equipes' },
+  { keywords:['segurança','acesso','login','autenticação','permissão'], modules:['nexia-auth','pki-scanner','sentinel-iot'], label:'🔐 Segurança & Acesso' },
+  { keywords:['ia','inteligência artificial','ai','gpt','gemini','cortex'], modules:['cortex-chat','ai-insights','lead-score','swarm-control'], label:'🧠 Inteligência Artificial' },
+];
+
+async function aiSearchModules() {
+  const q = document.getElementById('ai-search-input').value.trim();
+  if(!q) return;
+  const res = document.getElementById('ai-search-result');
+  res.style.display = 'block';
+  res.innerHTML = '<div style="color:rgba(232,240,255,.5);font-size:13px;text-align:center;padding:8px">✦ CORTEX analisando sua necessidade...</div>';
+  try {
+    const r = await fetch('/api/cortex', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        userId: (typeof NexiaAuth !== 'undefined' && typeof NexiaAuth.getUser === 'function' && NexiaAuth.getUser().catch(e => console.warn("[NEXIA] fetch failed:", e.message))?.uid) || window._nexiaUserId || 'anon',
+        tenantId: window._nexiaTenantId || 'nexia',
+        mode: 'store_search',
+        message: 'Você é o assistente da NEXIA Store. O usuário precisa: "' + q + '". Liste até 3 módulos relevantes da store com: nome, motivo em 1 frase, preço estimado. Responda em português, formato estruturado.'
+      })
+    });
+    const data = await r.json();
+    const text = (data.response||data.content||'').replace(/\n/g,'<br>');
+    res.innerHTML = text
+      ? '<div style="font-size:13px;line-height:1.8;color:var(--text2)">' + text + '</div>'
+      : '<div style="font-size:12px;color:var(--text3)">Nenhuma sugestão para essa busca. Navegue pelos módulos abaixo.</div>';
+  } catch(e) {
+    // Fallback keyword match local
+    const words = q.toLowerCase().split(/\s+/);
+    const matches = [];
+    if(typeof AI_INTENT_MAP !== 'undefined') {
+      for(const intent of AI_INTENT_MAP) {
+        const score = intent.keywords.filter(k => words.some(w => w.includes(k)||k.includes(w))||q.toLowerCase().includes(k)).length;
+        if(score > 0) matches.push({...intent, score});
+      }
+      matches.sort((a,b) => b.score-a.score);
+    }
+    if(matches.length > 0) {
+      res.innerHTML = matches.slice(0,3).map(m =>
+        '<div style="padding:8px 0;border-bottom:1px solid var(--brd)">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--text)">' + (m.modules||[]).join(', ') + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);margin-top:3px">' + (m.answer||'') + '</div></div>'
+      ).join('');
+    } else {
+      res.innerHTML = '<div style="font-size:12px;color:var(--text3)">CORTEX temporariamente indisponível. Navegue pelos módulos abaixo.</div>';
+    }
+  }
+}
+</script>
+
+<!-- ── DETAIL MODAL ── -->
+<div class="modal-overlay" id="detail-modal" onclick="if(event.target===this)closeDetail()">
+  <div class="modal">
+    <button class="modal-close-btn" onclick="closeDetail()">&#10005;</button>
+    <div class="detail-header">
+      <div class="detail-icon-wrap" id="detail-icon"></div>
+      <div class="detail-name" id="detail-name"></div>
+      <div class="detail-meta">
+        <span class="detail-price" id="detail-price"></span>
+        <span id="detail-badge-modal"></span>
+      </div>
+      <div class="card-tags" id="detail-tags"></div>
+    </div>
+    <div class="detail-body">
+      <div id="detail-video-wrap"></div>
+      <div class="detail-desc" id="detail-desc"></div>
+      <div id="detail-features"></div>
+      <div id="detail-usecases"></div>
+      <div id="detail-endpoint"></div>
+    </div>
+    <div class="detail-footer">
+      <button class="confirm-btn" id="detail-cart-btn"></button>
+    </div>
+  </div>
+</div>
+
+  <script src="../core/nexia-engine.js"></script>
+</body>
+</html>

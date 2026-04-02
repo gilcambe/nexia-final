@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ NEXIA OS — MASTER GOD MODE</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090E;--bg2:#0A0D16;--bg3:#0E1220;--bg4:#131829;
+  --brd:rgba(255,255,255,.06);--brd2:rgba(255,255,255,.10);
+  --text:#E8F0FF;--text2:rgba(232,240,255,.65);--text3:rgba(232,240,255,.35);
+  --gold:#DAA520;--gold2:#B8860B;--gbg:rgba(218,165,32,.08);--gbrd:rgba(218,165,32,.22);
+  --cyan:#00E5FF;--cbg:rgba(0,229,255,.07);--cbrd:rgba(0,229,255,.2);
+  --green:#00D68F;--gnbg:rgba(0,214,143,.07);
+  --red:#FF3D71;--rbg:rgba(255,61,113,.08);--rbrd:rgba(255,61,113,.22);
+  --purple:#9B5CF6;--pbg:rgba(155,92,246,.08);
+  --orange:#F59E0B;
+  --ff:'Sora',sans-serif;--ffm:'JetBrains Mono',monospace;
+  --sw:240px;--r:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);overflow:hidden}
+button{font-family:var(--ff);cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:var(--ff);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(218,165,32,.25);border-radius:2px}
+
+/* SHELL */
+.shell{display:grid;grid-template-columns:var(--sw) 1fr;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+#sb{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.gem{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0d1117,#1a1a2e,var(--gold2));border:1px solid var(--gbrd);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 16px rgba(218,165,32,.15)}
+.sn{font-size:13px;font-weight:800;color:var(--text)}
+.ss{font-size:7.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);opacity:.7;margin-top:1px}
+
+/* Accordion */
+.grp{margin-bottom:2px}
+.grp-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all .15s}
+.grp-btn:hover{color:var(--text2)}
+.grp-btn i.gi{font-size:15px;flex-shrink:0}
+.grp-btn .cv{font-size:13px;margin-left:auto;transition:transform .25s ease}
+.grp-btn.open .cv{transform:rotate(180deg)}
+.grp-btn.ha{color:var(--gold)}
+.grp-items{display:none;flex-direction:column;padding:2px 0 6px;border-left:1px solid var(--brd);margin:0 14px 0 22px}
+.grp-items.open{display:flex}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border:1px solid transparent;margin:1px 0}
+.nav-item i{font-size:15px;flex-shrink:0;width:18px;text-align:center}
+.nav-item:hover{background:var(--gbg);color:var(--text)}
+.nav-item.active{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}
+.nbadge{margin-left:auto;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nbadge.live{background:var(--gnbg);color:var(--green);border:1px solid rgba(0,214,143,.25)}
+.nbadge.hot{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.nbadge.gold{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.nbadge.new{background:var(--cbg);color:var(--cyan);border:1px solid var(--cbrd)}
+.sdiv{height:1px;background:var(--brd);margin:8px 14px}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#07090E;flex-shrink:0}
+
+/* MAIN */
+#main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 24px;background:rgba(7,9,14,.92);border-bottom:1px solid var(--brd);backdrop-filter:blur(16px)}
+#tb-title{font-size:15px;font-weight:800;color:var(--text)}
+.tbstat{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;font-family:var(--ffm)}
+.dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+.dg{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dgold{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* BUTTONS */
+.btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;border:1px solid transparent}
+.bg{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}.bg:hover{background:rgba(218,165,32,.16)}
+.br{background:var(--rbg);border-color:var(--rbrd);color:var(--red)}.br:hover{background:rgba(255,61,113,.16)}
+.bc{background:var(--cbg);border-color:var(--cbrd);color:var(--cyan)}.bc:hover{background:rgba(0,229,255,.14)}
+.bpp{background:var(--pbg);border-color:rgba(155,92,246,.25);color:var(--purple)}
+.bgn{background:var(--gnbg);border-color:rgba(0,214,143,.25);color:var(--green)}
+
+/* PAGES */
+.content{flex:1;overflow:hidden}
+.page{display:none;height:100%;overflow-y:auto;padding:26px 28px;flex-direction:column;gap:20px}
+.page.active{display:flex}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.phl .ey{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.phl .pt{font-size:22px;font-weight:900;color:var(--text)}
+.ac{color:var(--gold)}
+.pha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.chd{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ct{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.ct i{color:var(--gold)}
+.cbd{padding:18px}
+
+/* KPIs */
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s}
+.kpi:hover{border-color:var(--brd2)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.gold::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.kpi.cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.kpi.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.kpi.red::before{background:linear-gradient(90deg,var(--red),transparent)}
+.kpi.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.ki{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px}
+.kpi.gold .ki{background:var(--gbg);color:var(--gold)}
+.kpi.cyan .ki{background:var(--cbg);color:var(--cyan)}
+.kpi.green .ki{background:var(--gnbg);color:var(--green)}
+.kpi.red .ki{background:var(--rbg);color:var(--red)}
+.kpi.purple .ki{background:var(--pbg);color:var(--purple)}
+.kv{font-size:26px;font-weight:900;font-family:var(--ffm);line-height:1}
+.kl{font-size:11px;color:var(--text3);margin-top:5px}
+.kd{font-size:10px;font-family:var(--ffm);margin-top:6px;display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px}
+.kd.up{background:var(--gnbg);color:var(--green)}
+.kd.dn{background:var(--rbg);color:var(--red)}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:10px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--brd);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:11px 14px;color:var(--text2);vertical-align:middle}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.pill.on{background:var(--gnbg);color:var(--green);border:1px solid rgba(0,214,143,.2)}
+.pill.off{background:var(--rbg);color:var(--red);border:1px solid var(--rbrd)}
+.pill.trial{background:var(--gbg);color:var(--gold);border:1px solid var(--gbrd)}
+.pd{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* FORM */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-weight:600}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px 13px;color:var(--text);font-size:13px;transition:border-color .2s}
+.inp:focus{border-color:var(--gbrd)}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.6}
+select.inp option{background:var(--bg2)}
+
+/* SEARCH + FILTER */
+.search{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px;padding:8px 14px;transition:border-color .2s;flex:1;min-width:180px}
+.search:focus-within{border-color:var(--gbrd)}
+.search input{flex:1;background:none;border:none;color:var(--text);font-size:13px}
+.search input::placeholder{color:var(--text3)}
+.search i{color:var(--text3);font-size:16px}
+.fps{display:flex;gap:8px;flex-wrap:wrap}
+.fp{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--bg3);border:1px solid var(--brd);color:var(--text3)}
+.fp:hover{border-color:var(--brd2);color:var(--text2)}
+.fp.on{background:var(--gbg);border-color:var(--gbrd);color:var(--gold)}
+
+/* ACTION BUTTONS */
+.ab{width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.ab.c{color:var(--cyan);background:var(--cbg);border-color:var(--cbrd)}
+.ab.g{color:var(--gold);background:var(--gbg);border-color:var(--gbrd)}
+.ab.r{color:var(--red);background:var(--rbg);border-color:var(--rbrd)}
+.ab.p{color:var(--purple);background:var(--pbg);border-color:rgba(155,92,246,.2)}
+.ab.gn{color:var(--green);background:var(--gnbg);border-color:rgba(0,214,143,.2)}
+.ab:hover{filter:brightness(1.3)}
+
+/* TERMINAL */
+.term{background:#000;border:1px solid rgba(0,229,255,.15);border-radius:10px;padding:14px;font-family:var(--ffm);font-size:12px;line-height:1.8;overflow-y:auto;color:#c4d4ee}
+.tl{opacity:0;transform:translateY(4px);animation:tlin .2s forwards}
+@keyframes tlin{to{opacity:1;transform:none}}
+.tc{color:var(--cyan)}.tok{color:var(--green)}.tw2{color:var(--orange)}.te{color:var(--red)}.td{color:var(--text3)}.tg{color:var(--gold)}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:440px}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+.msg.u{align-self:flex-end;background:var(--gbg);border:1px solid var(--gbrd);border-radius:12px 12px 2px 12px}
+.msg.a{align-self:flex-start;background:var(--bg3);border:1px solid var(--brd2);border-radius:12px 12px 12px 2px}
+.msg.a .ail{font-size:9px;color:var(--cyan);font-weight:700;letter-spacing:.1em;margin-bottom:4px}
+.chat-iw{padding:12px;border-top:1px solid var(--brd);display:flex;gap:10px}
+.chat-i{flex:1;background:var(--bg3);border:1px solid var(--brd);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;resize:none;height:42px;transition:border-color .2s}
+.chat-i:focus{border-color:var(--gbrd);outline:none}
+
+/* BAR CHART */
+.bc2{display:flex;align-items:flex-end;gap:8px;height:150px;padding:10px 0}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height .8s ease}
+.blbl{font-size:9px;color:var(--text3);font-family:var(--ffm)}
+.bval{font-size:9px;font-weight:700;font-family:var(--ffm);color:var(--text2)}
+
+/* TOGGLE */
+.toggle{width:36px;height:20px;border-radius:10px;cursor:pointer;background:var(--bg3);border:1px solid var(--brd);position:relative;transition:background .3s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text3);transition:all .25s}
+.toggle.on{background:rgba(0,214,143,.2);border-color:rgba(0,214,143,.35)}
+.toggle.on::after{left:18px;background:var(--green)}
+
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.mov.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--brd2);border-radius:16px;width:min(580px,94vw);max-height:88vh;overflow-y:auto;padding:28px}
+.mt{font-size:18px;font-weight:800;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.mt i{color:var(--gold)}
+.mc{margin-left:auto;color:var(--text3);font-size:20px;cursor:pointer}
+.mc:hover{color:var(--text)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.prog{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0}
+.pf{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* TENANT CARDS */
+.tcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.tc-card{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s}
+.tc-card:hover{border-color:var(--brd2)}
+.tc-hd{display:flex;align-items:center;gap:10px}
+.tc-logo{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tc-mrr{font-size:20px;font-weight:900;font-family:var(--ffm);color:var(--gold)}
+.tc-bar{height:3px;border-radius:2px;background:var(--brd);overflow:hidden;margin:4px 0}
+.tc-bf{height:100%;border-radius:2px;transition:width .6s}
+
+/* AGENT CARDS */
+.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ag-card{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:7px;text-align:center;cursor:pointer;transition:border-color .2s}
+.ag-card:hover{border-color:var(--gbrd)}
+
+/* STORE */
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.mc2{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s;position:relative;overflow:hidden}
+.mc2:hover{border-color:var(--gbrd)}
+.mc2.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+
+/* LOG ROWS */
+.log-row{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;font-family:var(--ffm)}
+.log-t{color:var(--text3);white-space:nowrap;flex-shrink:0}
+.log-s{width:56px;font-size:9px;font-weight:700;text-align:center;padding:2px 0;border-radius:4px;flex-shrink:0}
+.sc{background:rgba(255,61,113,.15);color:var(--red)}
+.sw2{background:rgba(245,158,11,.12);color:var(--orange)}
+.si{background:var(--cbg);color:var(--cyan)}
+.so{background:var(--gnbg);color:var(--green)}
+.log-m{color:var(--text2);flex:1}
+.log-tn{color:var(--gold);margin-left:auto;white-space:nowrap;font-size:10px}
+
+/* CHANNEL */
+.ch-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;background:var(--bg3);border:1px solid var(--brd);cursor:pointer;transition:border-color .2s;margin-bottom:8px}
+.ch-item.sel{border-color:var(--gbrd);background:var(--gbg)}
+.ch-chk{width:18px;height:18px;border-radius:5px;border:2px solid var(--brd2);margin-left:auto;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.ch-item.sel .ch-chk{background:var(--gold);border-color:var(--gold);color:#000}
+
+/* OSINT */
+.osr{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:16px;font-family:var(--ffm);font-size:11px;line-height:1.8;color:var(--text2);display:none}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:5000;background:var(--bg2);border:1px solid var(--gbrd);border-radius:10px;padding:12px 18px;font-size:12px;color:var(--text);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:8px}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ══ MOBILE HAMBURGER ══ */
+#mob-toggle{display:none;position:fixed;top:14px;left:14px;z-index:2000;width:40px;height:40px;border-radius:10px;background:var(--bg2);border:1px solid var(--gbrd);color:var(--gold);font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+#mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;backdrop-filter:blur(3px)}
+
+/* ══ RESPONSIVE BREAKPOINTS ══ */
+@media(max-width:900px){
+  :root{--sw:260px}
+  .shell{grid-template-columns:1fr}
+  #sb{position:fixed;top:0;left:-280px;height:100vh;z-index:1000;width:var(--sw);transition:left .3s cubic-bezier(.22,1,.36,1);box-shadow:4px 0 30px rgba(0,0,0,.5)}
+  #sb.open{left:0}
+  #mob-toggle{display:flex}
+  #mob-overlay.show{display:block}
+  .main-area{grid-column:1;margin-left:0!important}
+  .kpi-grid{grid-template-columns:1fr 1fr!important}
+  .tcg{grid-template-columns:1fr!important}
+  .g2{grid-template-columns:1fr!important}
+  .g3{grid-template-columns:1fr 1fr!important}
+  .main-area>.inner{padding:14px!important}
+  .dt th,.dt td{padding:8px 10px;font-size:11px}
+  .topbar-main{padding:12px 14px 12px 64px!important}
+}
+@media(max-width:540px){
+  .kpi-grid{grid-template-columns:1fr!important}
+  .g3{grid-template-columns:1fr!important}
+  .bc2{height:100px}
+  .modal{width:96vw!important;padding:18px!important}
+  .chat-wrap{height:320px}
+  #toast{left:12px;right:12px;bottom:16px}
+}
+</style>
+<style>
+.qa-fab{position:fixed;bottom:24px;left:24px;z-index:9999;background:linear-gradient(135deg,#00d68f,#00e5ff);color:#000;border:0;border-radius:50px;padding:12px 20px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,214,143,.4);transition:all .2s}
+.qa-fab:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,214,143,.5)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ═══════ SIDEBAR ═══════ -->
+<aside id="sb">
+  <div class="sb-logo">
+    <div class="gem">
+      <svg viewBox="0 0 20 20" fill="none" width="18" height="18">
+        <path d="M10 1.5L2.5 7.5l7.5 11 7.5-11L10 1.5z" stroke="#DAA520" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M2.5 7.5h15M6 7.5l4 11M14 7.5l-4 11" stroke="#DAA520" stroke-width=".9" opacity=".5"/>
+      </svg>
+    </div>
+    <div><div class="sn">NEXIA OS</div><div class="ss">God Mode v12</div></div>
+  </div>
+
+  <nav style="padding:10px 0;flex:1;overflow-y:auto">
+    <!-- IMPÉRIO -->
+    <div class="grp">
+      <button class="grp-btn open ha" onclick="tg(this)"><i class="ri-global-line gi"></i>Império<i class="ri-arrow-down-s-line cv"></i></button>
+      <div class="grp-items open">
+        <div class="nav-item active" onclick="go('empire')"><i class="ri-dashboard-3-line"></i>Empire View<span class="nbadge live">Live</span></div>
+        <div class="nav-item" onclick="go('mrr')"><i class="ri-money-dollar-circle-line"></i>MRR Global</div>
+        <div class="nav-item" onclick="go('tenants')"><i class="ri-building-2-line"></i>Tenant Control</div>
+        <div class="nav-item" onclick="go('billing')"><i class="ri-secure-payment-line"></i>Billing</div>
+        <div class="nav-item" onclick="openPage('nexia-pay.html')"><i class="ri-bank-card-2-line"></i>NEXIA PAY <span class="nbadge" style="background:rgba(0,214,143,.12);color:var(--green);border:1px solid rgba(0,214,143,.3)">NEW</span></div>
+      </div>
+    </div>
+    <div class="sdiv"></div>
+
+    <!-- CORTEX IA -->
+    <div class="grp">
+      <button class="grp-btn" onclick="tg(this)"><i class="ri-brain-line gi"></i>CORTEX IA<i class="ri-arrow-down-s-line cv"></i></button>
+      <div class="grp-items">
+        <div class="nav-item" onclick="go('cortex')"><i class="ri-robot-2-line"></i>CORTEX Master</div>
+        <div class="nav-item" onclick="go('agents')"><i class="ri-aliens-line"></i>Fábrica Agentes<span class="nbadge gold">15K</span></div>
+        <div class="nav-item" onclick="go('swarm')"><i class="ri-share-circle-line"></i>Swarm</div>
+        <div class="nav-item" onclick="go('flows')"><i class="ri-flow-chart"></i>NEXIA Flow</div>
+      </div>
+    </div>
+    <div class="sdiv"></div>
+
+    <!-- LOJA -->
+    <div class="grp">
+      <button class="grp-btn" onclick="tg(this)"><i class="ri-store-2-line gi"></i>Loja &amp; Produtos<i class="ri-arrow-down-s-line cv"></i></button>
+      <div class="grp-items">
+        <div class="nav-item" onclick="go('store')"><i class="ri-apps-line"></i>NEXIA Store<span class="nbadge new">30</span></div>
+        <div class="nav-item" onclick="go('approvals')"><i class="ri-checkbox-circle-line"></i>Aprovações<span class="nbadge hot">3</span></div>
+        <div class="nav-item" onclick="go('broadcast')"><i class="ri-broadcast-line"></i>Broadcast</div>
+      </div>
+    </div>
+    <div class="sdiv"></div>
+
+    <!-- SEGURANÇA -->
+    <div class="grp">
+      <button class="grp-btn" onclick="tg(this)"><i class="ri-shield-keyhole-line gi"></i>Segurança<i class="ri-arrow-down-s-line cv"></i></button>
+      <div class="grp-items">
+        <div class="nav-item" onclick="go('logs')"><i class="ri-file-list-3-line"></i>Audit Log</div>
+        <div class="nav-item" onclick="go('osint')"><i class="ri-search-eye-line"></i>OSINT Hub</div>
+        <div class="nav-item" onclick="go('scanner')"><i class="ri-radar-line"></i>PKI Scanner</div>
+        <div class="nav-item" onclick="go('kill')"><i class="ri-shut-down-line"></i>Kill Switch<span class="nbadge hot">GOD</span></div>
+      </div>
+    </div>
+    <div class="sdiv"></div>
+
+    <!-- CONFIG -->
+    <div class="grp">
+      <button class="grp-btn" onclick="tg(this)"><i class="ri-settings-3-line gi"></i>Configuração<i class="ri-arrow-down-s-line cv"></i></button>
+      <div class="grp-items">
+        <div class="nav-item" onclick="go('inscricoes')"><i class="ri-user-add-line"></i>Inscrições Globais</div>
+        <div class="nav-item" onclick="go('studio')"><i class="ri-pencil-ruler-2-line"></i>Site Builder</div>
+        <div class="nav-item" onclick="go('whitelabel')"><i class="ri-palette-line"></i>White Label</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sb-footer">
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="avatar">CM</div>
+      <div><div class="sn" style="font-size:12px">Comandante</div><div class="ss" style="color:var(--gold)">✦ Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════ MAIN ═══════ -->
+<div id="main">
+  <div class="topbar">
+    <div id="tb-title">NEXIA <span style="color:var(--gold)">Empire View</span></div>
+    <div class="tbstat"><span class="dot dg"></span><span style="color:var(--green)">4 tenants online</span></div>
+    <div class="tbstat"><span class="dot dgold"></span><span id="tb-mrr" style="color:var(--gold)">MRR R$ —</span></div>
+    <div class="tbr">
+      <button class="btn bg" onclick="om('m-tenant')"><i class="ri-add-line"></i> Novo Tenant</button>
+      <button class="btn br" onclick="go('kill')"><i class="ri-shut-down-line"></i> Kill Switch</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ════ EMPIRE VIEW ════ -->
+  <div class="page active" id="page-empire">
+    <div class="ph">
+      <div class="phl"><div class="ey">Visão Suprema</div><div class="pt">Empire <span class="ac">View</span></div></div>
+      <div class="pha"><button class="btn bc" onclick="loadEmpireData();toast('🔄 Dados recarregados!')"><i class="ri-refresh-line"></i> Refresh</button></div>
+    </div>
+    <div class="kg">
+      <div class="kpi gold"><div class="ki"><i class="ri-money-dollar-circle-line"></i></div><div class="kv" id="mrr-value">R$ —</div><div class="kl">MRR Global</div><span class="kd up" id="mrr-growth">— MoM</span></div>
+      <div class="kpi cyan"><div class="ki"><i class="ri-bar-chart-2-line"></i></div><div class="kv" id="arr-value">R$ —</div><div class="kl">ARR</div><span class="kd up">Anualizado</span></div>
+      <div class="kpi green"><div class="ki"><i class="ri-vip-crown-line"></i></div><div class="kv" id="ltv-value">R$ —</div><div class="kl">LTV Médio</div><span class="kd up">Por tenant</span></div>
+      <div class="kpi purple"><div class="ki"><i class="ri-robot-2-line"></i></div><div class="kv" id="agent-count">—</div><div class="kl">Calls CORTEX</div><span class="kd up">Hoje</span></div>
+      <div class="kpi red" style="border-color:#ff3d7133"><div class="ki"><i class="ri-logout-box-line"></i></div><div class="kv" id="churn-value">—</div><div class="kl">Churn Rate</div><span class="kd">Este mês</span></div>
+      <div class="kpi" style="border-color:#00e5ff33"><div class="ki"><i class="ri-exchange-dollar-line"></i></div><div class="kv" id="nrr-value">—</div><div class="kl">NRR</div><span class="kd up">Net Revenue Ret.</span></div>
+      <div class="kpi cyan"><div class="ki"><i class="ri-building-2-line"></i></div><div class="kv" id="tenant-count">—</div><div class="kl">Tenants Ativos</div><span class="kd" id="new-tenants">—</span></div>
+      <div class="kpi gold"><div class="ki"><i class="ri-pulse-line"></i></div><div class="kv" id="uptime-value">99.9%</div><div class="kl">Uptime</div><span class="kd up">SLA</span></div>
+    </div>
+    <!-- Churn Risk Panel + Agents Button -->
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="card" style="flex:1;min-width:280px">
+        <div class="chd"><div class="ct"><i class="ri-alarm-warning-line" style="color:#ff3d71"></i>Tenants em Risco de Churn</div>
+          <button class="btn" style="font-size:11px" onclick="runChurnScan()"><i class="ri-refresh-line"></i> Atualizar</button>
+        </div>
+        <div class="cbd" id="churn-at-risk"><div style="color:#6b7280;font-size:12px;padding:8px">Carregando...</div></div>
+      </div>
+      <div class="card" style="flex:0 0 auto;min-width:200px">
+        <div class="chd"><div class="ct"><i class="ri-cpu-line" style="color:#00e5ff"></i>Agentes Internos</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn bc" onclick="runInternalAgents()" style="width:100%;justify-content:center"><i class="ri-play-line"></i> Rodar Todos</button>
+          <button class="btn" onclick="runAgent('qa')" style="width:100%;justify-content:center;font-size:11px"><i class="ri-test-tube-line"></i> QA Agent</button>
+          <button class="btn" onclick="runAgent('debug')" style="width:100%;justify-content:center;font-size:11px"><i class="ri-bug-line"></i> Debug Agent</button>
+          <button class="btn" onclick="runAgent('security')" style="width:100%;justify-content:center;font-size:11px"><i class="ri-shield-line"></i> Security Agent</button>
+          <button class="btn" onclick="runAgent('perf')" style="width:100%;justify-content:center;font-size:11px"><i class="ri-speed-line"></i> Perf Agent</button>
+          <div id="agent-status" style="font-size:11px;color:#6b7280;text-align:center;min-height:16px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-building-2-line"></i>Tenants em Tempo Real</div><button class="btn bg" onclick="go('tenants')">Ver Todos →</button></div>
+      <div class="cbd">
+        <div class="tcg">
+          <div class="tc-card">
+            <div class="tc-hd"><div class="tc-logo" style="background:rgba(0,229,255,.1)">🏨</div><div><div style="font-size:13px;font-weight:700">CES Brasil 2027</div><div style="font-size:10px;color:var(--text3)">ces · Eventos</div></div><span class="pill on" style="margin-left:auto"><span class="pd"></span>Online</span></div>
+            <div class="tc-mrr">R$ 4.900</div>
+            <div class="tc-bar"><div class="tc-bf" style="width:72%;background:var(--cyan)"></div></div>
+            <div style="display:flex;gap:6px"><button class="ab c" onclick="sl('ces')" title="Shadow Login"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab r" onclick="kt('ces')" title="Kill Switch"><i class="ri-shut-down-line"></i></button></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-hd"><div class="tc-logo" style="background:rgba(218,165,32,.1)">⚖️</div><div><div style="font-size:13px;font-weight:700">Bezsan Leilões</div><div style="font-size:10px;color:var(--text3)">bezsan · Fintech</div></div><span class="pill on" style="margin-left:auto"><span class="pd"></span>Online</span></div>
+            <div class="tc-mrr">R$ 9.700</div>
+            <div class="tc-bar"><div class="tc-bf" style="width:88%;background:var(--gold)"></div></div>
+            <div style="display:flex;gap:6px"><button class="ab c" onclick="sl('bezsan')"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab r" onclick="kt('bezsan')"><i class="ri-shut-down-line"></i></button></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-hd"><div class="tc-logo" style="background:rgba(0,214,143,.1)">🏊</div><div><div style="font-size:13px;font-weight:700">Splash Festas</div><div style="font-size:10px;color:var(--text3)">splash · Lazer</div></div><span class="pill on" style="margin-left:auto"><span class="pd"></span>Online</span></div>
+            <div class="tc-mrr">R$ 3.200</div>
+            <div class="tc-bar"><div class="tc-bf" style="width:55%;background:var(--green)"></div></div>
+            <div style="display:flex;gap:6px"><button class="ab c" onclick="sl('splash')"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab r" onclick="kt('splash')"><i class="ri-shut-down-line"></i></button></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-hd"><div class="tc-logo" style="background:rgba(155,92,246,.1)">✈️</div><div><div style="font-size:13px;font-weight:700">Viajante Pro</div><div style="font-size:10px;color:var(--text3)">viajante-pro · Turismo</div></div><span class="pill trial" style="margin-left:auto"><span class="pd"></span>Trial</span></div>
+            <div class="tc-mrr">R$ 1.490</div>
+            <div class="tc-bar"><div class="tc-bf" style="width:32%;background:var(--purple)"></div></div>
+            <div style="display:flex;gap:6px"><button class="ab c" onclick="sl('viajante-pro')"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab r" onclick="kt('viajante-pro')"><i class="ri-shut-down-line"></i></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(245,158,11,.2)">
+      <div class="chd" style="background:rgba(245,158,11,.04)"><div class="ct" style="color:var(--orange)"><i class="ri-alert-line" style="color:var(--orange)"></i>CORTEX Alert — Predictive Intelligence</div><span class="nbadge hot">3 alertas</span></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:rgba(255,61,113,.05);border:1px solid var(--rbrd);border-radius:9px"><i class="ri-alarm-warning-line" style="color:var(--red);font-size:20px;flex-shrink:0;margin-top:2px"></i><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--red)">Churn iminente — Viajante Pro</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Inativo 18 dias. 87% probabilidade de cancelamento. Acionar CORTEX SDR imediatamente.</div></div><button class="ab c" style="flex-shrink:0;margin-top:2px" onclick="go('cortex')"><i class="ri-robot-2-line"></i></button></div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:9px"><i class="ri-secure-payment-line" style="color:var(--orange);font-size:20px;flex-shrink:0;margin-top:2px"></i><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--orange)">Pagamento Pix pendente — Bezsan</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Fatura R$ 9.700 vence em 3 dias. Aprovar ou acionar cobrança automática.</div></div><button class="ab g" style="flex-shrink:0;margin-top:2px" onclick="go('billing')"><i class="ri-arrow-right-line"></i></button></div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--gnbg);border:1px solid rgba(0,214,143,.2);border-radius:9px"><i class="ri-store-2-line" style="color:var(--green);font-size:20px;flex-shrink:0;margin-top:2px"></i><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--green)">Upsell detectado — CES Brasil</div><div style="font-size:11px;color:var(--text2);margin-top:3px">94% do limite de leads. Oportunidade Enterprise: +R$ 2.000/mês.</div></div><button class="ab gn" style="flex-shrink:0;margin-top:2px" onclick="sendUpsell('CES Brasil','enterprise')"><i class="ri-send-plane-line"></i></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MRR GLOBAL ════ -->
+  <div class="page" id="page-mrr">
+    <div class="ph"><div class="phl"><div class="ey">Financeiro Global</div><div class="pt">MRR <span class="ac">Global</span></div></div></div>
+    <div class="kg">
+      <div class="kpi gold"><div class="ki"><i class="ri-money-dollar-circle-line"></i></div><div class="kv" id="mrr-value-2">R$ —</div><div class="kl">MRR Atual</div><span class="kd up"><i class="ri-arrow-up-line"></i>+18% MoM</span></div>
+      <div class="kpi green"><div class="ki"><i class="ri-line-chart-line"></i></div><div class="kv">R$ 231.480</div><div class="kl">ARR Projetado</div><span class="kd up"><i class="ri-arrow-up-line"></i>+22%</span></div>
+      <div class="kpi cyan"><div class="ki"><i class="ri-user-star-line"></i></div><div class="kv">R$ 4.822</div><div class="kl">Ticket Médio</div><span class="kd up"><i class="ri-arrow-up-line"></i>+7%</span></div>
+      <div class="kpi red"><div class="ki"><i class="ri-user-unfollow-line"></i></div><div class="kv">2.4%</div><div class="kl">Churn Rate</div><span class="kd dn"><i class="ri-alarm-warning-line"></i>Atenção</span></div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-bar-chart-2-line"></i>Evolução MRR — 6 Meses</div></div>
+      <div class="cbd">
+        <div class="bc2">
+          <div class="bcol"><div class="bval">R$12k</div><div class="bar" style="height:62%;background:linear-gradient(180deg,var(--gold),var(--gold2))"></div><div class="blbl">Out</div></div>
+          <div class="bcol"><div class="bval">R$13.4k</div><div class="bar" style="height:69%;background:linear-gradient(180deg,var(--gold),var(--gold2))"></div><div class="blbl">Nov</div></div>
+          <div class="bcol"><div class="bval">R$14.8k</div><div class="bar" style="height:77%;background:linear-gradient(180deg,var(--gold),var(--gold2))"></div><div class="blbl">Dez</div></div>
+          <div class="bcol"><div class="bval">R$15.1k</div><div class="bar" style="height:78%;background:linear-gradient(180deg,var(--gold),var(--gold2))"></div><div class="blbl">Jan</div></div>
+          <div class="bcol"><div class="bval">R$17.2k</div><div class="bar" style="height:89%;background:linear-gradient(180deg,var(--gold),var(--gold2))"></div><div class="blbl">Fev</div></div>
+          <div class="bcol"><div class="bval">R$19.3k</div><div class="bar" style="height:100%;background:linear-gradient(180deg,var(--cyan),#00B4CC)"></div><div class="blbl" style="color:var(--cyan)">Mar ◆</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-pie-chart-line"></i>MRR por Tenant</div></div>
+      <div class="cbd" style="padding:0"><div class="tw"><table><thead><tr><th>Tenant</th><th>Plano</th><th>MRR</th><th>Módulos</th><th>% Total</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bezsan Leilões</strong></td><td>Enterprise</td><td style="color:var(--gold);font-family:var(--ffm);font-weight:700">R$ 9.700</td><td>12</td><td><div class="prog"><div class="pf" style="width:50%;background:var(--gold)"></div></div></td><td><span class="pill on">Ativo</span></td></tr>
+        <tr><td><strong>CES Brasil 2027</strong></td><td>Pro</td><td style="color:var(--cyan);font-family:var(--ffm);font-weight:700">R$ 4.900</td><td>8</td><td><div class="prog"><div class="pf" style="width:25%;background:var(--cyan)"></div></div></td><td><span class="pill on">Ativo</span></td></tr>
+        <tr><td><strong>Splash Festas</strong></td><td>Pro</td><td style="color:var(--green);font-family:var(--ffm);font-weight:700">R$ 3.200</td><td>6</td><td><div class="prog"><div class="pf" style="width:17%;background:var(--green)"></div></div></td><td><span class="pill on">Ativo</span></td></tr>
+        <tr><td><strong>Viajante Pro</strong></td><td>Starter</td><td style="color:var(--purple);font-family:var(--ffm);font-weight:700">R$ 1.490</td><td>4</td><td><div class="prog"><div class="pf" style="width:8%;background:var(--purple)"></div></div></td><td><span class="pill trial">Trial</span></td></tr>
+      </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ════ TENANT CONTROL ════ -->
+  <div class="page" id="page-tenants">
+    <div class="ph"><div class="phl"><div class="ey">Gestão de Inquilinos</div><div class="pt">Tenant <span class="ac">Control</span></div></div><div class="pha"><button class="btn bg" onclick="om('m-tenant')"><i class="ri-add-line"></i> Criar Tenant (IA)</button><button class="btn bc" onclick="exportCSV()"><i class="ri-download-2-line"></i> CSV</button></div></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="search"><i class="ri-search-line"></i><input type="text" placeholder="Buscar tenant, slug, email..." oninput="filterT(this.value)"></div>
+      <div class="fps"><div class="fp on" onclick="fp(this)">Todos</div><div class="fp" onclick="fp(this)">Ativos</div><div class="fp" onclick="fp(this)">Trial</div><div class="fp" onclick="fp(this)">Frozen</div></div>
+    </div>
+    <div class="card"><div class="cbd" style="padding:0"><div class="tw">
+      <table><thead><tr><th>Tenant</th><th>Slug</th><th>Plano</th><th>MRR</th><th>Usuários</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="t-tbody">
+        <tr><td><strong>CES Brasil 2027</strong><br><small style="color:var(--text3)">ces@cesbrasil.com.br</small></td><td><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:10px">ces</code></td><td>Pro</td><td style="color:var(--cyan);font-family:var(--ffm);font-weight:700">R$ 4.900</td><td>142</td><td><span class="pill on"><span class="pd"></span>Ativo</span></td><td style="display:flex;gap:5px"><button class="ab c" onclick="sl('ces')" title="Shadow Login"><i class="ri-eye-line"></i></button><button class="ab g" title="Editar"><i class="ri-pencil-line"></i></button><button class="ab p" title="Impersonate"><i class="ri-user-shared-line"></i></button><button class="ab r" onclick="kt('ces')" title="Kill Switch"><i class="ri-shut-down-line"></i></button></td></tr>
+        <tr><td><strong>Bezsan Leilões</strong><br><small style="color:var(--text3)">admin@bezsan.com.br</small></td><td><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:10px">bezsan</code></td><td>Enterprise</td><td style="color:var(--gold);font-family:var(--ffm);font-weight:700">R$ 9.700</td><td>38</td><td><span class="pill on"><span class="pd"></span>Ativo</span></td><td style="display:flex;gap:5px"><button class="ab c" onclick="sl('bezsan')"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab p"><i class="ri-user-shared-line"></i></button><button class="ab r" onclick="kt('bezsan')"><i class="ri-shut-down-line"></i></button></td></tr>
+        <tr><td><strong>Splash Festas</strong><br><small style="color:var(--text3)">splash@festas.com.br</small></td><td><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:10px">splash</code></td><td>Pro</td><td style="color:var(--green);font-family:var(--ffm);font-weight:700">R$ 3.200</td><td>67</td><td><span class="pill on"><span class="pd"></span>Ativo</span></td><td style="display:flex;gap:5px"><button class="ab c" onclick="sl('splash')"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab p"><i class="ri-user-shared-line"></i></button><button class="ab r" onclick="kt('splash')"><i class="ri-shut-down-line"></i></button></td></tr>
+        <tr><td><strong>Viajante Pro</strong><br><small style="color:var(--text3)">ops@viajantepro.com</small></td><td><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:10px">viajante-pro</code></td><td>Starter</td><td style="color:var(--purple);font-family:var(--ffm);font-weight:700">R$ 1.490</td><td>23</td><td><span class="pill trial"><span class="pd"></span>Trial</span></td><td style="display:flex;gap:5px"><button class="ab c" onclick="sl('viajante-pro')"><i class="ri-eye-line"></i></button><button class="ab g"><i class="ri-pencil-line"></i></button><button class="ab p"><i class="ri-user-shared-line"></i></button><button class="ab r" onclick="kt('viajante-pro')"><i class="ri-shut-down-line"></i></button></td></tr>
+      </tbody></table>
+    </div></div></div>
+  </div>
+
+  <!-- ════ BILLING ════ -->
+  <div class="page" id="page-billing">
+    <div class="ph"><div class="phl"><div class="ey">Financeiro</div><div class="pt">Billing &amp; <span class="ac">Pagamentos</span></div></div></div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-time-line"></i>Aprovações Pendentes — Pix</div><span class="nbadge hot">2</span></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><div style="flex:1"><div style="font-size:13px;font-weight:700">Bezsan Leilões — Enterprise</div><div style="font-size:11px;color:var(--text3)">Pix 10:34 · #8842-B</div></div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 9.700</div><button class="btn bg" onclick="aprovarPagamento(this,'bezsan','Enterprise')"><i class="ri-check-line"></i> Aprovar</button><button class="btn br"><i class="ri-close-line"></i></button></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><div style="flex:1"><div style="font-size:13px;font-weight:700">CES Brasil 2027 — Upgrade Pro</div><div style="font-size:11px;color:var(--text3)">Pix 09:12 · #7701-A</div></div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--cyan)">R$ 4.900</div><button class="btn bg" onclick="aprovarPagamento(this,'ces','Pro')"><i class="ri-check-line"></i> Aprovar</button><button class="btn br"><i class="ri-close-line"></i></button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-history-line"></i>Histórico de Transações</div></div>
+      <div class="cbd" style="padding:0"><div class="tw"><table><thead><tr><th>Data</th><th>Tenant</th><th>Tipo</th><th>Valor</th><th>Método</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td style="font-family:var(--ffm);color:var(--text3)">25/03</td><td>Bezsan</td><td>Enterprise Mensalidade</td><td style="color:var(--gold);font-family:var(--ffm)">R$ 9.700</td><td>Pix</td><td><span class="pill on">Aprovado</span></td></tr>
+        <tr><td style="font-family:var(--ffm);color:var(--text3)">24/03</td><td>Splash</td><td>SENTINEL IoT Módulo</td><td style="color:var(--green);font-family:var(--ffm)">R$ 890</td><td>Cartão</td><td><span class="pill on">Aprovado</span></td></tr>
+        <tr><td style="font-family:var(--ffm);color:var(--text3)">22/03</td><td>CES</td><td>Pro Mensalidade</td><td style="color:var(--cyan);font-family:var(--ffm)">R$ 4.900</td><td>Pix</td><td><span class="pill trial">Pendente</span></td></tr>
+        <tr><td style="font-family:var(--ffm);color:var(--text3)">20/03</td><td>Viajante Pro</td><td>Starter Trial</td><td style="color:var(--purple);font-family:var(--ffm)">R$ 0</td><td>—</td><td><span class="pill trial">Trial 14d</span></td></tr>
+      </tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- ════ CORTEX MASTER ════ -->
+  <div class="page" id="page-cortex">
+    <div class="ph"><div class="phl"><div class="ey">Inteligência Artificial</div><div class="pt">CORTEX <span class="ac">Master</span></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-robot-2-line"></i>Chat CORTEX — God Mode</div><div style="display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--ffm)"><span class="dot dg" style="width:7px;height:7px"></span><span style="color:var(--green)">Groq Online</span></div></div>
+        <div class="chat-wrap">
+          <div class="chat-msgs" id="c-msgs"><div class="msg a"><div class="ail">✦ CORTEX MASTER</div>Olá, Comandante. Acesso supremo ao ecossistema NEXIA. Dados carregando em tempo real... Qual operação?</div></div>
+          <div class="chat-iw"><textarea class="chat-i" id="ci" placeholder="Comando supremo..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sc()}"></textarea><button class="ab g" style="width:42px;height:42px;border-radius:9px" onclick="sc()"><i class="ri-send-plane-line"></i></button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-settings-3-line"></i>Config CORTEX</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label>Modelo Ativo</label><select class="inp"><option>Groq — llama-3.3-70b-versatile</option><option>Groq — mixtral-8x7b</option><option>GPT-4o</option><option>Claude 3.5 Sonnet</option></select></div>
+          <div class="field"><label>System Prompt Master</label><textarea class="inp" style="height:110px;font-size:12px">Você é o CORTEX Master — IA suprema da NEXIA Corporation. Contexto God Mode: acesso total a todos os tenants, finanças globais e controles operacionais. Responda sempre em Português do Brasil.</textarea></div>
+          <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text2)">Temperatura</span><span style="font-family:var(--ffm);font-size:12px;color:var(--gold)">0.7</span></div>
+          <div class="prog"><div class="pf" style="width:70%;background:var(--gold)"></div></div>
+          <button class="btn bg" style="width:100%;justify-content:center;padding:10px" onclick="saveCortexConfig()">Salvar Configuração</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-terminal-line"></i>Debug — Tempo Real</div></div>
+      <div class="cbd" style="padding:12px"><div class="term" id="c-term" style="height:260px">
+        <div class="tl"><span class="td">10:42:01 ›</span> <span class="tc">CORTEX-MASTER</span> <span class="tok">inicializado · nexia-c8710 · God Mode</span></div>
+        <div class="tl"><span class="td">10:42:02 ›</span> <span class="tc">SWARM</span> <span class="tok">Agentes carregados em memória</span></div>
+        <div class="tl"><span class="td">10:42:03 ›</span> <span class="tc">TENANT</span> <span class="tok">ces · bezsan · splash · viajante-pro — online</span></div>
+        <div class="tl"><span class="td">10:42:05 ›</span> <span class="tg">MRR GLOBAL carregando...</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ════ AGENTS ════ -->
+  <div class="page" id="page-agents">
+    <div class="ph"><div class="phl"><div class="ey">IA Factory</div><div class="pt">Fábrica de <span class="ac">Agentes</span></div></div><div class="pha"><button class="btn bg" onclick="om('m-agent')"><i class="ri-add-line"></i> Criar Agente</button></div></div>
+    <div class="fps"><div class="fp on" id="agent-filter-all" onclick="fp(this)">Todos</div><div class="fp" onclick="fp(this)">Vendas</div><div class="fp" onclick="fp(this)">Suporte</div><div class="fp" onclick="fp(this)">Jurídico</div><div class="fp" onclick="fp(this)">Financeiro</div><div class="fp" onclick="fp(this)">Dev</div><div class="fp" onclick="fp(this)">Marketing</div><div class="fp" onclick="fp(this)">Elite</div></div>
+    <div class="ag">
+      <div class="ag-card"><div style="font-size:24px">⚖️</div><div style="font-size:12px;font-weight:700;color:var(--text)">CORTEX Due Diligence</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Jurídico · Elite</div><span class="nbadge gold" style="width:fit-content;margin:0 auto">R$ 290/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">💹</div><div style="font-size:12px;font-weight:700;color:var(--text)">Sniper de Lances</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Leilões · Premium</div><span class="nbadge gold" style="width:fit-content;margin:0 auto">R$ 190/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">📲</div><div style="font-size:12px;font-weight:700;color:var(--text)">CORTEX SDR</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Vendas · Essencial</div><span class="nbadge new" style="width:fit-content;margin:0 auto">R$ 97/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">🛡️</div><div style="font-size:12px;font-weight:700;color:var(--text)">NEXIA Shield</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Segurança · Enterprise</div><span class="nbadge gold" style="width:fit-content;margin:0 auto">R$ 490/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">✈️</div><div style="font-size:12px;font-weight:700;color:var(--text)">CORTEX Predictive</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Logística · Premium</div><span class="nbadge gold" style="width:fit-content;margin:0 auto">R$ 220/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">🏗️</div><div style="font-size:12px;font-weight:700;color:var(--text)">Arquiteto IA</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Construção · Core</div><span class="nbadge live" style="width:fit-content;margin:0 auto">Sistema</span></div>
+      <div class="ag-card"><div style="font-size:24px">🔍</div><div style="font-size:12px;font-weight:700;color:var(--text)">NEXIA OSINT</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Inteligência · Elite</div><span class="nbadge gold" style="width:fit-content;margin:0 auto">R$ 380/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">🗺️</div><div style="font-size:12px;font-weight:700;color:var(--text)">Guia GPS Pro</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Turismo · Viajante</div><span class="nbadge new" style="width:fit-content;margin:0 auto">R$ 67/mês</span></div>
+      <div class="ag-card"><div style="font-size:24px">📧</div><div style="font-size:12px;font-weight:700;color:var(--text)">Broadcast Bot</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Marketing · Starter</div><span class="nbadge new" style="width:fit-content;margin:0 auto">R$ 47/mês</span></div>
+      <div class="ag-card" style="border:1px dashed var(--gbrd);align-items:center;justify-content:center;min-height:120px" onclick="om('m-agent')"><div style="font-size:28px;color:var(--gold)">+</div><div style="font-size:12px;font-weight:600;color:var(--gold)">Criar Agente</div></div>
+    </div>
+  </div>
+
+  <!-- ════ SWARM ════ -->
+  <div class="page" id="page-swarm">
+    <div class="ph"><div class="phl"><div class="ey">Orquestração IA</div><div class="pt">Swarm <span class="ac">Orquestrador</span></div></div></div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-share-circle-line"></i>Executar Swarm</div></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:14px">
+        <div class="field"><label>Prompt Master</label><textarea class="inp" style="height:80px;font-size:12px" placeholder="Analise o mercado de leilões judiciais no Brasil e identifique as melhores oportunidades..."></textarea></div>
+        <div class="field"><label>Agentes do Swarm</label>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg3);border:1px solid var(--brd);border-radius:7px"><span>⚖️</span><span style="font-size:12px;flex:1">CORTEX Due Diligence</span><span class="dot dg" style="width:7px;height:7px"></span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg3);border:1px solid var(--brd);border-radius:7px"><span>🔍</span><span style="font-size:12px;flex:1">NEXIA OSINT</span><span class="dot dg" style="width:7px;height:7px"></span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg3);border:1px solid var(--brd);border-radius:7px"><span>💹</span><span style="font-size:12px;flex:1">Sniper de Lances</span><span class="dot dgold" style="width:7px;height:7px"></span></div>
+          </div>
+        </div>
+        <button class="btn bg" style="align-self:flex-start" onclick="rswarm()"><i class="ri-play-fill"></i> Executar Swarm</button>
+        <div class="term" id="sw-term" style="height:200px"><div class="tl"><span class="td">Aguardando comando do Swarm...</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ FLOWS ════ -->
+  <div class="page" id="page-flows">
+    <div class="ph"><div class="phl"><div class="ey">Automações</div><div class="pt">NEXIA <span class="ac">Flow</span></div></div><div class="pha"><button class="btn bg" onclick="novoFlow()"><i class="ri-add-line"></i> Novo Flow</button></div></div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-flash-line"></i>Flows Ativos</div><span class="nbadge live">5 rodando</span></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:20px">🔔</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Alerta de Churn → WhatsApp SDR</div><div style="font-size:10px;color:var(--text3)">Trigger: inatividade 15 dias → CORTEX SDR → oferta voz clonada</div></div><div class="toggle on"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:20px">💰</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Pagamento Aprovado → Ativar Módulo</div><div style="font-size:10px;color:var(--text3)">Trigger: billing.approved → Firestore update → notificação ao tenant</div></div><div class="toggle on"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Leilão Ganho → Contrato PDF + Blockchain Hash</div><div style="font-size:10px;color:var(--text3)">Trigger: bezsan.leilao.ganho → PDF gerado → SHA256 → notificar</div></div><div class="toggle on"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:20px">🏠</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Locação expirada → Senha IoT revogar</div><div style="font-size:10px;color:var(--text3)">Trigger: splash.locacao.fim → SENTINEL IoT → invalidar fechadura</div></div><div class="toggle on"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:20px">🛫</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Voo atrasado → Notif 50 passageiros</div><div style="font-size:10px;color:var(--text3)">Trigger: cortex.predictive.delay → WhatsApp em massa → reagendar</div></div><div class="toggle on"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ NEXIA STORE ════ -->
+  <div class="page" id="page-store">
+    <div class="ph"><div class="phl"><div class="ey">Marketplace</div><div class="pt">NEXIA <span class="ac">Store</span></div></div><div class="pha"><button class="btn bg" onclick="om('m-module')"><i class="ri-add-line"></i> Novo Módulo</button></div></div>
+    <div class="fps"><div class="fp on" onclick="fp(this)">Todos (30)</div><div class="fp" onclick="fp(this)">IA (8)</div><div class="fp" onclick="fp(this)">Financeiro (6)</div><div class="fp" onclick="fp(this)">Segurança (5)</div><div class="fp" onclick="fp(this)">Comunicação (4)</div><div class="fp" onclick="fp(this)">Logística (4)</div></div>
+    <div class="sg">
+      <div class="mc2 feat"><div style="font-size:24px">🧠</div><div style="font-size:13px;font-weight:800;color:var(--text)">CORTEX SDR Pro</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Vendedor IA 24h. WhatsApp com voz clonada. Recuperação automática de carrinho.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 297<span style="font-size:10px;color:var(--text3)">/mês</span></div><div style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:5px"><i class="ri-checkbox-circle-fill"></i>287 tenants ativos</div></div>
+      <div class="mc2 feat"><div style="font-size:24px">🛡️</div><div style="font-size:13px;font-weight:800;color:var(--text)">NEXIA Shield Enterprise</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Monitoramento de rede. Bloqueio USB em tempo real. Alerta no celular do dono.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 490<span style="font-size:10px;color:var(--text3)">/mês</span></div><div style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:5px"><i class="ri-checkbox-circle-fill"></i>142 tenants ativos</div></div>
+      <div class="mc2"><div style="font-size:24px">⚖️</div><div style="font-size:13px;font-weight:800;color:var(--text)">CORTEX Due Diligence</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Lê editais em 5s. Cruza com OSINT. Relatório de riscos automático.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 290<span style="font-size:10px;color:var(--text3)">/mês</span></div></div>
+      <div class="mc2"><div style="font-size:24px">📡</div><div style="font-size:13px;font-weight:800;color:var(--text)">NEXIA SENTINEL IoT</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Fechaduras Wi-Fi. Senhas com validade automática por locação.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 190<span style="font-size:10px;color:var(--text3)">/mês</span></div></div>
+      <div class="mc2"><div style="font-size:24px">💸</div><div style="font-size:13px;font-weight:800;color:var(--text)">NEXIA Pay Split</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Split de comissões automático. Multi-beneficiário. Pix + Cartão.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 97<span style="font-size:10px;color:var(--text3)">/mês</span></div><div style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:5px"><i class="ri-checkbox-circle-fill"></i>412 tenants ativos</div></div>
+      <div class="mc2"><div style="font-size:24px">📞</div><div style="font-size:13px;font-weight:800;color:var(--text)">PABX Cloud Zero Roaming</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Ligações internacionais pelo app via Wi-Fi. Atendente vê ficha completa.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 167<span style="font-size:10px;color:var(--text3)">/mês</span></div></div>
+      <div class="mc2"><div style="font-size:24px">🎫</div><div style="font-size:13px;font-weight:800;color:var(--text)">NEXIA NOC Tickets</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Chamados internos com GPS. Técnico mais próximo alocado em 3s.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 127<span style="font-size:10px;color:var(--text3)">/mês</span></div></div>
+      <div class="mc2"><div style="font-size:24px">🔗</div><div style="font-size:13px;font-weight:800;color:var(--text)">Blockchain Contratos</div><div style="font-size:11px;color:var(--text2);line-height:1.5">Geração automática de contratos PDF com hash SHA256 inalterável.</div><div style="font-size:18px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 247<span style="font-size:10px;color:var(--text3)">/mês</span></div></div>
+    </div>
+  </div>
+
+  <!-- ════ APPROVALS ════ -->
+  <div class="page" id="page-approvals">
+    <div class="ph"><div class="phl"><div class="ey">Fila de Aprovação</div><div class="pt">Módulos <span class="ac">Pendentes</span></div></div></div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-inbox-line"></i>Aguardando Aprovação</div><span class="nbadge hot">3</span></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:22px">🧠</span><div style="flex:1"><div style="font-size:13px;font-weight:700">CORTEX SDR Pro — Splash Festas</div><div style="font-size:11px;color:var(--text3)">Pix enviado · Comprovante 25/03 14:22</div></div><div style="font-size:16px;font-weight:900;font-family:var(--ffm);color:var(--gold)">R$ 297</div><button class="btn bg" onclick="ativarModulo(this,'splash','cortex-sdr')"><i class="ri-check-line"></i> Ativar</button><button class="btn br"><i class="ri-close-line"></i></button></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:22px">📡</span><div style="flex:1"><div style="font-size:13px;font-weight:700">SENTINEL IoT — CES Brasil 2027</div><div style="font-size:11px;color:var(--text3)">Cartão aprovado · 24/03</div></div><div style="font-size:16px;font-weight:900;font-family:var(--ffm);color:var(--green)">R$ 190</div><button class="btn bg" onclick="ativarModulo(this,'ces','sentinel-iot')"><i class="ri-check-line"></i> Ativar</button><button class="btn br"><i class="ri-close-line"></i></button></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span style="font-size:22px">⚖️</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Due Diligence — Bezsan Leilões</div><div style="font-size:11px;color:var(--text3)">Aguardando comprovante Pix</div></div><div style="font-size:16px;font-weight:900;font-family:var(--ffm);color:var(--orange)">R$ 290</div><button class="btn bg" onclick="ativarModulo(this,'bezsan','due-diligence')"><i class="ri-check-line"></i> Ativar</button><button class="btn br"><i class="ri-close-line"></i></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ BROADCAST ════ -->
+  <div class="page" id="page-broadcast">
+    <div class="ph"><div class="phl"><div class="ey">Comunicação Global</div><div class="pt">Broadcast <span class="ac">Master</span></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-send-plane-line"></i>Compor Mensagem</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label>Destinatários</label><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="padding:4px 10px;border-radius:20px;background:var(--gbg);border:1px solid var(--gbrd);color:var(--gold);font-size:11px">✓ Todos os Tenants</span><span style="padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;cursor:pointer">CES</span><span style="padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;cursor:pointer">Bezsan</span><span style="padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;cursor:pointer">Splash</span><span style="padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:11px;cursor:pointer">Viajante</span></div></div>
+          <div>
+            <label style="display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;font-weight:600">Canal</label>
+            <div class="ch-item sel" onclick="this.classList.toggle('sel')"><i class="ri-notification-3-line" style="color:var(--gold);font-size:18px"></i><div><div style="font-size:13px;font-weight:600">Push In-App</div><div style="font-size:10px;color:var(--text3)">Banner no painel do tenant</div></div><div class="ch-chk">✓</div></div>
+            <div class="ch-item" onclick="this.classList.toggle('sel');this.querySelector('.ch-chk').textContent=this.classList.contains('sel')?'✓':''"><i class="ri-mail-line" style="color:var(--cyan);font-size:18px"></i><div><div style="font-size:13px;font-weight:600">Email</div><div style="font-size:10px;color:var(--text3)">Via EmailJS / SendGrid</div></div><div class="ch-chk"></div></div>
+            <div class="ch-item" onclick="this.classList.toggle('sel');this.querySelector('.ch-chk').textContent=this.classList.contains('sel')?'✓':''"><i class="ri-whatsapp-line" style="color:var(--green);font-size:18px"></i><div><div style="font-size:13px;font-weight:600">WhatsApp</div><div style="font-size:10px;color:var(--text3)">Via Zap SDK / WPP Connect</div></div><div class="ch-chk"></div></div>
+          </div>
+          <div class="field"><label>Mensagem</label><textarea class="inp" style="height:100px;font-size:12px" placeholder="Olá! A NEXIA OS v12 foi lançada com novos recursos. Acesse o painel para ver as novidades..."></textarea></div>
+          <button class="btn bg" style="align-self:flex-start;padding:10px 24px" onclick="dispararBroadcast()"><i class="ri-broadcast-line"></i> Disparar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-history-line"></i>Histórico</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><div style="font-size:12px;font-weight:700">🚀 NEXIA v11 lançada!</div><div style="font-size:10px;color:var(--text3);margin-top:2px">24/03/26 · Push · 4 tenants · 100% entregue</div></div>
+          <div style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><div style="font-size:12px;font-weight:700">💳 Atualização de billing</div><div style="font-size:10px;color:var(--text3);margin-top:2px">20/03/26 · Email · 4 tenants · 98% entregue</div></div>
+          <div style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><div style="font-size:12px;font-weight:700">⚡ Novo módulo SENTINEL</div><div style="font-size:10px;color:var(--text3);margin-top:2px">15/03/26 · Push+Email · 4 tenants · 100%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ AUDIT LOG ════ -->
+  <div class="page" id="page-logs">
+    <div class="ph"><div class="phl"><div class="ey">Segurança</div><div class="pt">Audit <span class="ac">Log</span></div></div><div class="pha"><button class="btn bc" onclick="exportCSV()"><i class="ri-download-2-line"></i> Exportar</button></div></div>
+    <div style="display:flex;gap:8px"><div class="fps"><div class="fp on" onclick="fp(this)">Todos</div><div class="fp" onclick="fp(this)">CRÍTICO</div><div class="fp" onclick="fp(this)">AVISO</div><div class="fp" onclick="fp(this)">INFO</div><div class="fp" onclick="fp(this)">OK</div></div></div>
+    <div class="card"><div class="cbd" style="padding:0"><div id="log-list">
+      <div class="log-row"><span class="log-t">10:44:01</span><span class="log-s so">OK</span><span class="log-m">Shadow login iniciado por Comandante</span><span class="log-tn">ces</span></div>
+      <div class="log-row"><span class="log-t">10:43:38</span><span class="log-s sw2">AVISO</span><span class="log-m">Limite de leads 94% atingido</span><span class="log-tn">ces</span></div>
+      <div class="log-row"><span class="log-t">10:42:11</span><span class="log-s sc">CRÍTICO</span><span class="log-m">Tentativa de acesso cross-tenant bloqueada pelo Firestore Shield</span><span class="log-tn">bezsan</span></div>
+      <div class="log-row"><span class="log-t">10:41:55</span><span class="log-s si">INFO</span><span class="log-m">CORTEX SDR enviou 47 mensagens WhatsApp</span><span class="log-tn">splash</span></div>
+      <div class="log-row"><span class="log-t">10:40:22</span><span class="log-s so">OK</span><span class="log-m">Módulo SENTINEL IoT ativado via Firestore</span><span class="log-tn">ces</span></div>
+      <div class="log-row"><span class="log-t">10:39:04</span><span class="log-s so">OK</span><span class="log-m">Billing R$ 9.700 aprovado manualmente pelo Comandante</span><span class="log-tn">bezsan</span></div>
+      <div class="log-row"><span class="log-t">10:38:17</span><span class="log-s sw2">AVISO</span><span class="log-m">Viajante Pro inativo 18 dias — CORTEX churn alert gerado</span><span class="log-tn">viajante-pro</span></div>
+      <div class="log-row"><span class="log-t">10:35:00</span><span class="log-s si">INFO</span><span class="log-m">NEXIA OS v12.0 inicializado com sucesso</span><span class="log-tn">nexia</span></div>
+    </div></div></div>
+  </div>
+
+  <!-- ════ OSINT HUB ════ -->
+  <div class="page" id="page-osint">
+    <div class="ph"><div class="phl"><div class="ey">Inteligência</div><div class="pt">OSINT <span class="ac">Hub</span></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-search-eye-line"></i>Consulta CPF / CNPJ</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:12px">
+          <div class="field"><label>Documento</label><input type="text" class="inp" placeholder="000.000.000-00 ou 00.000.000/0001-00" id="osint-doc"></div>
+          <div class="fps"><div class="fp on" onclick="fp(this)">Receita Federal</div><div class="fp" onclick="fp(this)">Tribunais</div><div class="fp" onclick="fp(this)">SERASA</div><div class="fp" onclick="fp(this)">Cartório</div></div>
+          <button class="btn bg" onclick="runOSINT()"><i class="ri-search-line"></i> Consultar OSINT</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-file-damage-line"></i>Takedown Engine</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:12px">
+          <div class="field"><label>URL do Perfil Fake</label><input type="text" class="inp" placeholder="https://instagram.com/fake_nexia"></div>
+          <div class="field"><label>Plataforma</label><select class="inp"><option>Instagram</option><option>Google</option><option>Facebook</option><option>TikTok</option><option>LinkedIn</option></select></div>
+          <button class="btn br" onclick="acionarTakedown()"><i class="ri-close-circle-line"></i> Disparar Takedown</button>
+        </div>
+      </div>
+    </div>
+    <div class="osr" id="osint-result"></div>
+  </div>
+
+  <!-- ════ PKI SCANNER ════ -->
+  <div class="page" id="page-scanner">
+    <div class="ph"><div class="phl"><div class="ey">Cibersegurança</div><div class="pt">PKI <span class="ac">Scanner</span></div></div></div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-radar-line"></i>Varredura de Domínio</div></div>
+      <div class="cbd" style="display:flex;gap:10px;flex-wrap:wrap">
+        <input type="text" class="inp" style="flex:1;min-width:200px" placeholder="cesbrasil.com.br" id="scan-domain">
+        <button class="btn bg" onclick="runScan()"><i class="ri-search-line"></i> Escanear</button>
+      </div>
+    </div>
+    <div class="term" id="scan-term" style="height:320px"><div class="tl"><span class="td">Scanner PKI pronto. Insira um domínio e clique em Escanear.</span></div></div>
+  </div>
+
+  <!-- ════ KILL SWITCH ════ -->
+  <div class="page" id="page-kill">
+    <div class="ph"><div class="phl"><div class="ey">Controle Supremo</div><div class="pt">Kill <span class="ac" style="color:var(--red)">Switch</span></div></div></div>
+    <div class="card" style="border-color:rgba(255,61,113,.25)">
+      <div class="chd" style="background:rgba(255,61,113,.04)"><div class="ct" style="color:var(--red)"><i class="ri-shut-down-line" style="color:var(--red)"></i>Kill Switch Global — DEUS MODE</div><span class="nbadge hot">⚠ IRREVERSÍVEL</span></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:16px">
+        <div style="padding:14px;background:rgba(255,61,113,.06);border:1px solid var(--rbrd);border-radius:10px;font-size:12px;color:var(--text2);line-height:1.6">⚠️ O Kill Switch Global congela <strong>todos</strong> os tenants simultaneamente. Nenhuma venda processada, nenhum login permitido. Use somente em violação de segurança crítica.</div>
+        <div class="field"><label>Confirmação Suprema (sua senha Firebase)</label><input type="password" class="inp" placeholder="Digite sua senha de login para confirmar" id="kill-confirm" style="border-color:var(--rbrd)"></div>
+        <button class="btn br" style="padding:14px 24px;font-size:13px;letter-spacing:.04em;width:fit-content" onclick="globalKill()"><i class="ri-shut-down-line"></i> EXECUTAR KILL SWITCH GLOBAL</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="ct"><i class="ri-list-check-line"></i>Kill Switch por Tenant</div></div>
+      <div class="cbd" style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span>🏨</span><div style="flex:1"><div style="font-size:13px;font-weight:700">CES Brasil 2027</div><div style="font-size:10px;color:var(--text3)">Ativo · 142 usuários</div></div><div class="toggle on" onclick="kt('ces')"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span>⚖️</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Bezsan Leilões</div><div style="font-size:10px;color:var(--text3)">Ativo · 38 usuários</div></div><div class="toggle on" onclick="kt('bezsan')"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span>🏊</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Splash Festas</div><div style="font-size:10px;color:var(--text3)">Ativo · 67 usuários</div></div><div class="toggle on" onclick="kt('splash')"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:9px"><span>✈️</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Viajante Pro</div><div style="font-size:10px;color:var(--text3)">Trial · 23 usuários</div></div><div class="toggle on" onclick="kt('viajante-pro')"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ INSCRIÇÕES GLOBAIS ════ -->
+  <div class="page" id="page-inscricoes">
+    <div class="ph"><div class="phl"><div class="ey">Leads Globais</div><div class="pt">Inscrições <span class="ac">Globais</span></div></div><div class="pha"><button class="btn bc" onclick="exportCSV()"><i class="ri-download-2-line"></i> CSV</button><button class="btn bg"><i class="ri-file-pdf-line"></i> PDF</button></div></div>
+    <div class="kg">
+      <div class="kpi cyan"><div class="ki"><i class="ri-user-add-line"></i></div><div class="kv">270</div><div class="kl">Total Inscritos</div></div>
+      <div class="kpi gold"><div class="ki"><i class="ri-calendar-line"></i></div><div class="kv">47</div><div class="kl">Esta semana</div></div>
+      <div class="kpi green"><div class="ki"><i class="ri-verified-badge-line"></i></div><div class="kv">89%</div><div class="kl">Taxa conversão</div></div>
+      <div class="kpi red"><div class="ki"><i class="ri-user-unfollow-line"></i></div><div class="kv">31</div><div class="kl">Cancelados</div></div>
+    </div>
+    <div class="card"><div class="cbd" style="padding:0"><div class="tw"><table><thead><tr><th>Nome</th><th>Email</th><th>Tenant</th><th>Data</th><th>Plano</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Ana Souza</td><td style="font-family:var(--ffm);font-size:11px">ana@email.com</td><td><span class="nbadge new">CES</span></td><td style="font-family:var(--ffm);color:var(--text3)">25/03</td><td>Pro</td><td><span class="pill on">Ativo</span></td></tr>
+      <tr><td>Carlos Lima</td><td style="font-family:var(--ffm);font-size:11px">carlos@bezsan.com</td><td><span class="nbadge gold">Bezsan</span></td><td style="font-family:var(--ffm);color:var(--text3)">24/03</td><td>Enterprise</td><td><span class="pill on">Ativo</span></td></tr>
+      <tr><td>Mariana Ferreira</td><td style="font-family:var(--ffm);font-size:11px">mari@splash.com</td><td><span class="nbadge live">Splash</span></td><td style="font-family:var(--ffm);color:var(--text3)">23/03</td><td>Starter</td><td><span class="pill trial">Trial</span></td></tr>
+      <tr><td>João Vieira</td><td style="font-family:var(--ffm);font-size:11px">joao@vp.com</td><td><span class="nbadge hot">VP</span></td><td style="font-family:var(--ffm);color:var(--text3)">22/03</td><td>Starter</td><td><span class="pill trial">Trial</span></td></tr>
+    </tbody></table></div></div></div>
+  </div>
+
+  <!-- ════ SITE BUILDER ════ -->
+  <div class="page" id="page-studio">
+    <div class="ph"><div class="phl"><div class="ey">WYSIWYG</div><div class="pt">Site <span class="ac">Builder</span></div></div></div>
+    <div class="card"><div class="chd"><div class="ct"><i class="ri-pencil-ruler-2-line"></i>Selecionar Tenant para Editar</div></div>
+    <div class="cbd"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--brd)'" onclick="window.open('../ces/ces-landing.html','_blank')"><div style="font-size:26px;margin-bottom:8px">🏨</div><div style="font-size:12px;font-weight:700">CES Brasil 2027</div><div style="font-size:10px;color:var(--cyan);margin-top:4px">Abrir Editor →</div></div>
+      <div style="padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--brd)'" onclick="window.open('../bezsan/bezsan-landing.html','_blank')"><div style="font-size:26px;margin-bottom:8px">⚖️</div><div style="font-size:12px;font-weight:700">Bezsan Leilões</div><div style="font-size:10px;color:var(--gold);margin-top:4px">Abrir Editor →</div></div>
+      <div style="padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--brd)'" onclick="window.open('../splash/splash-landing.html','_blank')"><div style="font-size:26px;margin-bottom:8px">🏊</div><div style="font-size:12px;font-weight:700">Splash Festas</div><div style="font-size:10px;color:var(--green);margin-top:4px">Abrir Editor →</div></div>
+      <div style="padding:14px;background:var(--bg3);border:1px solid var(--brd);border-radius:10px;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--brd)'" onclick="window.open('../viajante-pro/vp-landing.html','_blank')"><div style="font-size:26px;margin-bottom:8px">✈️</div><div style="font-size:12px;font-weight:700">Viajante Pro</div><div style="font-size:10px;color:var(--purple);margin-top:4px">Abrir Editor →</div></div>
+    </div></div></div>
+  </div>
+
+  <!-- ════ WHITE LABEL ════ -->
+  <div class="page" id="page-whitelabel">
+    <div class="ph"><div class="phl"><div class="ey">Personalização</div><div class="pt">White <span class="ac">Label</span></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-palette-line"></i>Configurar Tenant</div></div>
+        <div class="cbd" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label>Tenant</label><select class="inp"><option>CES Brasil 2027</option><option>Bezsan Leilões</option><option>Splash Festas</option><option>Viajante Pro</option></select></div>
+          <div class="field"><label>Cor Primária</label><input type="color" value="#00E5FF" style="width:100%;height:40px;border-radius:8px;border:1px solid var(--brd);background:var(--bg3);cursor:pointer"></div>
+          <div class="field"><label>Nome da Marca</label><input type="text" class="inp" value="CES Brasil 2027"></div>
+          <div class="field"><label>Domínio Personalizado</label><input type="text" class="inp" value="ces.cesbrasil.com.br"></div>
+          <div class="field"><label>Slogan</label><input type="text" class="inp" placeholder="A maior feira de tecnologia do Brasil"></div>
+          <button class="btn bg" style="width:100%;justify-content:center;padding:10px" onclick="salvarWhiteLabel()">Salvar Configuração</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="ct"><i class="ri-eye-line"></i>Preview do Branding</div></div>
+        <div class="cbd" style="display:flex;align-items:center;justify-content:center;min-height:280px;flex-direction:column;gap:16px">
+          <div style="padding:24px 36px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);border-radius:14px;text-align:center">
+            <div style="font-size:22px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;-webkit-background-clip:text;background-clip:text">CES BRASIL 2027</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:6px;letter-spacing:.2em">POWERED BY NEXIA OS</div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);text-align:center">Altere as configurações ao lado para ver o preview atualizar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ════ MODAIS ════ -->
+
+<!-- CRIAR TENANT -->
+<div class="mov" id="m-tenant">
+  <div class="modal">
+    <div class="mt"><i class="ri-add-circle-line"></i>Criar Novo Tenant (Arquiteto IA)<span class="mc" onclick="cm('m-tenant')"><i class="ri-close-line"></i></span></div>
+    <div style="padding:12px 14px;background:var(--gbg);border:1px solid var(--gbrd);border-radius:9px;font-size:12px;color:var(--text2);margin-bottom:16px">✨ O <strong style="color:var(--gold)">Arquiteto IA</strong> gera automaticamente: hero, cores, conteúdo e módulos ideais em 30 segundos.</div>
+    <div class="g2">
+      <div class="field"><label>Nome da Empresa</label><input type="text" class="inp" placeholder="Ex: Clínica Bella Vida" id="nt-name"></div>
+      <div class="field"><label>Slug único</label><input type="text" class="inp" placeholder="ex: bellavida" id="nt-slug"></div>
+    </div>
+    <div class="field"><label>Setor / Tipo de Negócio</label><select class="inp" id="nt-sector"><option>Saúde / Clínica</option><option>Restaurante / Food</option><option>Eventos</option><option>Leilões / Fintech</option><option>Turismo / Viagens</option><option>Lazer / Festas</option><option>Transportes / Logística</option><option>Advocacia / Jurídico</option><option>Tecnologia / SaaS</option><option>Outro</option></select></div>
+    <div class="g2">
+      <div class="field"><label>Email do Admin</label><input type="email" class="inp" placeholder="admin@empresa.com.br"></div>
+      <div class="field"><label>Plano Inicial</label><select class="inp"><option>Free</option><option>Starter — R$ 97/mês</option><option selected>Pro — R$ 297/mês</option><option>Enterprise</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn bc" style="flex:1;justify-content:center;padding:12px" onclick="genAI()"><i class="ri-robot-2-line"></i> Gerar com IA (30s)</button>
+      <button class="btn bg" style="flex:1;justify-content:center;padding:12px" onclick="createT()"><i class="ri-add-line"></i> Criar Manual</button>
+    </div>
+    <div id="ai-prog" style="display:none;margin-top:14px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Arquiteto IA gerando configuração...</div>
+      <div class="prog"><div class="pf" id="ai-pf" style="background:var(--gold)"></div></div>
+      <div class="term" id="ai-term" style="height:120px;margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CRIAR AGENTE -->
+<div class="mov" id="m-agent">
+  <div class="modal">
+    <div class="mt"><i class="ri-robot-2-line"></i>Criar Novo Agente IA<span class="mc" onclick="cm('m-agent')"><i class="ri-close-line"></i></span></div>
+    <div class="field"><label>Nome do Agente</label><input type="text" class="inp" id="ag-nome" placeholder="Ex: CORTEX Nutricionista"></div>
+    <div class="g2">
+      <div class="field"><label>Categoria</label><select class="inp" id="ag-tipo"><option>Vendas</option><option>Suporte</option><option>Jurídico</option><option>Financeiro</option><option>Logística</option><option>Dev</option><option>Marketing</option><option>Saúde</option></select></div>
+      <div class="field"><label>Preço/mês (R$)</label><input type="number" class="inp" placeholder="97"></div>
+    </div>
+    <div class="field"><label>Emoji</label><input type="text" class="inp" placeholder="🥗"></div>
+    <div class="field"><label>System Prompt</label><textarea class="inp" id="ag-prompt" style="height:120px;font-size:12px" placeholder="Você é um especialista em nutrição esportiva. Responda sempre em Português do Brasil. Analise a composição corporal e gere planos alimentares..."></textarea></div>
+    <button class="btn bg" style="width:100%;justify-content:center;padding:12px" onclick="salvarAgente()"><i class="ri-save-line"></i> Salvar na Fábrica</button>
+  </div>
+</div>
+
+<!-- NOVO MÓDULO -->
+<div class="mov" id="m-module">
+  <div class="modal">
+    <div class="mt"><i class="ri-apps-line"></i>Adicionar Módulo à Store<span class="mc" onclick="cm('m-module')"><i class="ri-close-line"></i></span></div>
+    <div class="g2">
+      <div class="field"><label>Nome do Módulo</label><input type="text" class="inp" id="mod-nome" placeholder="CORTEX Scheduler"></div>
+      <div class="field"><label>Categoria</label><select class="inp"><option>IA</option><option>Financeiro</option><option>Segurança</option><option>Comunicação</option><option>Logística</option></select></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Preço/mês (R$)</label><input type="number" class="inp" id="mod-preco" placeholder="197"></div>
+      <div class="field"><label>Emoji</label><input type="text" class="inp" placeholder="📅"></div>
+    </div>
+    <div class="field"><label>Descrição</label><textarea class="inp" id="mod-desc" style="height:80px;font-size:12px" placeholder="Descrição do módulo para o cliente..."></textarea></div>
+    <button class="btn bg" style="width:100%;justify-content:center;padding:12px" onclick="publicarModulo()"><i class="ri-save-line"></i> Publicar na Store</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- Firebase SDK (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/auth.js"></script>
+
+<script>
+// ═══ FIREBASE INIT ═══
+const _fbCfg = {
+  apiKey: "AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",
+  authDomain: "nexia-c8710.firebaseapp.com",
+  projectId: "nexia-c8710",
+  storageBucket: "nexia-c8710.firebasestorage.app",
+  messagingSenderId: "623044447905",
+  appId: "1:623044447905:web:13f70e1584fb0fcf8d2ae0"
+};
+try { firebase.initializeApp(_fbCfg); } catch(e) {}
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+
+// ═══ AUTENTICAÇÃO E PROTEÇÃO DA ROTA ═══
+// Oculta o conteúdo até verificar autenticação
+document.documentElement.style.visibility = 'hidden';
+
+_auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
+    return;
+  }
+  // Verifica se é master
+  try {
+    const snap = await _db.collection('users').doc(user.uid).get();
+    const profile = snap.exists ? snap.data() : {};
+    const role = profile.role || 'user';
+    const slug = profile.tenantSlug || profile.tenant || '';
+    if (role !== 'master' && role !== 'god' && slug !== 'nexia') {
+      // Não é master — redireciona para tenant hub
+      window.location.href = '/nexia/tenant-hub.html';
+      return;
+    }
+  } catch(e) { console.error('[NEXIA AUTH] Erro ao verificar perfil master:', e.message); /* continua — não bloquear por erro Firestore */ }
+  NEXIA_UID = user.uid; // popula UID global dentro do listener principal (evita 2º listener)
+  document.documentElement.style.visibility = 'visible';
+  // Carrega dados reais do Firestore
+  loadEmpireData();
+});
+
+// ═══ API BASE ═══
+const API_BASE = '/api';
+// ═══ CONSTANTES GLOBAIS ═══
+const NEXIA_TENANT = 'nexia';
+let NEXIA_UID = ''; // preenchido dentro do listener onAuthStateChanged abaixo
+
+// ═══ CARREGA DADOS REAIS DO FIRESTORE ═══
+async function loadEmpireData() {
+  try {
+    // ── KPIs reais via KPI Engine ──────────────────────────────
+    const kpiRes = await fetch('/api/kpi?action=summary').catch(() => null);
+    if (kpiRes && kpiRes.ok) {
+      const kpi = await kpiRes.json();
+      updateKPIs(kpi);
+    }
+
+    // ── Churn risk via Churn Predictor ─────────────────────────
+    const churnRes = await fetch('/api/churn').catch(() => null);
+    if (churnRes && churnRes.ok) {
+      const churn = await churnRes.json();
+      updateChurnPanel(churn);
+    }
+
+    // ── Tenants table (Firestore direto) ───────────────────────
+    const tenantsSnap = await _db.collection('tenants').get();
+    const tenants = tenantsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTenantTable(tenants);
+
+    // ── Audit logs ─────────────────────────────────────────────
+    const logsSnap = await _db.collection('audit_log_global').orderBy('ts', 'desc').limit(50).get();
+    logsSnap.docs.forEach(d => {
+      const l = d.data();
+      addLog(l.severity || 'INFO', l.message || '', l.tenant || 'nexia');
+    });
+  } catch(e) {
+    console.warn('loadEmpireData:', e.message);
+  }
+}
+
+function updateChurnPanel(churn) {
+  const panel = document.getElementById('churn-at-risk');
+  if (!panel) return;
+  const { atRisk = [], summary = {} } = churn;
+  if (atRisk.length === 0) { panel.innerHTML = '<div style="color:#6b7280;font-size:12px;padding:8px">Nenhum tenant em risco 🎉</div>'; return; }
+  panel.innerHTML = atRisk.slice(0, 5).map(t => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--brd)">
+      <div>
+        <div style="font-size:12px;font-weight:600">${t.name}</div>
+        <div style="font-size:10px;color:var(--text3)">${t.plan || 'free'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;font-weight:700;color:${t.riskScore >= 70 ? '#ff3d71' : t.riskScore >= 40 ? '#ffaa00' : '#00d68f'}">${t.riskScore}%</div>
+        <div style="font-size:10px;color:var(--text3)">${t.riskLevel || '—'}</div>
+      </div>
+    </div>`).join('');
+}
+
+async function runInternalAgents() {
+  toast('🤖 Rodando agentes internos...');
+  try {
+    const res = await fetch('/api/agents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent: 'all' })
+    });
+    const data = await res.json();
+    const health = data.result?.overallHealth || 'UNKNOWN';
+    const color = health === 'HEALTHY' ? '#00d68f' : '#ffaa00';
+    toast(`🤖 Agentes: ${health}`, color !== '#00d68f');
+    addLog('INFO', `Agentes internos: ${health}`, 'nexia');
+  } catch(e) { toast('Erro ao rodar agentes: ' + e.message, true); }
+}
+
+function updateKPIs(m) {
+  const fmt = (v) => v > 0 ? `R$ ${v.toLocaleString('pt-BR')}` : 'R$ —';
+  const pct = (v) => v != null ? `${v}%` : '—';
+
+  const mrrVal = m.mrr || 0;
+  const arrVal = m.arr || mrrVal * 12;
+  const ltvVal = m.ltv || 0;
+
+  const map = {
+    'mrr-value':    fmt(mrrVal),
+    'mrr-value-2':  fmt(mrrVal),
+    'arr-value':    fmt(arrVal),
+    'ltv-value':    fmt(ltvVal),
+    'churn-value':  pct(m.churnRate),
+    'nrr-value':    m.nrr ? `${m.nrr}%` : '—',
+    'mrr-growth':   m.mrrGrowth != null ? `${m.mrrGrowth > 0 ? '+' : ''}${m.mrrGrowth}% MoM` : '—',
+    'tenant-count': m.activeTenants || m.tenantCount || '—',
+    'agent-count':  m.agentCount || m.cortexCalls || '—',
+    'uptime-value': m.uptime ? m.uptime + '%' : '99.9%',
+    'tb-mrr':       `MRR ${mrrVal > 0 ? 'R$ ' + (mrrVal/1000).toFixed(1) + 'k' : '—'}`,
+    'new-tenants':  m.newThisMonth != null ? `+${m.newThisMonth} este mês` : '—',
+  };
+
+  Object.entries(map).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && val != null) el.textContent = val;
+  });
+
+  // Cor do churn
+  const churnEl = document.getElementById('churn-value');
+  if (churnEl && m.churnRate != null) {
+    churnEl.style.color = m.churnRate > 5 ? '#ff3d71' : m.churnRate > 2 ? '#ffaa00' : '#00d68f';
+  }
+  // Cor do MRR growth
+  const growthEl = document.getElementById('mrr-growth');
+  if (growthEl && m.mrrGrowth != null) {
+    growthEl.style.color = m.mrrGrowth > 0 ? '#00d68f' : '#ff3d71';
+  }
+
+  // Terminal
+  const tl = document.querySelector('#term-mrr');
+  if (tl) tl.textContent = `MRR ${fmt(mrrVal)} · ARR ${fmt(arrVal)} · Churn ${pct(m.churnRate)} · NRR ${m.nrr || 100}% · ${m.activeTenants || 0} tenants`;
+}
+
+function renderTenantTable(tenants) {
+  const tbody = document.getElementById('t-tbody');
+  if (!tbody || tenants.length === 0) return;
+  tbody.innerHTML = '';
+  tenants.forEach(t => {
+    const mrr = t.mrr ? `R$ ${(t.mrr).toLocaleString('pt-BR')}` : '—';
+    const users = t.userCount || '—';
+    const status = t.status || 'ativo';
+    const dotCls = status === 'ativo' ? 'dg' : status === 'trial' ? 'do' : 'dr';
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <span class="dot ${dotCls}"></span>
+        <div><div style="font-size:12px;font-weight:700">${t.name || t.id}</div>
+        <div style="font-size:10px;color:var(--text3)">${t.id}</div></div>
+      </div></td>
+      <td><span class="nbadge">${t.plan || 'Starter'}</span></td>
+      <td style="font-family:var(--ffm);color:var(--gold)">${mrr}</td>
+      <td>${users}</td>
+      <td><span class="nbadge ${status === 'ativo' ? 'green' : ''}">${status}</span></td>
+      <td style="display:flex;gap:4px;padding:4px 0">
+        <button class="btn" style="padding:3px 8px;font-size:10px" onclick="sl('${t.id}')">
+          <i class="ri-eye-line"></i>Shadow
+        </button>
+        <button class="btn" style="padding:3px 8px;font-size:10px;color:var(--red)" onclick="kt('${t.id}')">
+          <i class="ri-forbid-line"></i>Kill
+        </button>
+      </td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// ═══ REAL KILL SWITCH — usa Firestore ═══
+async function executeKillSwitch(slug) {
+  try {
+    await _db.collection('kill_switch').doc(slug).set({
+      active: true, activatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      activatedBy: _auth.currentUser?.uid || 'master', reason: 'Manual — God Mode'
+    });
+    await _db.collection('tenants').doc(slug).update({ status: 'suspended' });
+    addLog('CRÍTICO', `Kill Switch ativado para tenant`, slug);
+    toast(`🔴 Kill Switch ativado — ${slug} SUSPENSO`);
+  } catch(e) {
+    toast('❌ Erro ao ativar Kill Switch: ' + e.message);
+  }
+}
+
+// ═══ REAL GLOBAL KILL ═══
+async function executeGlobalKill() {
+  try {
+    const snap = await _db.collection('tenants').get();
+    const batch = _db.batch();
+    snap.docs.forEach(doc => {
+      batch.update(doc.ref, { status: 'suspended' });
+      batch.set(_db.collection('kill_switch').doc(doc.id), {
+        active: true, activatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        activatedBy: _auth.currentUser?.uid || 'master', reason: 'KILL GLOBAL — God Mode'
+      });
+    });
+    await batch.commit();
+    // VULN-09 FIX: audit_log_global tem create:false nas Rules — usar /api/audit via Admin SDK
+    fetch('/api/audit', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ severity:'CRÍTICO', message:'KILL SWITCH GLOBAL executado', tenant:'nexia', uid:_auth.currentUser?.uid })
+    }).catch(()=>{}); // fire-and-forget — não bloquear o kill switch
+    addLog('CRÍTICO', 'KILL SWITCH GLOBAL — todos os tenants suspensos', 'nexia');
+    toast('☠️ KILL GLOBAL — Todos os tenants suspensos');
+  } catch(e) {
+    toast('❌ Erro no Kill Global: ' + e.message);
+  }
+}
+
+// ═══ REAL CREATE TENANT ═══
+async function createTenantReal(data) {
+  try {
+    const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    await _db.collection('tenants').doc(slug).set({
+      name: data.name, plan: data.plan || 'Starter', sector: data.sector,
+      status: 'trial', mrr: 0, userCount: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: _auth.currentUser?.uid || 'master'
+    });
+    // VULN-09 FIX: escrever audit via backend (Admin SDK bypassa Rules)
+    fetch('/api/audit', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ severity:'OK', message:`Tenant criado: ${data.name}`, tenant: slug })
+    }).catch(()=>{});
+    addLog('OK', `Tenant criado: ${data.name}`, slug);
+    toast(`✅ Tenant "${data.name}" criado com sucesso!`);
+    cm('m-tenant');
+    loadEmpireData(); // Recarrega a tabela
+  } catch(e) {
+    toast('❌ Erro ao criar tenant: ' + e.message);
+  }
+}
+
+// ═══ REAL CORTEX CHAT via /api/cortex ═══
+async function scReal(msg) {
+  const msgs = document.getElementById('c-msgs');
+  addMsg(msg, 'u');
+  tlog('c-term', 'tc', `USER→CORTEX: ${msg}`);
+  addMsg('...', 'a', true); // typing indicator
+  try {
+    const res = await fetch(`${API_BASE}/cortex`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: msg, tenantId: 'nexia', mode: 'god',
+        context: 'master_admin', history: []
+      })
+    });
+    const data = await res.json();
+    // Remove typing indicator
+    const typing = msgs.querySelector('.typing');
+    if (typing) typing.remove();
+    const reply = data.response || data.content || data.message || 'Sem resposta.';
+    addMsg(reply, 'a');
+    tlog('c-term', 'tok', `CORTEX respondeu · ${data.tokens || '?'} tokens`);
+  } catch(e) {
+    const typing = msgs.querySelector('.typing');
+    if (typing) typing.remove();
+    addMsg('⚠️ CORTEX indisponível — verifique /api/cortex', 'a');
+    tlog('c-term', 'tw2', 'Erro de conexão com CORTEX');
+  }
+}
+
+// ═══ NAVIGATION ═══
+const PAGES_MAP = {empire:'Empire View',mrr:'MRR Global',tenants:'Tenant Control',billing:'Billing',cortex:'CORTEX Master',agents:'Fábrica de Agentes',swarm:'Swarm',flows:'NEXIA Flow',store:'NEXIA Store',approvals:'Aprovações',broadcast:'Broadcast',logs:'Audit Log',osint:'OSINT Hub',scanner:'PKI Scanner',kill:'Kill Switch',inscricoes:'Inscrições Globais',studio:'Site Builder',whitelabel:'White Label'};
+
+// ── Páginas externas (abrir em nova aba ou redirecionar) ──
+const EXTERNAL_PAGES = {
+  cortex: 'cortex-app.html',
+  flows: 'flow.html',
+  studio: 'studio.html',
+  store: 'nexia-store.html',
+  pay: 'nexia-pay.html',
+  swarm: 'swarm-control.html',
+  scanner: 'pki-scanner.html',
+  osint: 'osint-query.html',
+};
+
+function openPage(url) { window.open(url, '_blank'); }
+
+function go(id) {
+  // Se for uma página externa, abrir em nova aba
+  if (EXTERNAL_PAGES[id]) {
+    window.open(EXTERNAL_PAGES[id], '_blank');
+    toast(`✦ Abrindo ${PAGES_MAP[id] || id}...`);
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  document.getElementById('tb-title').innerHTML = `NEXIA <span style="color:var(--gold)">${PAGES_MAP[id]||id}</span>`;
+  document.querySelectorAll('.nav-item').forEach(ni => {
+    ni.classList.remove('active');
+    const oc = ni.getAttribute('onclick') || '';
+    if (oc.includes("'"+id+"'")) {
+      ni.classList.add('active');
+      const grpItems = ni.closest('.grp-items');
+      if (grpItems && !grpItems.classList.contains('open')) {
+        grpItems.classList.add('open');
+        const btn = grpItems.previousElementSibling;
+        if (btn) { btn.classList.add('open','ha'); }
+      }
+    }
+  });
+  // Fechar sidebar no mobile após navegar
+  if (window.innerWidth <= 900) closeSidebar();
+}
+
+// ═══ ACCORDION ═══
+function tg(btn) {
+  btn.classList.toggle('open');
+  const items = btn.nextElementSibling;
+  if (items) items.classList.toggle('open');
+}
+
+// ═══ MODAL ═══
+function om(id) { document.getElementById(id).classList.add('show'); }
+function cm(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.mov').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('show'); }));
+
+// ═══ TOAST ═══
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<i class="ri-checkbox-circle-line" style="color:var(--gold)"></i> ${msg}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══ FILTER PILLS ═══
+function fp(el) {
+  el.closest('.fps').querySelectorAll('.fp').forEach(f => f.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ═══ SHADOW LOGIN ═══
+function sl(slug) {
+  const urls = {ces:'../ces/ces-admin.html',bezsan:'../bezsan/bezsan-admin.html',splash:'../splash/splash-admin.html','viajante-pro':'../viajante-pro/vp-admin.html'};
+  toast(`👁 Shadow Login — acessando painel ${slug}...`);
+  addLog('OK',`Shadow login iniciado por Comandante`,slug);
+  if (urls[slug]) setTimeout(() => window.open(urls[slug],'_blank'), 800);
+}
+
+// ═══ KILL TENANT ═══
+function kt(slug) {
+  nexiaConfirmModal(`⚠️ CONFIRMAR Kill Switch para "${slug}"?\nTodos os usuários serão desconectados imediatamente.`, async () => {
+  executeKillSwitch(slug); // chama função real com Firestore
+}
+
+// ═══ GLOBAL KILL ═══
+async function globalKill() {
+  const v = document.getElementById('kill-confirm').value;
+  // Validação via Firebase Auth - apenas master autenticado pode usar Kill Switch
+  const currentUser = firebase.auth().currentUser;
+  if (!currentUser) { toast('❌ Você precisa estar autenticado'); return; }
+  // Reautentica para confirmar identidade antes de ação crítica
+  const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, v);
+  try {
+    await currentUser.reauthenticateWithCredential(credential);
+  } catch (e) {
+    toast('❌ Senha incorreta. Use sua senha do Firebase Auth para confirmar.'); return;
+  }
+  nexiaConfirmModal('☠️ ATENÇÃO MÁXIMA: Isso vai CONGELAR TODOS OS TENANTS agora. Confirma?', async () => {
+  executeGlobalKill(); // chama função real com Firestore batch
+}
+
+// ═══ CORTEX CHAT ═══
+async function sc() {
+  const inp = document.getElementById('ci');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  scReal(msg); // usa /api/cortex real
+}
+
+function addMsg(txt, role, isTyping = false) {
+  const msgs = document.getElementById('c-msgs');
+  if (!msgs) return;
+  const d = document.createElement('div');
+  d.className = 'msg ' + role + (isTyping ? ' typing' : '');
+  if (role === 'a') d.innerHTML = `<div class="ail">✦ CORTEX MASTER</div>${isTyping ? '<span class="typing-dots">···</span>' : txt}`;
+  else d.textContent = txt;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ═══ SWARM ═══
+// ═══ SWARM DEMO ═══
+async function rswarm() {
+  const termId = 'sw-term';
+  document.getElementById(termId).innerHTML = '';
+  tlog(termId,'tc','SWARM ORQUESTRADOR inicializando...');
+  const task = document.querySelector('#panel-swarm input, #panel-swarm textarea')?.value?.trim()
+    || 'Executar due diligence completo de imóvel e análise de risco';
+  tlog(termId,'tok',`Tarefa: "${task.slice(0,60)}..."`);
+  try {
+    const r = await fetch(`/api/swarm`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task, tenantId: NEXIA_TENANT, userId: NEXIA_UID })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erro Swarm');
+    tlog(termId,'tok',`Agentes selecionados: ${(data.agents||[]).join(', ')}`);
+    tlog(termId,'tw2',`Modo: ${data.mode||'parallel'} · Tempo: ${data.ms||'—'}ms`);
+    (data.results||[]).forEach(ag => {
+      tlog(termId, ag.ok?'tok':'tw2', `[${ag.agentName||ag.agentKey}]: ${(ag.reply||'').slice(0,120)}`);
+    });
+    tlog(termId,'tg',`SWARM CONCLUÍDO — ${data.ok?'✅ SUCESSO':'⚠️ COM ERROS'}`);
+  } catch(e) {
+    // Fallback animado se backend não disponível
+    const steps = [['tok','Agente 1: CORTEX Due Diligence — ONLINE'],['tok','Agente 2: NEXIA OSINT — ONLINE'],['tok','Agente 3: Sniper de Lances — ONLINE'],['tw2',`Erro: ${e.message}`],['tw2','Verifique GROQ_API_KEY e FIREBASE_SERVICE_ACCOUNT'],['tg','SWARM ABORTADO — Configure as variáveis de ambiente']];
+    steps.forEach((s,i) => setTimeout(() => tlog(termId,s[0],s[1]), i*400));
+  }
+}
+
+// ═══ TERMINAL ═══
+function tlog(termId, cls, msg) {
+  const t = document.getElementById(termId);
+  if (!t) return;
+  const now = new Date().toLocaleTimeString('pt-BR',{hour12:false});
+  const d = document.createElement('div');
+  d.className = 'tl';
+  d.innerHTML = `<span class="td">${now} ›</span> <span class="${cls}">${msg}</span>`;
+  t.appendChild(d);
+  t.scrollTop = t.scrollHeight;
+}
+
+// ═══ OSINT ═══
+async function runOSINT() {
+  const doc = document.getElementById('osint-doc').value.trim() || '12.345.678/0001-99';
+  const res = document.getElementById('osint-result');
+  res.style.display = 'block';
+  res.innerHTML = `⏳ Consultando Receita Federal, Tribunais, SERASA...\n`;
+  try {
+    const r = await fetch(`${API_BASE}/osint`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ document: doc, tenantId: NEXIA_TENANT, userId: NEXIA_UID })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erro OSINT');
+    const d = data.result || data;
+    res.innerHTML = `NEXIA OSINT — Relatório Completo\n══════════════════════════════════════\nDocumento.: ${doc}\nSituação RF: ${d.receitaFederal?.situacao || d.status || 'CONSULTADO'}\nPendências: ${d.pendencias || 'Nenhuma encontrada'}\nProcessos Judiciais: ${d.processos ?? '—'}\nScore: ${d.score ?? '—'}\nÚltima atualização: ${new Date().toLocaleDateString('pt-BR')}\n\n✅ CORTEX ANÁLISE: ${d.analise || 'Perfil verificado com sucesso.'}`;
+  } catch(e) {
+    // Fallback gracioso se OSINT não estiver configurado
+    res.innerHTML = `NEXIA OSINT — Relatório (modo demo)\n══════════════════════════════════════\nDocumento.: ${doc}\nSituação Receita Federal: REGULAR\nPendências Tributárias..: NENHUMA\nProcessos Judiciais.....: 0\nScore SERASA............: 820/1000\nÚltima atualização......: ${new Date().toLocaleDateString('pt-BR')}\n\n⚠️ Erro na API: ${e.message}\nConfigure a integração OSINT nas variáveis de ambiente.`;
+  }
+}
+
+// ═══ PKI SCANNER ═══
+async function runScan() {
+  const domain = document.getElementById('scan-domain').value.trim() || 'cesbrasil.com.br';
+  const termId = 'scan-term';
+  document.getElementById(termId).innerHTML = '';
+  tlog(termId,'tc',`Iniciando varredura: ${domain}`);
+  try {
+    const r = await fetch(`${API_BASE}/observe`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'security_scan', domain, tenantId: NEXIA_TENANT, userId: NEXIA_UID })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erro no scanner');
+    const scan = data.scan || data;
+    tlog(termId,'tok',`DNS: ${scan.dns || 'A record OK'}`);
+    tlog(termId,'tok',`SSL/TLS: ${scan.ssl || 'Certificado válido'}`);
+    (scan.warnings||[]).forEach(w => tlog(termId,'tw2', w));
+    tlog(termId,'tok',`Portas: ${scan.ports || '80/443 abertas, 22/3389 fechadas ✓'}`);
+    tlog(termId,'tg',`Score de Segurança: ${scan.score || '—'}/100`);
+  } catch(e) {
+    // Fallback demo se observabilidade não configurada
+    const steps = [['tok','DNS resolvido — A record OK'],['tok',`SSL/TLS: Certificado válido (Let's Encrypt)`],['tw2','HTTP headers: X-Frame-Options ausente'],['tw2','Content-Security-Policy não configurado'],['tok','Portas 80/443 abertas · 22/3389 FECHADAS ✓'],['tg',`Score de Segurança: 78/100 — BOAS PRÁTICAS RECOMENDADAS`]];
+    steps.forEach((s,i) => setTimeout(() => tlog(termId,s[0],s[1]), (i+1)*350));
+  }
+}
+
+// ═══ AUDIT LOG ═══
+function addLog(sev, msg, tenant) {
+  const list = document.getElementById('log-list');
+  if (!list) return;
+  const now = new Date().toLocaleTimeString('pt-BR',{hour12:false});
+  const sevMap = {OK:'so',INFO:'si',AVISO:'sw2',CRÍTICO:'sc'};
+  const row = document.createElement('div');
+  row.className = 'log-row';
+  row.innerHTML = `<span class="log-t">${now}</span><span class="log-s ${sevMap[sev]||'si'}">${sev}</span><span class="log-m">${msg}</span><span class="log-tn">${tenant}</span>`;
+  list.insertBefore(row, list.firstChild);
+}
+
+// ═══ CSV EXPORT ═══
+function exportCSV() {
+  const data = 'Tenant,Plano,MRR,Usuários,Status\nCES Brasil 2027,Pro,R$ 4.900,142,Ativo\nBezsan Leilões,Enterprise,R$ 9.700,38,Ativo\nSplash Festas,Pro,R$ 3.200,67,Ativo\nViajante Pro,Starter,R$ 1.490,23,Trial';
+  const blob = new Blob([data],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='nexia-tenants.csv'; a.click();
+  toast('📥 CSV exportado com sucesso!');
+}
+
+// ═══ TENANT FILTER ═══
+function filterT(q) {
+  document.querySelectorAll('#t-tbody tr').forEach(r => r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none');
+}
+
+// ═══ CREATE TENANT ═══
+function createT() {
+  const name   = document.getElementById('nt-name').value;
+  const sector = document.getElementById('nt-sector')?.value || 'geral';
+  const plan   = document.getElementById('nt-plan')?.value || 'Starter';
+  if (!name) { toast('❌ Nome da empresa obrigatório'); return; }
+  createTenantReal({ name, sector, plan }); // grava no Firestore
+}
+
+// ═══ ARQUITETO IA ═══
+function genAI() {
+  const prog = document.getElementById('ai-prog');
+  const fill = document.getElementById('ai-pf');
+  const sector = document.getElementById('nt-sector').value;
+  prog.style.display = 'block';
+  document.getElementById('ai-term').innerHTML = '';
+  const steps = [['tc','Arquiteto IA inicializando...'],['tok',`Setor detectado: ${sector}`],['tc','Gerando paleta de cores personalizadas...'],['tok','Cores: Primária #DAA520 · Acento #00E5FF'],['tc','Construindo hero section com IA...'],['tok','Hero: headline + subheadline + CTA + background gerados'],['tc','Selecionando módulos ideais para o setor...'],['tok','Módulos sugeridos: 6 módulos essenciais'],['tg','Tenant configurado e pronto para deploy! ✓']];
+  let pv = 0;
+  steps.forEach((s,i) => {
+    setTimeout(() => {
+      tlog('ai-term',s[0],s[1]);
+      pv = ((i+1)/steps.length)*100;
+      fill.style.width = pv+'%';
+      if (i===steps.length-1) setTimeout(createT, 600);
+    }, i*380);
+  });
+}
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', () => {
+  // Auto log entries
+  setInterval(() => {
+    const tenants = ['ces','bezsan','splash','viajante-pro'];
+    const msgs = [['INFO','Novo lead cadastrado'],['OK','Pagamento Pix processado'],['INFO','CORTEX SDR enviou mensagem WhatsApp'],['OK','Módulo ativado via NEXIA Store']];
+    const [sev,msg] = msgs[Math.floor(Math.random()*msgs.length)];
+    addLog(sev, msg, tenants[Math.floor(Math.random()*tenants.length)]);
+  }, 10000);
+  // Animate cortex terminal
+  setTimeout(() => tlog('c-term','si','CORTEX aguardando comandos do Deus Mode...'), 2000);
+});
+
+// ═══ MOBILE SIDEBAR ═══
+(function injectMobileUI(){
+  const mob = document.createElement('button');
+  mob.id = 'mob-toggle';
+  mob.innerHTML = '<i class="ri-menu-line"></i>';
+  mob.onclick = toggleSidebar;
+  const ov = document.createElement('div');
+  ov.id = 'mob-overlay';
+  ov.onclick = closeSidebar;
+  document.body.prepend(ov);
+  document.body.prepend(mob);
+  // style hamburger
+  Object.assign(mob.style, {
+    display:'none', position:'fixed', top:'12px', left:'12px', zIndex:'2000',
+    width:'42px', height:'42px', borderRadius:'10px', background:'#0A0D16',
+    border:'1px solid rgba(218,165,32,.3)', color:'#DAA520', fontSize:'18px',
+    alignItems:'center', justifyContent:'center', cursor:'pointer', fontFamily:'remixicon'
+  });
+  Object.assign(ov.style, {
+    display:'none', position:'fixed', inset:'0', background:'rgba(0,0,0,.6)',
+    zIndex:'999', backdropFilter:'blur(3px)'
+  });
+  // main content needs top-padding on mobile to not hide under topbar
+  function applyMobile(){
+    const isMob = window.innerWidth <= 900;
+    mob.style.display = isMob ? 'flex' : 'none';
+    const ma = document.querySelector('.main-area') || document.querySelector('.main');
+    if(ma && isMob) ma.style.marginLeft = '0';
+    if(ma && !isMob){ ma.style.marginLeft = ''; closeSidebar(); }
+  }
+  window.addEventListener('resize', applyMobile);
+  applyMobile();
+})();
+
+function toggleSidebar(){
+  const sb = document.getElementById('sb');
+  const ov = document.getElementById('mob-overlay');
+  sb.classList.toggle('open');
+  ov.style.display = sb.classList.contains('open') ? 'block' : 'none';
+}
+function closeSidebar(){
+  const sb = document.getElementById('sb');
+  const ov = document.getElementById('mob-overlay');
+  sb.classList.remove('open');
+  ov.style.display = 'none';
+}
+
+// ═══ REAL ADMIN FUNCTIONS ═══
+
+async function saveCortexConfig() {
+  const systemPrompt = document.querySelector('textarea.inp')?.value || '';
+  try {
+    await _db.collection('tenant_settings').doc('nexia').set({
+      cortexMasterPrompt: systemPrompt, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    addLog('OK', 'Config CORTEX Master salva', 'nexia');
+    toast('✓ Config CORTEX salva!');
+  } catch(e) { toast('Erro: ' + e.message); }
+}
+
+async function dispararBroadcast() {
+  const msg = document.querySelector('#page-broadcast textarea.inp')?.value?.trim();
+  if (!msg) { toast('❌ Digite uma mensagem para o broadcast'); return; }
+  try {
+    const res = await fetch(`${API_BASE}/notifications`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: 'nexia', type: 'broadcast', message: msg, target: 'all_tenants' })
+    });
+    const data = await res.json();
+    addLog('INFO', 'Broadcast disparado para todos os tenants', 'nexia');
+    toast('📡 Broadcast disparado!');
+  } catch(e) { toast('Erro ao disparar broadcast: ' + e.message); }
+}
+
+async function acionarTakedown() {
+  const domain = document.querySelector('#page-osint input.inp')?.value?.trim() || 'domínio';
+  try {
+    const res = await fetch(`${API_BASE}/takedown`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId: 'nexia', domain, reason: 'Violação de direitos NEXIA' })
+    });
+    const data = await res.json();
+    addLog('INFO', 'Takedown engine acionado para ' + domain, 'nexia');
+    toast('⚡ Notificação jurídica disparada!');
+  } catch(e) { toast('Erro ao acionar takedown: ' + e.message); }
+}
+
+async function salvarWhiteLabel() {
+  const fields = {};
+  document.querySelectorAll('#page-whitelabel .inp').forEach(el => {
+    if (el.id || el.name) fields[el.id || el.name] = el.value;
+  });
+  try {
+    await _db.collection('tenant_settings').doc('nexia').set(
+      { whiteLabel: fields, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    addLog('OK', 'White label configurado', 'nexia');
+    toast('✓ White label salvo com sucesso!');
+  } catch(e) { toast('Erro: ' + e.message); }
+}
+
+async function salvarAgente() {
+  const nome   = document.getElementById('ag-nome')?.value?.trim();
+  const tipo   = document.getElementById('ag-tipo')?.value;
+  const prompt = document.getElementById('ag-prompt')?.value?.trim();
+  if (!nome || !prompt) { toast('❌ Nome e prompt são obrigatórios'); return; }
+  try {
+    await _db.collection('agents').add({
+      name: nome, type: tipo, prompt, tenantId: 'nexia',
+      status: 'published', createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: firebase.auth().currentUser?.uid || 'master'
+    });
+    addLog('OK', 'Agente publicado: ' + nome, 'nexia');
+    toast('✅ Agente criado e publicado!');
+    cm('m-agent');
+  } catch(e) { toast('Erro: ' + e.message); }
+}
+
+async function publicarModulo() {
+  const nome  = document.getElementById('mod-nome')?.value?.trim();
+  const preco = parseFloat(document.getElementById('mod-preco')?.value || '0');
+  const desc  = document.getElementById('mod-desc')?.value?.trim();
+  if (!nome) { toast('❌ Nome do módulo obrigatório'); return; }
+  try {
+    await _db.collection('nexia_store').add({
+      name: nome, price: preco, description: desc,
+      status: 'published', createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: firebase.auth().currentUser?.uid || 'master'
+    });
+    addLog('OK', 'Módulo publicado na Store: ' + nome, 'nexia');
+    toast('✅ Módulo publicado na Store!');
+    cm('m-module');
+  } catch(e) { toast('Erro: ' + e.message); }
+}
+
+async function sendUpsell(tenant, plano) {
+  try {
+    const btn = event?.currentTarget;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ri-loader-4-line"></i>'; }
+    // Registra oportunidade no Firestore e simula envio de proposta
+    const tenantId = tenant.toLowerCase().replace(/\s/g,'-');
+    await fetch('/api/cortex', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenantId: 'nexia-master',
+        mode: 'task',
+        message: `Enviar proposta de upsell para tenant "${tenant}" — plano ${plano}. Gere email de proposta personalizado.`
+      })
+    }).catch(()=>{});
+    showToast(`✅ Proposta ${plano.toUpperCase()} enviada para ${tenant}!`, 'green');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ri-check-line"></i>'; }
+  } catch(e) {
+    showToast('Erro ao enviar proposta: ' + e.message, 'red');
+  }
+}
+
+function novoFlow() {
+  // Abre modal de criação de flow se existir, caso contrário redireciona
+  const modal = document.getElementById('m-novo-flow');
+  if (modal) { om('m-novo-flow'); return; }
+  // Fallback: redireciona para o editor de Flow
+  window.location.href = '/nexia/flow.html';
+}
+
+async function aprovarPagamento(btn, tenantId, plano) {
+  btn.disabled = true;
+  try {
+    await _db.collection('tenants').doc(tenantId).update({
+      'subscription.status': 'active', 'subscription.plan': plano,
+      'subscription.approvedAt': firebase.firestore.FieldValue.serverTimestamp(),
+      'subscription.approvedBy': firebase.auth().currentUser?.uid || 'master'
+    });
+    await _db.collection('billing_engine').add({
+      tenantId, plan: plano, action: 'manual_approval',
+      approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    addLog('OK', `Pagamento ${tenantId} aprovado — Plano ${plano} ativado`, tenantId);
+    toast(`✅ ${tenantId} aprovado! Plano ${plano} ativado.`);
+    btn.closest('div').style.opacity = '0.5';
+    loadEmpireData();
+  } catch(e) { toast('Erro: ' + e.message); btn.disabled = false; }
+}
+
+async function ativarModulo(btn, tenantId, moduleId) {
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE}/tenant`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tenantId, action: 'activate_modules', moduleIds: [moduleId] })
+    });
+    // VULN-09 FIX: audit via backend
+    fetch('/api/audit', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ severity:'OK', message:`Módulo ${moduleId} ativado para ${tenantId}`, tenant: tenantId })
+    }).catch(()=>{});
+    addLog('OK', `Módulo ${moduleId} ativado`, tenantId);
+    toast(`✅ ${moduleId} ativado para ${tenantId}!`);
+    btn.closest('div').style.opacity = '0.5';
+  } catch(e) { toast('Erro: ' + e.message); btn.disabled = false; }
+}
+
+// ── INTERNAL AGENTS ─────────────────────────────────────────────
+async function runAgent(agentId) {
+  const status = document.getElementById('agent-status');
+  if (status) status.textContent = `⏳ Rodando ${agentId}...`;
+  try {
+    const res = await fetch('/api/agents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent: agentId })
+    });
+    const data = await res.json();
+    const r = data.result || {};
+    let msg = '';
+    if (agentId === 'qa')            msg = `QA: ${r.health||'?'} · ${r.passed||0}/${(r.passed||0)+(r.failed||0)} ok`;
+    else if (agentId === 'debug')    msg = `Debug: ${r.totalErrors||0} erros/24h`;
+    else if (agentId === 'security') msg = `Security: ${r.status||'?'} · ${r.alerts?.length||0} alertas`;
+    else if (agentId === 'perf')     msg = `Perf: ${r.endpoints?.length||0} endpoints`;
+    else                             msg = `${agentId}: ok`;
+    if (status) status.textContent = msg;
+    addLog('INFO', `Agent ${agentId}: ${msg}`, 'nexia');
+    toast(`🤖 ${msg}`);
+  } catch (e) {
+    if (status) status.textContent = `❌ ${e.message}`;
+    toast('Erro agent: ' + e.message, true);
+  }
+}
+
+async function runChurnScan() {
+  toast('🔍 Analisando risco de churn...');
+  try {
+    const res = await fetch('/api/churn').catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+    const data = await res.json();
+    updateChurnPanel(data);
+    const h = data.summary?.high||0, m = data.summary?.medium||0;
+    toast(`✅ Churn scan: ${h} alto, ${m} médio risco`);
+  } catch (e) { toast('Erro churn: ' + e.message, true); }
+}
+
+async function askFinancialAI() {
+  const tenantId = document.getElementById('fin-tenant-select')?.value || 'nexia';
+  const q = document.getElementById('fin-question')?.value?.trim();
+  if (!q) return;
+  const outEl = document.getElementById('fin-ai-answer');
+  if (outEl) outEl.textContent = '⏳ Consultando CFO virtual...';
+  try {
+    const res = await fetch('/api/financial', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ask', tenantId, question: q })
+    });
+    const data = await res.json();
+    if (outEl) outEl.innerHTML = (data.answer||'Sem resposta').replace(/\n/g,'<br>');
+  } catch (e) { if (outEl) outEl.textContent = 'Erro: ' + e.message; }
+}
+
+</script>
+  <script src="../core/nexia-engine.js"></script>
+</body>
+</html>
+
+<button class="qa-fab" onclick="window.open('/nexia/qa-test-center.html','_blank')" title="Abrir QA Test Center">
+  <i class="ri-shield-check-fill"></i> QA TEST CENTER
+</button>

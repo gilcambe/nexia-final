@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXIA OS — Hub</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070F; --bg2:#0C1225; --bg3:#111830; --bg4:#161E35;
+  --cyan:#00E5FF; --cyan2:#00B4CC; --cyanlt:rgba(0,229,255,.07); --cyanbrd:rgba(0,229,255,.18);
+  --purple:#A855F7; --purplt:rgba(168,85,247,.08); --purpbrd:rgba(168,85,247,.2);
+  --green:#2ED080; --greenlt:rgba(46,208,128,.08); --greenbrd:rgba(46,208,128,.2);
+  --red:#FF3D5A; --redlt:rgba(255,61,90,.08); --redbrd:rgba(255,61,90,.2);
+  --amber:#F59E0B; --amberlt:rgba(245,158,11,.08);
+  --text:#E2E8F0; --text2:rgba(226,232,240,.65); --text3:rgba(226,232,240,.35);
+  --brd:rgba(255,255,255,.06); --brd2:rgba(255,255,255,.1);
+  --radius:12px; --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;overflow:hidden}
+
+/* ── SHELL ───────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr;height:100vh}
+
+/* ── TOPBAR ──────────────────────────────────────────── */
+.topbar{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:0 24px;background:rgba(5,7,15,.9);border-bottom:1px solid var(--brd);backdrop-filter:blur(12px);z-index:50}
+.logo{font-size:16px;font-weight:900;letter-spacing:.5px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tb-tenant{font-size:11px;color:var(--text3);margin-left:4px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-user{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--brd);font-size:12px;color:var(--text2)}
+.tb-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tb-logout{padding:5px 12px;border-radius:8px;background:var(--redlt);border:1px solid var(--redbrd);color:var(--red);font-size:12px;cursor:pointer;transition:opacity .2s}
+.tb-logout:hover{opacity:.8}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--brd);padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;padding:12px 8px 6px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;color:var(--text2);cursor:pointer;transition:all .15s;border:1px solid transparent}
+.nav-item i{font-size:17px;width:20px;text-align:center}
+.nav-item:hover{background:var(--cyanlt);color:var(--text)}
+.nav-item.active{background:var(--cyanlt);border-color:var(--cyanbrd);color:var(--cyan)}
+.nav-item .badge{margin-left:auto;background:var(--cyan);color:var(--bg);font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px}
+.sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--brd)}
+
+/* ── MAIN ────────────────────────────────────────────── */
+.main{overflow:hidden;display:flex;flex-direction:column;background:var(--bg)}
+.page{display:none;flex:1;overflow-y:auto;padding:28px 32px;flex-direction:column;gap:24px}
+.page.active{display:flex}
+.page-title{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px}
+.page-title i{color:var(--cyan)}
+
+/* ── CARDS ───────────────────────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:var(--brd2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.stat-card.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.stat-card.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.stat-card.amber::before{background:linear-gradient(90deg,var(--amber),transparent)}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.stat-card.cyan .stat-icon{background:var(--cyanlt);color:var(--cyan)}
+.stat-card.purple .stat-icon{background:var(--purplt);color:var(--purple)}
+.stat-card.green .stat-icon{background:var(--greenlt);color:var(--green)}
+.stat-card.amber .stat-icon{background:var(--amberlt);color:var(--amber)}
+.stat-val{font-size:28px;font-weight:900;line-height:1}
+.stat-label{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ── KANBAN ──────────────────────────────────────────── */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.kb-col{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--radius);overflow:hidden}
+.kb-head{padding:14px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--brd)}
+.kb-head .dot{width:8px;height:8px;border-radius:50%}
+.kb-body{padding:12px;display:flex;flex-direction:column;gap:8px;min-height:80px}
+.kb-card{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;cursor:pointer;transition:border-color .15s}
+.kb-card:hover{border-color:var(--brd2)}
+.kb-card-title{font-size:13px;font-weight:600;margin-bottom:6px}
+.kb-card-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3)}
+.kb-card-meta .tag{padding:2px 8px;border-radius:6px;font-weight:600}
+.tag-high{background:var(--redlt);color:var(--red);border:1px solid var(--redbrd)}
+.tag-mid{background:var(--amberlt);color:var(--amber)}
+.tag-low{background:var(--greenlt);color:var(--green)}
+
+/* ── TABLE ───────────────────────────────────────────── */
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--radius);overflow:hidden}
+.card-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd)}
+.card-title{font-size:14px;font-weight:700}
+.btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--cyan2),rgba(0,180,204,.8));color:#fff}
+.btn-primary:hover{box-shadow:0 4px 16px rgba(0,229,255,.25)}
+.btn-ghost{background:var(--bg3);border:1px solid var(--brd);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--brd2);color:var(--text)}
+.btn-danger{background:var(--redlt);border:1px solid var(--redbrd);color:var(--red)}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;font-size:11px;font-weight:700;color:var(--text3);text-align:left;border-bottom:1px solid var(--brd);text-transform:uppercase;letter-spacing:.5px}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--brd)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--cyanlt)}
+.status-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.s-lead{background:var(--purplt);color:var(--purple);border:1px solid var(--purpbrd)}
+.s-active{background:var(--greenlt);color:var(--green);border:1px solid var(--greenbrd)}
+.s-pending{background:var(--amberlt);color:var(--amber)}
+.s-done{background:var(--cyanlt);color:var(--cyan);border:1px solid var(--cyanbrd)}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-state i{font-size:36px;margin-bottom:12px;display:block}
+
+/* ── CHAT ────────────────────────────────────────────── */
+.chat-shell{display:flex;flex:1;overflow:hidden;gap:0}
+.chat-history{width:240px;background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.ch-head{padding:14px 16px;font-size:13px;font-weight:700;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.ch-list{flex:1;overflow-y:auto;padding:8px}
+.ch-item{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text2);transition:background .15s;border:1px solid transparent;margin-bottom:4px}
+.ch-item:hover{background:var(--cyanlt);color:var(--text)}
+.ch-item.active{background:var(--cyanlt);border-color:var(--cyanbrd);color:var(--cyan)}
+.ch-item-time{font-size:10px;color:var(--text3);margin-top:3px}
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.msgs{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:5px} .msgs::-webkit-scrollbar-thumb{background:var(--cyanbrd);border-radius:3px}
+.welcome-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.w-orb{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(0,229,255,.4),rgba(168,85,247,.3),transparent 70%);border:1px solid var(--cyanbrd);display:flex;align-items:center;justify-content:center;font-size:36px;animation:float 4s ease-in-out infinite;margin-bottom:20px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.welcome-chat h2{font-size:22px;font-weight:800;margin-bottom:8px} .welcome-chat h2 span{color:var(--cyan)}
+.welcome-chat p{color:var(--text2);font-size:13px;max-width:380px;line-height:1.6;margin-bottom:20px}
+.quick-cmds{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.qcmd{padding:7px 14px;border-radius:20px;background:var(--cyanlt);border:1px solid var(--cyanbrd);color:var(--cyan);font-size:12px;cursor:pointer;transition:background .15s}
+.qcmd:hover{background:rgba(0,229,255,.15)}
+.msg{display:flex;gap:14px;max-width:800px;width:100%;margin:0 auto}
+.msg.user{flex-direction:row-reverse}
+.msg-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.msg.bot .msg-av{background:linear-gradient(135deg,var(--cyanlt),var(--purplt));border:1px solid var(--cyanbrd);color:var(--cyan)}
+.msg.user .msg-av{background:var(--bg3);border:1px solid var(--brd);color:var(--text)}
+.msg-bubble{padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.75;background:var(--bg2);border:1px solid var(--brd);flex:1}
+.msg.user .msg-bubble{background:var(--bg3)}
+.msg-bubble strong{color:var(--cyan)}
+.msg-bubble pre{background:#000;border:1px solid var(--brd);border-radius:8px;padding:12px;margin:10px 0;overflow-x:auto;font-family:monospace;font-size:12px;color:#a5f3fc}
+.msg-bubble code{background:rgba(0,229,255,.1);padding:1px 6px;border-radius:4px;font-family:monospace;color:var(--cyan);font-size:13px}
+.msg-bubble pre code{background:none;padding:0;color:inherit}
+.msg-meta{font-size:10px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:8px}
+.meta-tag{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700}
+.meta-action{background:var(--greenlt);color:var(--green)}
+.meta-swarm{background:var(--purplt);color:var(--purple)}
+.meta-chat{background:var(--cyanlt);color:var(--cyan)}
+.thinking{display:flex;gap:5px;padding:8px 0;align-items:center}
+.thinking span{width:7px;height:7px;border-radius:50%;background:var(--cyan);opacity:.3;animation:think 1s infinite alternate}
+.thinking span:nth-child(2){animation-delay:.2s} .thinking span:nth-child(3){animation-delay:.4s}
+@keyframes think{to{opacity:1;transform:scale(1.2);box-shadow:0 0 8px var(--cyan)}}
+.input-zone{padding:16px 28px 22px;border-top:1px solid var(--brd);background:rgba(5,7,15,.8);backdrop-filter:blur(10px)}
+.input-row{display:flex;gap:10px;align-items:flex-end;background:var(--bg2);border:1px solid var(--cyanbrd);border-radius:14px;padding:10px 14px;transition:box-shadow .2s}
+.input-row:focus-within{box-shadow:0 0 0 2px rgba(0,229,255,.12)}
+#chatInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;font-family:inherit;line-height:1.5;resize:none;max-height:180px;min-height:22px}
+.send-btn{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--cyan2),var(--purple));border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;flex-shrink:0;transition:transform .15s}
+.send-btn:hover:not(:disabled){transform:scale(1.06)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.chat-status{font-size:11px;color:var(--text3);padding:6px 0 0;display:flex;gap:12px;align-items:center}
+
+/* ── MODAL ───────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--brd2);border-radius:16px;padding:28px;width:480px;max-width:95vw}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.modal-title i{color:var(--cyan)}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--cyan)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238A9DC0' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* ── NOTIFICATION BELL ────────────────────────────────── */
+.notif-btn{position:relative;width:36px;height:36px;border-radius:8px;border:1px solid var(--brd);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:17px;transition:all .15s}
+.notif-btn:hover{border-color:var(--brd2);color:var(--text)}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.notif-badge.hidden{display:none}
+.notif-dropdown{position:absolute;top:100%;right:0;width:340px;background:var(--bg2);border:1px solid var(--brd2);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:200;display:none;overflow:hidden;margin-top:8px}
+.notif-dropdown.open{display:block}
+.nd-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd)}
+.nd-title{font-size:13px;font-weight:700}
+.nd-readall{font-size:11px;color:var(--cyan);cursor:pointer}
+.nd-list{max-height:320px;overflow-y:auto}
+.nd-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--brd);cursor:pointer;transition:background .15s}
+.nd-item:hover{background:var(--cyanlt)} .nd-item:last-child{border-bottom:none}
+.nd-item.unread{background:rgba(0,229,255,.03)}
+.nd-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.nd-content{flex:1} .nd-item-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.nd-item-body{font-size:11px;color:var(--text3);line-height:1.4}
+.nd-item-time{font-size:10px;color:var(--text3);margin-top:3px}
+.nd-empty{text-align:center;padding:24px;color:var(--text3);font-size:12px}
+/* ── TOAST ────────────────────────────────────────────── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;background:var(--bg3);border:1px solid var(--brd2);box-shadow:var(--shadow);animation:toastIn .25s ease;min-width:240px;max-width:360px}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.toast.success{border-color:var(--greenbrd);color:var(--green)}
+.toast.error{border-color:var(--redbrd);color:var(--red)}
+.toast.info{border-color:var(--cyanbrd);color:var(--cyan)}
+.toast i{font-size:17px}
+/* ── SKELETON ──────────────────────────────────────────── */
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-row{height:42px;margin-bottom:8px}
+.sk-stat{height:80px}
+/* ── FINANCE ───────────────────────────────────────────── */
+.finance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.fin-card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--radius);padding:20px;text-align:center}
+.fin-val{font-size:28px;font-weight:900;margin-bottom:4px}
+.fin-val.green{color:var(--green)} .fin-val.red{color:var(--red)} .fin-val.cyan{color:var(--cyan)}
+.fin-label{font-size:12px;color:var(--text3)}
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:8px;height:120px;padding:12px 0}
+.chart-bar-group{flex:1;display:flex;gap:3px;align-items:flex-end}
+.bar{flex:1;border-radius:4px 4px 0 0;min-height:4px;transition:height .4s ease}
+.bar.income{background:var(--green)}
+.bar.expense{background:var(--red)}
+.chart-label{font-size:10px;color:var(--text3);text-align:center;margin-top:4px}
+/* ── AGENT JOB ─────────────────────────────────────────── */
+.job-card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--radius);padding:18px;margin-bottom:12px}
+.job-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.job-steps{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.step.done{color:var(--green)} .step.error{color:var(--red)} .step.running{color:var(--cyan)}
+.step i{font-size:14px;width:16px;text-align:center}
+.job-result{margin-top:12px;padding:12px;background:var(--bg3);border-radius:8px;font-size:13px;line-height:1.6;border:1px solid var(--brd)}
+/* ── MOBILE ────────────────────────────────────────────── */
+@media(max-width:768px){
+  .shell{grid-template-columns:1fr;grid-template-rows:56px auto 1fr}
+  .sidebar{display:none;position:fixed;inset:56px 0 0;z-index:100;width:220px}
+  .sidebar.open{display:flex}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .kanban{grid-template-columns:1fr}
+  .finance-grid{grid-template-columns:1fr}
+  .chat-history{display:none}
+  .page{padding:16px}
+  .tb-hamburger{display:flex}
+}
+.tb-hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;cursor:pointer;border:1px solid var(--brd);color:var(--text2)}
+/* ── LOGS ────────────────────────────────────────────────── */
+.log-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--brd);font-size:12px}
+.log-row:last-child{border-bottom:none}
+.log-type{padding:2px 8px;border-radius:6px;font-weight:700;font-size:10px;white-space:nowrap}
+.log-exec{background:var(--cyanlt);color:var(--cyan)}
+.log-action{background:var(--greenlt);color:var(--green)}
+.log-error{background:var(--redlt);color:var(--red)}
+.log-time{color:var(--text3);white-space:nowrap;margin-left:auto}
+.loader{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- MODAL: Novo Lançamento -->
+<div class="modal-overlay" id="modalFinance">
+  <div class="modal">
+    <div class="modal-title"><i class="ri-money-dollar-circle-line"></i> Novo Lançamento</div>
+    <div class="form-group"><label class="form-label">Descrição *</label><input class="form-input" id="fn-desc" placeholder="Ex: Venda produto X"></div>
+    <div class="form-group"><label class="form-label">Valor (R$) *</label><input class="form-input" id="fn-valor" type="number" step="0.01" placeholder="0,00"></div>
+    <div class="form-group"><label class="form-label">Tipo *</label>
+      <select class="form-input form-select" id="fn-tipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Categoria</label><input class="form-input" id="fn-cat" placeholder="Ex: Vendas, Marketing..."></div>
+    <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="fn-data" type="date"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalFinance')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFinance()"><i class="ri-save-line"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Novo Agente -->
+<div class="modal-overlay" id="modalAgent">
+  <div class="modal">
+    <div class="modal-title"><i class="ri-robot-line"></i> Novo Agente</div>
+    <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="ag-name" placeholder="MINHA_IA"></div>
+    <div class="form-group"><label class="form-label">Nome de Exibição</label><input class="form-input" id="ag-display" placeholder="Minha IA Especializada"></div>
+    <div class="form-group"><label class="form-label">Ícone</label><input class="form-input" id="ag-icon" placeholder="🤖" maxlength="4"></div>
+    <div class="form-group"><label class="form-label">System Prompt *</label>
+      <textarea class="form-input" id="ag-prompt" rows="4" placeholder="Você é um especialista em..."></textarea>
+    </div>
+    <div class="form-group"><label class="form-label">Temperatura (0-1)</label>
+      <input class="form-input" id="ag-temp" type="number" step="0.1" min="0" max="1" value="0.7">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalAgent')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAgent()"><i class="ri-save-line"></i> Criar Agente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Novo Cliente -->
+<div class="modal-overlay" id="modalClient">
+  <div class="modal">
+    <div class="modal-title"><i class="ri-user-add-line"></i> Novo Cliente</div>
+    <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="cl-nome" placeholder="Nome completo"></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="cl-email" type="email" placeholder="email@empresa.com"></div>
+    <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" id="cl-tel" placeholder="(11) 99999-0000"></div>
+    <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="cl-empresa" placeholder="Nome da empresa"></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-input form-select" id="cl-status">
+        <option value="Lead">Lead</option><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalClient')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveClient()"><i class="ri-save-line"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nova Tarefa -->
+<div class="modal-overlay" id="modalTask">
+  <div class="modal">
+    <div class="modal-title"><i class="ri-task-line"></i> Nova Tarefa</div>
+    <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="tk-titulo" placeholder="Descrição da tarefa"></div>
+    <div class="form-group"><label class="form-label">Responsável</label><input class="form-input" id="tk-resp" placeholder="Nome ou time"></div>
+    <div class="form-group"><label class="form-label">Prioridade</label>
+      <select class="form-input form-select" id="tk-prio">
+        <option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="tk-data" type="date"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalTask')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTask()"><i class="ri-save-line"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="shell">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tb-hamburger" onclick="toggleSidebar()"><i class="ri-menu-line"></i></div>
+    <span class="logo">NEXIA OS</span>
+    <span class="tb-tenant" id="tbTenant">carregando...</span>
+    <div class="tb-right">
+      <div class="tb-user"><span class="tb-dot"></span><span id="tbUser">...</span></div>
+      <div style="position:relative">
+        <div class="notif-btn" id="notifBtn" onclick="toggleNotifDropdown()">
+          <i class="ri-notification-3-line"></i>
+          <span class="notif-badge hidden" id="notifBadge">0</span>
+        </div>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="nd-head"><span class="nd-title">Notificações</span><span class="nd-readall" onclick="readAllNotifs()">Marcar todas lidas</span></div>
+          <div class="nd-list" id="notifList"><div class="nd-empty">Sem notificações</div></div>
+        </div>
+      </div>
+      <button class="tb-logout" onclick="NexiaAuth.logout()"><i class="ri-logout-box-line"></i></button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <span class="nav-section">Principal</span>
+    <div class="nav-item active" data-page="dashboard" onclick="goPage('dashboard',this)"><i class="ri-dashboard-line"></i> Dashboard</div>
+    <a class="nav-item" href="flow.html"><i class="ri-funds-line"></i> Pipeline</a>
+    <div class="nav-item" data-page="clients" onclick="goPage('clients',this)"><i class="ri-contacts-line"></i> Clientes</div>
+    <div class="nav-item" data-page="tasks" onclick="goPage('tasks',this)"><i class="ri-kanban-view"></i> Tarefas</div>
+
+    <div class="nav-item" data-page="finance" onclick="goPage('finance',this)"><i class="ri-money-dollar-circle-line"></i> Finanças</div>
+
+    <span class="nav-section">IA</span>
+    <div class="nav-item" data-page="cortex" onclick="goPage('cortex',this)"><i class="ri-brain-line"></i> Cortex IA</div>
+
+    <span class="nav-section">Sistema</span>
+    <div class="nav-item" data-page="logs" onclick="goPage('logs',this)"><i class="ri-file-list-3-line"></i> Logs</div>
+    <div class="nav-item" data-page="agents" onclick="goPage('agents',this)"><i class="ri-robot-line"></i> Agentes</div>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" onclick="NexiaAuth.logout()"><i class="ri-logout-box-line"></i> Sair</div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-title"><i class="ri-dashboard-line"></i> Dashboard</div>
+      <div class="stats-row">
+        <div class="stat-card cyan"><div class="stat-icon"><i class="ri-contacts-line"></i></div><div class="stat-val" id="stat-clients">—</div><div class="stat-label">Clientes Totais</div></div>
+        <div class="stat-card green"><div class="stat-icon"><i class="ri-task-line"></i></div><div class="stat-val" id="stat-tasks">—</div><div class="stat-label">Tarefas Ativas</div></div>
+        <div class="stat-card purple"><div class="stat-icon"><i class="ri-brain-line"></i></div><div class="stat-val" id="stat-cortex">—</div><div class="stat-label">Execuções Cortex</div></div>
+        <div class="stat-card amber"><div class="stat-icon"><i class="ri-time-line"></i></div><div class="stat-val" id="stat-latency">—</div><div class="stat-label">Latência Média (ms)</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Clientes Recentes</span></div>
+          <div id="dash-clients"><div class="loader"><i class="ri-loader-4-line"></i> carregando...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Logs Recentes</span></div>
+          <div id="dash-logs" style="padding:12px 20px;max-height:280px;overflow-y:auto"><div class="loader">carregando...</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTS -->
+    <section class="page" id="page-clients">
+      <div class="page-title"><i class="ri-contacts-line"></i> Clientes
+        <button class="btn btn-primary" style="margin-left:auto" onclick="openModal('modalClient')"><i class="ri-add-line"></i> Novo Cliente</button>
+      </div>
+      <div class="card">
+        <div id="clients-table"><div class="loader">carregando...</div></div>
+      </div>
+    </section>
+
+    <!-- TASKS -->
+    <section class="page" id="page-tasks">
+      <div class="page-title"><i class="ri-kanban-view"></i> Tarefas
+        <button class="btn btn-primary" style="margin-left:auto" onclick="openModal('modalTask')"><i class="ri-add-line"></i> Nova Tarefa</button>
+      </div>
+      <div class="kanban">
+        <div class="kb-col">
+          <div class="kb-head"><span class="dot" style="background:var(--amber)"></span> Pendente <span id="cnt-pending" class="badge" style="background:var(--amber);color:#000">0</span></div>
+          <div class="kb-body" id="kb-pending"></div>
+        </div>
+        <div class="kb-col">
+          <div class="kb-head"><span class="dot" style="background:var(--cyan)"></span> Em Progresso <span id="cnt-progress" class="badge">0</span></div>
+          <div class="kb-body" id="kb-progress"></div>
+        </div>
+        <div class="kb-col">
+          <div class="kb-head"><span class="dot" style="background:var(--green)"></span> Concluído <span id="cnt-done" class="badge" style="background:var(--green);color:#000">0</span></div>
+          <div class="kb-body" id="kb-done"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORTEX -->
+    <section class="page" id="page-cortex" style="padding:0;gap:0">
+      <div class="chat-shell">
+        <div class="chat-history">
+          <div class="ch-head">Histórico <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="clearMemory()"><i class="ri-delete-bin-line"></i></button></div>
+          <div class="ch-list" id="chatHistory"></div>
+        </div>
+        <div class="chat-main">
+          <div class="msgs" id="msgs">
+            <div class="welcome-chat" id="welcome">
+              <div class="w-orb"><i class="ri-brain-line"></i></div>
+              <h2>Olá, eu sou o <span>CORTEX</span></h2>
+              <p>Seu núcleo de inteligência soberana. Execute ações, analise dados e coordene agentes.</p>
+              <div class="quick-cmds">
+                <div class="qcmd" onclick="quickCmd(this)">Criar lead João Silva</div>
+                <div class="qcmd" onclick="quickCmd(this)">Criar tarefa revisão de contrato</div>
+                <div class="qcmd" onclick="quickCmd(this)">Analisar pipeline de vendas</div>
+                <div class="qcmd" onclick="quickCmd(this)">Revisar segurança do sistema</div>
+              </div>
+            </div>
+          </div>
+          <div class="input-zone">
+            <div class="input-row">
+              <textarea id="chatInput" placeholder="Dê uma ordem ao Cortex..." rows="1"></textarea>
+              <button class="send-btn" id="btnSend" onclick="sendMsg()"><i class="ri-send-plane-fill"></i></button>
+            </div>
+            <div class="chat-status"><span id="chatStatusText">Pronto</span><span id="chatLayer" style="margin-left:auto"></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGS -->
+    <section class="page" id="page-logs">
+      <div class="page-title"><i class="ri-file-list-3-line"></i> Logs de Execução</div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Histórico Cortex</span>
+          <button class="btn btn-ghost" onclick="loadLogs()"><i class="ri-refresh-line"></i> Atualizar</button>
+        </div>
+        <div id="logs-content" style="padding:16px 20px;max-height:600px;overflow-y:auto"><div class="loader">carregando...</div></div>
+      </div>
+    </section>
+
+    <!-- FINANCE -->
+    <section class="page" id="page-finance">
+      <div class="page-title"><i class="ri-money-dollar-circle-line"></i> Finanças
+        <button class="btn btn-primary" style="margin-left:auto" onclick="openModalFinance()"><i class="ri-add-line"></i> Lançamento</button>
+      </div>
+      <div class="finance-grid">
+        <div class="fin-card"><div class="fin-val green" id="fin-receita">—</div><div class="fin-label">Total Receitas</div></div>
+        <div class="fin-card"><div class="fin-val red"   id="fin-despesa">—</div><div class="fin-label">Total Despesas</div></div>
+        <div class="fin-card"><div class="fin-val cyan"  id="fin-saldo">—</div><div class="fin-label">Saldo</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Gráfico Mensal</span></div>
+        <div style="padding:16px 24px">
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--text3);margin-bottom:8px">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block"></span>Receita</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);display:inline-block"></span>Despesa</span>
+          </div>
+          <div class="chart-bar-wrap" id="fin-chart"></div>
+          <div id="fin-chart-labels" style="display:flex;gap:8px;padding:0 12px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Lançamentos</span></div>
+        <div id="finance-table"><div class="loader">carregando...</div></div>
+      </div>
+    </section>
+
+    <!-- AGENTS -->
+    <section class="page" id="page-agents">
+      <div class="page-title"><i class="ri-robot-line"></i> Agentes IA
+        <button class="btn btn-primary" style="margin-left:auto" onclick="openModalAgent()"><i class="ri-add-line"></i> Novo Agente</button>
+      </div>
+      <div id="agents-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+        <div class="loader">carregando...</div>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <div class="card-head"><span class="card-title">🤖 Executar Tarefa Longa (Agent Loop)</span></div>
+        <div style="padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap">
+          <textarea id="agentTask" class="form-input" style="flex:1;min-height:60px;resize:vertical" placeholder="Descreva a tarefa complexa para o swarm de agentes..."></textarea>
+          <button class="btn btn-primary" onclick="runAgentJob()" style="align-self:flex-end"><i class="ri-play-line"></i> Executar</button>
+        </div>
+        <div id="job-status" style="padding:0 20px 16px"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../core/config.js"></script>
+<script src="../core/nexia-engine.js"></script>
+<script src="../core/auth.js"></script>
+<script>
+'use strict';
+
+// ── State ─────────────────────────────────────────────────────
+let _uid = null, _tenant = "nexia", _thinking = false;
+
+// ── Init ──────────────────────────────────────────────────────
+NexiaAuth.requireAuth('../login.html');
+NexiaAuth.onChange(async user => {
+  if (!user) return;
+  _uid    = user.uid;
+  const p = (typeof NexiaAuth !== 'undefined' && NexiaAuth.getProfile ? NexiaAuth.getProfile() : null);
+  _tenant = p?.tenantSlug || "nexia";
+  document.getElementById('tbUser').textContent   = p?.displayName || user.email;
+  document.getElementById('tbTenant').textContent = `/ ${_tenant}`;
+  loadDashboard();
+  loadNotifications();
+});
+
+// ── Navigation ────────────────────────────────────────────────
+function goPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'clients') loadClients();
+  if (name === 'tasks')   loadTasks();
+  if (name === 'logs')    loadLogs();
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── API Helpers ───────────────────────────────────────────────
+async function apiAction(action, data) {
+  const r = await fetch('/api/actions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, data, tenantId: _tenant, userId: _uid })
+  });
+  const j = await r.json();
+  if (!r.ok || !j.ok) throw new Error(j.error || 'Erro desconhecido');
+  return j;
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('pt-BR');
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+async function loadDashboard() {
+  if (!_uid || !NEXIA.db) return;
+  const base = NEXIA.db.collection('tenants').doc(_tenant);
+
+  // Counts
+  Promise.all([
+    base.collection('clients').where('_deleted','!=',true).get().catch(()=>({size:0})),
+    base.collection('tasks').where('status','!=','done').get().catch(()=>({size:0})),
+  ]).then(([cl, tk]) => {
+    document.getElementById('stat-clients').textContent = cl.size ?? 0;
+    document.getElementById('stat-tasks').textContent   = tk.size ?? 0;
+  });
+
+  // Logs stats
+  base.collection('cortex_logs').orderBy('ts','desc').limit(50).get()
+    .then(snap => {
+      document.getElementById('stat-cortex').textContent = snap.size;
+      const msArr = snap.docs.map(d => d.data().ms).filter(Boolean);
+      const avg   = msArr.length ? Math.round(msArr.reduce((a,b)=>a+b,0)/msArr.length) : 0;
+      document.getElementById('stat-latency').textContent = avg || '—';
+
+      const logHtml = snap.docs.slice(0,8).map(d => {
+        const l = d.data();
+        return `<div class="log-row">
+          <span class="log-type log-exec">${l.type || 'exec'}</span>
+          <span style="color:var(--text2)">${l.intent || ''} ${l.actionsCount ? `· ${l.actionsCount} ação(ões)` : ''}</span>
+          <span class="log-time">${l.ms ? l.ms+'ms' : ''}</span>
+        </div>`;
+      }).join('') || '<div class="empty-state">Sem logs</div>';
+      document.getElementById('dash-logs').innerHTML = logHtml;
+    }).catch(() => {});
+
+  // Recent clients
+  base.collection('clients').orderBy('createdAt','desc').limit(5).get()
+    .then(snap => {
+      if (!snap.size) { document.getElementById('dash-clients').innerHTML = '<div class="empty-state"><i class="ri-contacts-line"></i>Sem clientes</div>'; return; }
+      const html = `<table><thead><tr><th>Nome</th><th>Status</th><th>Criado</th></tr></thead><tbody>` +
+        snap.docs.map(d => { const c = d.data(); return `<tr><td>${c.nome||'—'}</td><td><span class="status-badge s-${(c.status||'lead').toLowerCase()}">${c.status||'Lead'}</span></td><td>${fmtDate(c.createdAt)}</td></tr>`; }).join('') +
+        `</tbody></table>`;
+      document.getElementById('dash-clients').innerHTML = html;
+    }).catch(() => {});
+}
+
+// ── CLIENTS ───────────────────────────────────────────────────
+async function loadClients() {
+  if (!NEXIA.db) return;
+  document.getElementById('clients-table').innerHTML = '<div class="loader">carregando...</div>';
+  try {
+    const snap = await NEXIA.db.collection('tenants').doc(_tenant).collection('clients')
+      .orderBy('createdAt','desc').limit(100).get();
+    if (!snap.size) { document.getElementById('clients-table').innerHTML = '<div class="empty-state"><i class="ri-contacts-line"></i>Nenhum cliente. Crie o primeiro!</div>'; return; }
+    const html = `<table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Empresa</th><th>Status</th><th>Criado</th></tr></thead><tbody>` +
+      snap.docs.map(d => {
+        if (d.data()._deleted) return '';
+        const c = d.data();
+        const sc = (c.status||'lead').toLowerCase();
+        return `<tr><td><strong>${c.nome||'—'}</strong></td><td>${c.email||'—'}</td><td>${c.telefone||'—'}</td><td>${c.empresa||'—'}</td><td><span class="status-badge s-${sc}">${c.status||'Lead'}</span></td><td>${fmtDate(c.createdAt)}</td></tr>`;
+      }).join('') + `</tbody></table>`;
+    document.getElementById('clients-table').innerHTML = html;
+  } catch(e) { document.getElementById('clients-table').innerHTML = `<div class="empty-state">${e.message}</div>`; }
+}
+
+async function saveClient() {
+  const nome = document.getElementById('cl-nome').value.trim();
+  if (!nome) { nexiaToast('Nome é obrigatório'); return; }
+  try {
+    await apiAction('createClient', {
+      nome, email: document.getElementById('cl-email').value,
+      telefone: document.getElementById('cl-tel').value,
+      empresa:  document.getElementById('cl-empresa').value,
+      status:   document.getElementById('cl-status').value
+    });
+    closeModal('modalClient');
+    ['cl-nome','cl-email','cl-tel','cl-empresa'].forEach(id => document.getElementById(id).value = '');
+    toast('Cliente criado com sucesso!', 'success');
+    loadClients(); loadDashboard();
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+}
+
+// ── TASKS / KANBAN ────────────────────────────────────────────
+async function loadTasks() {
+  if (!NEXIA.db) return;
+  ['kb-pending','kb-progress','kb-done'].forEach(id => document.getElementById(id).innerHTML = '<div class="loader" style="font-size:11px">carregando...</div>');
+  try {
+    const snap = await NEXIA.db.collection('tenants').doc(_tenant).collection('tasks')
+      .orderBy('createdAt','desc').limit(200).get();
+    const cols = { pending: [], progress: [], done: [] };
+    snap.docs.forEach(d => {
+      const t = { id: d.id, ...d.data() };
+      if (t._deleted) return;
+      const s = (t.status || 'pending').toLowerCase().replace(' ','');
+      if      (s === 'done' || s === 'concluido') cols.done.push(t);
+      else if (s === 'inprogress' || s === 'progress' || s === 'andamento') cols.progress.push(t);
+      else    cols.pending.push(t);
+    });
+    document.getElementById('cnt-pending').textContent  = cols.pending.length;
+    document.getElementById('cnt-progress').textContent = cols.progress.length;
+    document.getElementById('cnt-done').textContent     = cols.done.length;
+
+    const renderCard = t => {
+      const pc = t.prioridade === 'alta' ? 'tag-high' : t.prioridade === 'baixa' ? 'tag-low' : 'tag-mid';
+      const pl = t.prioridade || 'média';
+      return `<div class="kb-card">
+        <div class="kb-card-title">${t.titulo||'Sem título'}</div>
+        <div class="kb-card-meta">
+          ${t.responsavel ? `<span>${t.responsavel}</span>` : ''}
+          <span class="tag ${pc}">${pl}</span>
+          ${t.dataVencimento ? `<span><i class="ri-calendar-line"></i> ${t.dataVencimento}</span>` : ''}
+        </div>
+      </div>`;
+    };
+
+    document.getElementById('kb-pending').innerHTML  = cols.pending.map(renderCard).join('') || '<div class="empty-state" style="font-size:12px;padding:20px">Vazio</div>';
+    document.getElementById('kb-progress').innerHTML = cols.progress.map(renderCard).join('') || '<div class="empty-state" style="font-size:12px;padding:20px">Vazio</div>';
+    document.getElementById('kb-done').innerHTML     = cols.done.map(renderCard).join('') || '<div class="empty-state" style="font-size:12px;padding:20px">Vazio</div>';
+  } catch(e) { console.error(e); }
+}
+
+async function saveTask() {
+  const titulo = document.getElementById('tk-titulo').value.trim();
+  if (!titulo) { nexiaToast('Título é obrigatório'); return; }
+  try {
+    await apiAction('createTask', {
+      titulo,
+      responsavel:    document.getElementById('tk-resp').value,
+      prioridade:     document.getElementById('tk-prio').value,
+      dataVencimento: document.getElementById('tk-data').value,
+      status: 'pending'
+    });
+    closeModal('modalTask');
+    ['tk-titulo','tk-resp','tk-data'].forEach(id => document.getElementById(id).value = '');
+    toast('Tarefa criada!', 'success');
+    loadTasks();
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+}
+
+// ── CORTEX CHAT ───────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderMD(txt) {
+  return txt
+    .replace(/```(\w+)?\n([\s\S]*?)```/g, (_,l,c) => `<pre><code>${esc(c.trim())}</code></pre>`)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+}
+
+function appendMsg(role, text, meta = {}) {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+  const ms = document.getElementById('msgs');
+  const el = document.createElement('div');
+  el.className = `msg ${role}`;
+  const icon   = role === 'bot' ? '<i class="ri-brain-line"></i>' : '<i class="ri-user-line"></i>';
+  const metaTag = meta.intent ? `<span class="meta-tag meta-${meta.intent}">${meta.intent}</span>` : '';
+  const msInfo  = meta.ms     ? `<span>${meta.ms}ms</span>` : '';
+  el.innerHTML = `
+    <div class="msg-av">${icon}</div>
+    <div>
+      <div class="msg-bubble"><p>${renderMD(text)}</p></div>
+      ${metaTag || msInfo ? `<div class="msg-meta">${metaTag}${msInfo}</div>` : ''}
+    </div>`;
+  ms.appendChild(el);
+  ms.scrollTop = ms.scrollHeight;
+  // Adiciona ao histórico lateral
+  const now = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const ch  = document.getElementById('chatHistory');
+  const prev = ch.querySelector('.active');
+  if (prev) prev.classList.remove('active');
+  const item = document.createElement('div');
+  item.className = 'ch-item active';
+  item.innerHTML = `<div>${text.slice(0,40)}${text.length>40?'…':''}</div><div class="ch-item-time">${now}</div>`;
+  ch.prepend(item);
+}
+
+function showThinking() {
+  const ms = document.getElementById('msgs');
+  const el = document.createElement('div');
+  el.id = 'thinking'; el.className = 'msg bot';
+  el.innerHTML = '<div class="msg-av"><i class="ri-brain-line"></i></div><div class="msg-bubble"><div class="thinking"><span></span><span></span><span></span></div></div>';
+  ms.appendChild(el);
+  ms.scrollTop = ms.scrollHeight;
+}
+
+async function sendMsg() {
+  if (_thinking) return;
+  const input = document.getElementById('chatInput');
+  const text  = input.value.trim();
+  if (!text || !_uid) return;
+  input.value = ''; input.style.height = 'auto';
+  _thinking = true;
+  document.getElementById('btnSend').disabled = true;
+  document.getElementById('chatStatusText').textContent = 'Cortex processando...';
+
+  appendMsg('user', text);
+  showThinking();
+
+  try {
+    const r = await fetch('/api/cortex', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: _uid, message: text, tenantId: _tenant })
+    });
+    const data = await r.json();
+    document.getElementById('thinking')?.remove();
+
+    if (!r.ok || data.error) {
+      if (r.status === 429) {
+        appendMsg('bot', `⚠️ **Rate limit atingido.** Aguarde ${data.retryAfter || 60}s e tente novamente.`);
+      } else {
+        appendMsg('bot', `❌ **Erro:** ${data.error || 'Falha desconhecida.'}`);
+      }
+    } else {
+      appendMsg('bot', data.reply, { intent: data.intent, ms: data._meta?.ms });
+      document.getElementById('chatLayer').textContent = `layer:${data._meta?.layer ?? '?'}`;
+      // Refresh dashboard se houve ações
+      if (data.actions?.length) { loadDashboard(); }
+    }
+  } catch(e) {
+    document.getElementById('thinking')?.remove();
+    appendMsg('bot', `❌ **Erro de rede:** ${e.message}`);
+  }
+
+  _thinking = false;
+  document.getElementById('btnSend').disabled = false;
+  document.getElementById('chatStatusText').textContent = 'Pronto';
+}
+
+function quickCmd(el) {
+  document.getElementById('chatInput').value = el.textContent;
+  sendMsg();
+}
+
+async function clearMemory() {
+  if (!_uid || !true /* nexiaConfirm: 'Limpar memória do Cortex?' */) return;
+  await fetch('/api/memory', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: _uid, action: 'clear' })
+  });
+  document.getElementById('msgs').innerHTML = '';
+  document.getElementById('chatHistory').innerHTML = '';
+}
+
+// ── LOGS ─────────────────────────────────────────────────────
+async function loadLogs() {
+  document.getElementById('logs-content').innerHTML = '<div class="loader">carregando...</div>';
+  try {
+    const r    = await fetch(`/api/logs?tenantId=${_tenant}&limit=100`).catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+    const data = await r.json();
+    if (!data.logs?.length) { document.getElementById('logs-content').innerHTML = '<div class="empty-state">Sem logs ainda</div>'; return; }
+
+    const statsHtml = `<div style="display:flex;gap:16px;padding:0 0 14px;border-bottom:1px solid var(--brd);margin-bottom:14px;font-size:12px;color:var(--text2)">
+      <span>Total: <strong>${data.stats.total}</strong></span>
+      <span>Latência média: <strong>${data.stats.avgMs}ms</strong></span>
+      <span>Erros: <strong style="color:var(--red)">${data.stats.errorCount}</strong></span>
+    </div>`;
+
+    const rows = data.logs.map(l => {
+      const d = l.ts?._seconds ? new Date(l.ts._seconds*1000) : new Date();
+      return `<div class="log-row">
+        <span class="log-type log-exec">${l.type || 'exec'}</span>
+        <span style="color:var(--text2);flex:1">${l.intent || '—'} ${l.actionsCount ? `· ${l.actionsCount} ação(ões)` : ''} ${l.agentsUsed?.length ? `· agentes: ${l.agentsUsed.join(',')}` : ''}</span>
+        <span class="log-time">${l.ms ? l.ms+'ms · ' : ''}${d.toLocaleString('pt-BR')}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('logs-content').innerHTML = statsHtml + rows;
+  } catch(e) { document.getElementById('logs-content').innerHTML = `<div class="empty-state">${e.message}</div>`; }
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, type = 'info', duration = 3500) {
+  const icon = type === 'success' ? 'ri-checkbox-circle-line' : type === 'error' ? 'ri-error-warning-line' : 'ri-information-line';
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="${icon}"></i><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(12px)'; el.style.transition = 'all .3s'; setTimeout(() => el.remove(), 300); }, duration);
+}
+
+// ── Skeleton ──────────────────────────────────────────────────
+function showSkeleton(containerId, rows = 4) {
+  document.getElementById(containerId).innerHTML =
+    Array(rows).fill(`<div class="skeleton sk-row"></div>`).join('');
+}
+
+// ── Mobile sidebar ────────────────────────────────────────────
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+}
+
+// ── goPage override com skeleton ─────────────────────────────
+const _origGoPage = goPage;
+// já definido acima, adicionamos efeitos depois
+
+// ── FINANCE ───────────────────────────────────────────────────
+function openModalFinance() {
+  document.getElementById('fn-data').value = new Date().toISOString().split('T')[0];
+  openModal('modalFinance');
+}
+
+async function loadFinance() {
+  if (!NEXIA.db) return;
+  showSkeleton('finance-table', 5);
+  try {
+    const snap = await NEXIA.db.collection('tenants').doc(_tenant).collection('finance')
+      .orderBy('createdAt','desc').limit(200).get();
+
+    let receita = 0, despesa = 0;
+    const monthly = {};
+
+    snap.docs.forEach(d => {
+      const f = d.data();
+      if (f._deleted) return;
+      const v = Number(f.valor) || 0;
+      if (f.tipo === 'receita') receita += v;
+      else                      despesa += v;
+
+      const dt  = f.data || (f.createdAt?.toDate ? f.createdAt.toDate().toISOString().slice(0,7) : new Date().toISOString().slice(0,7));
+      const mon = dt.slice(0,7);
+      if (!monthly[mon]) monthly[mon] = { income: 0, expense: 0 };
+      if (f.tipo === 'receita') monthly[mon].income  += v;
+      else                      monthly[mon].expense += v;
+    });
+
+    const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    document.getElementById('fin-receita').textContent = fmt(receita);
+    document.getElementById('fin-despesa').textContent = fmt(despesa);
+    const saldo = receita - despesa;
+    const selEl = document.getElementById('fin-saldo');
+    selEl.textContent = fmt(saldo);
+    selEl.className = `fin-val ${saldo >= 0 ? 'green' : 'red'}`;
+
+    // Gráfico de barras simples
+    const months = Object.keys(monthly).sort().slice(-6);
+    const maxVal = Math.max(...months.flatMap(m => [monthly[m].income, monthly[m].expense]), 1);
+    document.getElementById('fin-chart').innerHTML = months.map(m => {
+      const ih = Math.round((monthly[m].income  / maxVal) * 100);
+      const eh = Math.round((monthly[m].expense / maxVal) * 100);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="chart-bar-group"><div class="bar income" style="height:${ih}px"></div><div class="bar expense" style="height:${eh}px"></div></div>
+        <div class="chart-label">${m.slice(5)}</div>
+      </div>`;
+    }).join('');
+
+    if (!snap.size) { document.getElementById('finance-table').innerHTML = '<div class="empty-state"><i class="ri-money-dollar-circle-line"></i>Sem lançamentos</div>'; return; }
+    const html = `<table><thead><tr><th>Descrição</th><th>Valor</th><th>Tipo</th><th>Categoria</th><th>Data</th></tr></thead><tbody>` +
+      snap.docs.map(d => {
+        if (d.data()._deleted) return '';
+        const f = d.data();
+        const col = f.tipo === 'receita' ? 'var(--green)' : 'var(--red)';
+        return `<tr><td>${f.descricao||'—'}</td><td style="color:${col};font-weight:700">${fmt(Number(f.valor)||0)}</td><td><span class="status-badge" style="color:${col}">${f.tipo}</span></td><td>${f.categoria||'—'}</td><td>${f.data||fmtDate(f.createdAt)}</td></tr>`;
+      }).join('') + '</tbody></table>';
+    document.getElementById('finance-table').innerHTML = html;
+  } catch(e) { document.getElementById('finance-table').innerHTML = `<div class="empty-state">${e.message}</div>`; }
+}
+
+async function saveFinance() {
+  const desc  = document.getElementById('fn-desc').value.trim();
+  const valor = parseFloat(document.getElementById('fn-valor').value);
+  const tipo  = document.getElementById('fn-tipo').value;
+  if (!desc || isNaN(valor) || valor <= 0) { toast('Preencha descrição e valor válido', 'error'); return; }
+  try {
+    await apiAction('createFinance', { descricao: desc, valor, tipo, categoria: document.getElementById('fn-cat').value, data: document.getElementById('fn-data').value });
+    closeModal('modalFinance');
+    ['fn-desc','fn-valor','fn-cat'].forEach(id => document.getElementById(id).value = '');
+    toast(`Lançamento de ${tipo} salvo!`, 'success');
+    loadFinance();
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+}
+
+// ── AGENTS ────────────────────────────────────────────────────
+function openModalAgent() { openModal('modalAgent'); }
+
+async function loadAgents() {
+  const grid = document.getElementById('agents-grid');
+  grid.innerHTML = '<div class="loader">carregando...</div>';
+  try {
+    const r    = await fetch('/api/agents').catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+    const data = await r.json();
+    if (!data.agents?.length) { grid.innerHTML = '<div class="empty-state">Nenhum agente</div>'; return; }
+    grid.innerHTML = data.agents.map(a => `
+      <div class="card" style="padding:20px">
+        <div style="font-size:28px;margin-bottom:10px">${a.icon||'🤖'}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${a.displayName||a.name}</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">${a.description||''}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="status-badge s-active">${a.status||'sleeping'}</span>
+          <span class="status-badge" style="background:var(--purplt);color:var(--purple)">T:${a.temperature??0.7}</span>
+          ${a.runCount ? `<span class="status-badge s-done">×${a.runCount}</span>` : ''}
+        </div>
+        ${!['business','dev','security'].includes(a.id) ? `<button class="btn btn-danger" style="margin-top:12px;width:100%" onclick="deleteAgent('${a.id}')"><i class="ri-delete-bin-line"></i> Remover</button>` : ''}
+      </div>`).join('');
+  } catch(e) { grid.innerHTML = `<div class="empty-state">${e.message}</div>`; }
+}
+
+async function saveAgent() {
+  const name   = document.getElementById('ag-name').value.trim().toUpperCase();
+  const prompt = document.getElementById('ag-prompt').value.trim();
+  if (!name || !prompt) { toast('Nome e system prompt são obrigatórios', 'error'); return; }
+  try {
+    const r = await fetch('/api/agents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, displayName: document.getElementById('ag-display').value||name, icon: document.getElementById('ag-icon').value||'🤖', systemPrompt: prompt, temperature: parseFloat(document.getElementById('ag-temp').value)||0.7 })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    closeModal('modalAgent');
+    ['ag-name','ag-display','ag-icon','ag-prompt'].forEach(id => document.getElementById(id).value = '');
+    toast('Agente criado!', 'success');
+    loadAgents();
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+}
+
+async function deleteAgent(id) {
+  if (!true /* nexiaConfirm: 'Remover agente?' */) return;
+  const r = await fetch(`/api/agents?id=${id}`, { method: 'DELETE' }).catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+  const d = await r.json();
+  if (d.ok) { toast('Agente removido', 'info'); loadAgents(); }
+  else toast('Erro: ' + d.error, 'error');
+}
+
+// ── AGENT JOB (loop longo) ────────────────────────────────────
+let _pollInterval = null;
+
+async function runAgentJob() {
+  const task = document.getElementById('agentTask').value.trim();
+  if (!task || !_uid) { toast('Descreva a tarefa', 'error'); return; }
+  document.getElementById('job-status').innerHTML = '<div class="loader">Iniciando job...</div>';
+  try {
+    const r    = await fetch('/api/agent-run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: _uid, tenantId: _tenant, task }) });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    toast('Job iniciado!', 'info');
+    pollJob(data.jobId);
+  } catch(e) { toast('Erro: ' + e.message, 'error'); document.getElementById('job-status').innerHTML = ''; }
+}
+
+function pollJob(jobId) {
+  if (_pollInterval) clearInterval(_pollInterval);
+  _pollInterval = setInterval(async () => {
+    try {
+      const r    = await fetch(`/api/agent-run?jobId=${jobId}`).catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+      const data = await r.json();
+      renderJob(data);
+      if (data.status === 'done' || data.status === 'error') {
+        clearInterval(_pollInterval);
+        toast(data.status === 'done' ? 'Job concluído!' : 'Job falhou', data.status === 'done' ? 'success' : 'error');
+      }
+    } catch(e) { clearInterval(_pollInterval); }
+  }, 2000);
+}
+
+function renderJob(job) {
+  const stepIcon = s => s === 'done' ? '<i class="ri-checkbox-circle-line"></i>' : s === 'error' ? '<i class="ri-close-circle-line"></i>' : '<i class="ri-loader-4-line"></i>';
+  const stepsHtml = (job.steps||[]).map(s => `<div class="step ${s.status}">${stepIcon(s.status)} ${s.name}</div>`).join('');
+  const resultHtml = job.result ? `<div class="job-result">${job.result.replace(/
+/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>` : '';
+  const ms = job.totalMs ? `<span style="color:var(--text3);font-size:11px">${job.totalMs}ms</span>` : '';
+  document.getElementById('job-status').innerHTML = `
+    <div class="job-card">
+      <div class="job-title">${job.task?.slice(0,60)||'Job'} ${ms}</div>
+      <div style="font-size:11px;color:var(--cyan);margin-bottom:8px">Status: <strong>${job.status}</strong> · Step: ${job.currentStep||'—'}</div>
+      <div class="job-steps">${stepsHtml}</div>
+      ${resultHtml}
+    </div>`;
+}
+
+// ── Patch goPage para chamar load correto ─────────────────────
+function goPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+  document.querySelector('.sidebar').classList.remove('open');
+  if (name === 'clients') loadClients();
+  if (name === 'tasks')   loadTasks();
+  if (name === 'finance') loadFinance();
+  if (name === 'agents')  loadAgents();
+  if (name === 'logs')    loadLogs();
+}
+
+// ── Patch saveClient / saveTask com toast ─────────────────────
+const _origSaveClient = saveClient;
+// Override inline below
+
+// ── NOTIFICATIONS ────────────────────────────────────────────
+let _notifOpen = false;
+
+async function loadNotifications() {
+  if (!_uid) return;
+  try {
+    const r    = await fetch(`/api/notifications?userId=${_uid}`).catch(e => console.warn("[NEXIA] fetch failed:", e.message));
+    const data = await r.json();
+    const badge = document.getElementById('notifBadge');
+    if (data.unread > 0) {
+      badge.textContent = data.unread > 9 ? '9+' : data.unread;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+    const list = document.getElementById('notifList');
+    if (!data.items?.length) { list.innerHTML = '<div class="nd-empty">Sem notificações</div>'; return; }
+    list.innerHTML = data.items.map(n => {
+      const ts = n.createdAt?._seconds ? new Date(n.createdAt._seconds*1000).toLocaleString('pt-BR') : '';
+      return `<div class="nd-item ${n.read ? '' : 'unread'}" onclick="readNotif('${n.id}')">
+        <div class="nd-icon" style="background:rgba(${hexToRgb(n.color||'#00E5FF')},.1);color:${n.color||'var(--cyan)'}"><i class="${n.icon||'ri-notification-3-line'}"></i></div>
+        <div class="nd-content">
+          <div class="nd-item-title">${n.title||''}</div>
+          <div class="nd-item-body">${n.body||''}</div>
+          <div class="nd-item-time">${ts}</div>
+        </div>
+        ${!n.read ? '<div style="width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;margin-top:6px"></div>' : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { console.warn('Notif load failed', e.message); }
+}
+
+function hexToRgb(hex) {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '0,229,255';
+}
+
+function toggleNotifDropdown() {
+  const dd = document.getElementById('notifDropdown');
+  _notifOpen = !_notifOpen;
+  dd.classList.toggle('open', _notifOpen);
+  if (_notifOpen) loadNotifications();
+}
+
+async function readNotif(id) {
+  await fetch('/api/notifications', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'read', userId: _uid, notifId: id }) });
+  loadNotifications();
+}
+
+async function readAllNotifs() {
+  await fetch('/api/notifications', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'readAll', userId: _uid }) });
+  loadNotifications();
+  toast('Todas as notificações lidas', 'info');
+}
+
+// Fecha dropdown ao clicar fora
+document.addEventListener('click', e => {
+  if (_notifOpen && !e.target.closest('#notifBtn') && !e.target.closest('#notifDropdown')) {
+    document.getElementById('notifDropdown').classList.remove('open');
+    _notifOpen = false;
+  }
+});
+
+// Polling a cada 30s
+setInterval(() => { if (_uid) loadNotifications(); }, 30_000);
+
+// ── Keyboard ──────────────────────────────────────────────────
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+document.getElementById('chatInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 180) + 'px';
+});
+</script>
+
+<script>
+// NEXIA v38 — toast helper (substitui alert/confirm nativos)
+function nexiaToast(msg, type='info', duration=4000) {
+  const colors = {info:'#00e5ff',ok:'#00d68f',warn:'#ffaa00',err:'#ff3d71'};
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${colors[type]||colors.info};color:#000;padding:14px 20px;border-radius:10px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px`;
+  t.innerHTML = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), duration);
+}
+function nexiaConfirm(msg, onOk, onCancel) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `<div style="background:#1a2035;border:1px solid #2a3555;border-radius:14px;padding:28px 32px;max-width:420px;text-align:center"><p style="color:#c4d4ee;font-size:15px;margin:0 0 20px">${msg}</p><div style="display:flex;gap:12px;justify-content:center"><button id="nc-ok" style="background:#ff3d71;color:#fff;border:0;border-radius:8px;padding:10px 24px;font-weight:600;cursor:pointer">Confirmar</button><button id="nc-cancel" style="background:#2a3555;color:#c4d4ee;border:0;border-radius:8px;padding:10px 24px;font-weight:600;cursor:pointer">Cancelar</button></div></div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#nc-ok').onclick = () => { overlay.remove(); onOk && onOk(); };
+  overlay.querySelector('#nc-cancel').onclick = () => { overlay.remove(); onCancel && onCancel(); };
+}
+</script>
+</body>
+</html>

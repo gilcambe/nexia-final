@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="UTF-8">
+<title>NEXIA OS</title>
+<p class="hsub">Orquestre Claude, GPT-4o, Gemini e 15+ IAs em uma unica plataforma.</p>
+<script>
+function chip(el) {
+  var cbody = document.getElementById('cbody');
+  var msg = document.createElement('div');
+  msg.className = 'cm user';
+  msg.textContent = el.textContent;
+  cbody.appendChild(msg);
+  setTimeout(function() {
+    var ai = document.createElement('div');
+    ai.className = 'cm ai';
+    ai.textContent = 'Obrigado! Nossa equipe responde em breve.';
+    cbody.appendChild(ai);
+    cbody.scrollTop = cbody.scrollHeight;
+  }, 600);
+}
+function send() {
+  var inp = document.getElementById('cinp');
+  var val = inp.value.trim();
+  if (!val) return;
+  var cbody = document.getElementById('cbody');
+  var msg = document.createElement('div');
+  msg.className = 'cm user';
+  msg.textContent = val;
+  cbody.appendChild(msg);
+  inp.value = '';
+  setTimeout(function() {
+    var ai = document.createElement('div');
+    ai.className = 'cm ai';
+    ai.textContent = 'Obrigado! Para resposta imediata, use o WhatsApp.';
+    cbody.appendChild(ai);
+    cbody.scrollTop = cbody.scrollHeight;
+  }, 800);
+}
+async function sub() {
+  var nome = document.getElementById('fn').value.trim();
+  var email = document.getElementById('fe').value.trim();
+  if (!nome || !email) { alert('Preencha Nome e E-mail.'); return; }
+  document.getElementById('fc').style.display = 'none';
+  document.getElementById('fs').style.display = 'flex';
+}
+</script>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="UTF-8">
+<title>NEXIA Arquiteto IA</title>
+<script>
+const STEPS_DATA = {
+  1: { options: [{ value:'saas', label:'SaaS / Software' },{ value:'ecommerce', label:'E-commerce / Varejo' },{ value:'servicos', label:'Servicos / Consultoria' }]},
+  2: { options: [{ value:'atendimento', label:'Atendimento ao cliente' },{ value:'vendas', label:'Aumentar vendas' },{ value:'automacao', label:'Automatizar processos' }]},
+  3: { options: [{ value:'pequeno', label:'1 a 50 clientes' },{ value:'medio', label:'51 a 500 clientes' },{ value:'grande', label:'501 a 5.000 clientes' }]},
+};
+let currentStep = 1;
+const answers = {};
+function renderOptions(step) {
+  var container = document.getElementById('options-' + step);
+  if (!container) return;
+  container.innerHTML = '';
+  STEPS_DATA[step].options.forEach(function(opt) {
+    var div = document.createElement('div');
+    div.className = 'option';
+    div.textContent = opt.label;
+    div.onclick = function() { selectOption(step, opt.value, div); };
+    container.appendChild(div);
+  });
+}
+function selectOption(step, value, el) {
+  document.querySelectorAll('#options-' + step + ' .option').forEach(function(o) { o.classList.remove('selected'); });
+  el.classList.add('selected');
+  answers[step] = value;
+  var btn = document.getElementById('btn-' + step);
+  if (btn) btn.disabled = false;
+}
+function nextStep() {
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  currentStep++;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  renderOptions(currentStep);
+}
+function generate() {
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('step-4').classList.add('active');
+}
+document.addEventListener('DOMContentLoaded', function() { renderOptions(1); });
+</script>

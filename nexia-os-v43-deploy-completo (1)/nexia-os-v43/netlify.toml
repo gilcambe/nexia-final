@@ -1,0 +1,61 @@
+[build]
+command = "echo 'NEXIA OS v43 — Build OK'"
+functions = "netlify/functions"
+publish = "."
+
+[functions]
+node_bundler = "esbuild"
+
+[[redirects]]
+from = "/api/cortex"
+to = "/.netlify/functions/cortex-chat"
+status = 200
+
+[[redirects]]
+from = "/api/rag"
+to = "/.netlify/functions/rag-engine"
+status = 200
+
+[[redirects]]
+from = "/api/actions"
+to = "/.netlify/functions/action-engine"
+status = 200
+
+[[redirects]]
+from = "/api/logs"
+to = "/.netlify/functions/cortex-logs"
+status = 200
+
+[[redirects]]
+from = "/api/learn"
+to = "/.netlify/functions/cortex-learn"
+status = 200
+
+[[redirects]]
+from = "/api/agent-run"
+to = "/.netlify/functions/cortex-agent"
+status = 200
+
+[[redirects]]
+from = "/api/observe"
+to = "/.netlify/functions/observability"
+status = 200
+
+[[redirects]]
+from = "/api/tenant"
+to = "/.netlify/functions/tenant-admin"
+status = 200
+
+# CORRIGIDO: /api/governance REMOVIDO | versao v43
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[[headers]]
+for = "/*"
+[headers.values]
+X-Frame-Options = "DENY"
+X-Content-Type-Options = "nosniff"
+Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://static.readdy.ai/web/favicon-180.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://static.readdy.ai/web/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="https://static.readdy.ai/web/favicon-16.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Readdy</title>
+
+    <script>
+      function setRootFontSize() {
+        const baseSize = 14; // 基础字体大小
+        const scaleFactor = window.innerWidth / 393;
+        document.documentElement.style.fontSize = `${baseSize * scaleFactor}px`;
+      }
+    </script>
+
+    <!-- Preload proxy -->
+    <script>
+      try {
+        const READDY_PRELOAD = {};
+        READDY_PRELOAD['toggles'] = fetch('/api/public/toggles', {
+          method: 'GET'
+        }).then((res) => res.json());
+        window.READDY_PRELOAD = READDY_PRELOAD;
+      } catch (error) {
+        console.error('Preload proxy error:', error);
+      }
+    </script>
+
+    
+    <!-- Rewardful -->
+    <script type="module" src="https://static.readdy.ai/static/rewardful.js"></script>
+    <script src="https://r.wdfl.co/rw.js" data-rewardful="e9859a"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script src="https://www.googletagmanager.com/gtag/js?id=AW-17337021885"></script>
+    <script type="module" src="https://static.readdy.ai/static/google-ads.js"></script>
+    <script src="https://www.googletagmanager.com/gtag/js?id=G-FB0NP1MM86"></script>
+    <script type="module" src="https://static.readdy.ai/static/google-analytics.js"></script>
+
+    <!-- Meta Pixel Code -->
+    <script type="module" src="https://static.readdy.ai/static/facebook-pixel.js"></script>
+
+    <!-- Bing Ads Tag -->
+    <!-- <script type="module" src="/static/bing-ads.js"></script> -->
+
+    <!-- TikTok Pixel Code -->
+    <script type="module" src="https://static.readdy.ai/static/tiktok-pixel.js"></script>
+
+    <!-- LinkedIn Insight Tag -->
+    <script type="module" src="https://static.readdy.ai/static/linkedin-pixel.js"></script>
+
+    <!-- Gravity Pixel -->
+    <script src="https://static.readdy.ai/static/gravity-pixel.js"></script>
+
+    <!-- Reddit Pixel -->
+    <!-- <script type="module" src="/static/reddit-pixel.js"></script> -->
+    
+    <script type="module" crossorigin src="https://static.readdy.ai/static/index-FswJFWnB.js"></script>
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/chart-55cR7lWH.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/dexie-DTDOAvqa.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/local-modules-daHcumY5.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/lodash-Czf3lVKe.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/posthog-CDHEbEKZ.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/lucide-icons-CKdtppk0.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/marked-CQz6xZ8n.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/image-compression-BzWLnoYn.js">
+    <link rel="modulepreload" crossorigin href="https://static.readdy.ai/static/jszip-BGBfUMn9.js">
+    <link rel="stylesheet" crossorigin href="https://static.readdy.ai/static/index-BMvW7T4A.css">
+  </head>
+  <body>
+    <!-- 初始加载进度条 -->
+    <div id="init-loading">
+      <div class="init-loading-progress"></div>
+    </div>
+
+    <style>
+      #init-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #e5e7eb;
+        z-index: 9999;
+        overflow: hidden;
+        transition: opacity 0.3s ease-out;
+      }
+
+      #init-loading.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .init-loading-progress {
+        height: 100%;
+        background: rgba(112, 87, 255, 1);
+        animation: loading-progress 1.5s ease-out forwards;
+        transform-origin: left;
+        transition: transform 0.3s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* 高光效果 */
+      .init-loading-progress::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.6) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        animation: shine 2s ease-in-out infinite;
+      }
+
+      @keyframes loading-progress {
+        0% {
+          transform: scaleX(0);
+        }
+        100% {
+          transform: scaleX(0.9);
+        }
+      }
+
+      @keyframes shine {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(350%);
+        }
+      }
+
+      /* 暗色主题适配 */
+      html.dark #init-loading {
+        background-color: #1e293b;
+      }
+    </style>
+
+    
+    <!-- Facebook Pixel Code (noscript) -->
+    <script type="module" src="https://static.readdy.ai/static/facebook-pixel-noscript.js"></script>
+    <!-- LinkedIn fallback-->
+    <noscript>
+        <img height="1" width="1" style="display: none" alt="" src="https://px.ads.linkedin.com/collect/?pid=8875564&fmt=gif" />
+    </noscript>
+    
+    <div outline="0" id="app"></div>
+  </body>
+</html>

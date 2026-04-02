@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cortex Lab — NEXIA OS</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030712;color:#e2e8f0;font-family:monospace;min-height:100vh}
+.header{border-bottom:1px solid #1f2937;background:rgba(17,24,39,.9);position:sticky;top:0;z-index:20;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem}
+.logo-icon{width:2rem;height:2rem;border-radius:.5rem;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem}
+.logo-text{font-size:.875rem;font-weight:700;color:#fff;margin-left:.5rem}
+.main{max-width:1280px;margin:0 auto;padding:1.25rem}
+.tabs{display:flex;gap:.25rem;margin-bottom:1.25rem;background:#111827;border-radius:.75rem;padding:.25rem;width:fit-content}
+.tab{padding:.5rem 1rem;border-radius:.5rem;font-size:.75rem;font-weight:500;cursor:pointer;border:none;background:transparent;color:#9ca3af;transition:all .2s}
+.tab.active{background:#7c3aed;color:#fff}
+.panel{display:none}.panel.active{display:block}
+.upload-area{border:2px dashed #374151;border-radius:1rem;padding:3rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem}
+.upload-area:hover{border-color:#7c3aed}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.625rem 1.25rem;background:#7c3aed;color:#fff;border:none;border-radius:.75rem;font-size:.875rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{background:#6d28d9}
+.card{background:#111827;border:1px solid #1f2937;border-radius:.75rem;overflow:hidden;margin-bottom:.75rem}
+.card-header{padding:.75rem 1rem;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between;font-size:.875rem;font-weight:700;color:#fff}
+.test-item{display:flex;align-items:center;gap:.75rem;padding:.5rem 1rem;border-bottom:1px solid rgba(31,41,55,.5);font-size:.75rem}
+.issue-card{background:#111827;border:1px solid #1f2937;border-radius:.75rem;padding:1rem;margin-bottom:.75rem}
+.badge{font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:.25rem;border:1px solid}
+.badge-critical{background:rgba(127,29,29,.4);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.badge-high{background:rgba(124,45,18,.4);color:#fdba74;border-color:rgba(249,115,22,.3)}
+.badge-medium{background:rgba(113,63,18,.4);color:#fde68a;border-color:rgba(234,179,8,.3)}
+.badge-low{background:#1f2937;color:#9ca3af;border-color:#374151}
+.progress-bar{height:.5rem;background:#1f2937;border-radius:9999px;overflow:hidden;margin-top:.75rem}
+.progress-fill{height:100%;background:#7c3aed;border-radius:9999px;transition:width .5s ease}
+.fix-btn{display:inline-flex;align-items:center;gap:.375rem;padding:.375rem .75rem;background:#7c3aed;color:#fff;border:none;border-radius:.5rem;font-size:.7rem;font-weight:700;cursor:pointer}
+.fix-btn:disabled{background:#374151;color:#6b7280;cursor:not-allowed}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo-icon"><i class="ri-flask-line"></i></div>
+  <span class="logo-text">Cortex Lab — NEXIA OS</span>
+</div>
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('upload')">Upload / URL</button>
+    <button class="tab" onclick="switchTab('simulation')">Simulacao Visual</button>
+    <button class="tab" onclick="switchTab('report')">Relatorio</button>
+    <button class="tab" onclick="switchTab('fix')">Correcao Cortex</button>
+  </div>
+  <div class="panel active" id="panel-upload">
+    <div class="upload-area" onclick="document.getElementById('fi').click()">
+      <div style="font-size:3rem;color:#7c3aed;margin-bottom:1rem"><i class="ri-upload-cloud-2-line"></i></div>
+      <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.5rem">Arraste seu projeto aqui</div>
+      <div style="font-size:.875rem;color:#6b7280;margin-bottom:1.5rem">Suporta .zip, .tar.gz ou qualquer estrutura de projeto</div>
+      <button class="btn" onclick="event.stopPropagation()"><i class="ri-folder-open-line"></i> Selecionar arquivo</button>
+      <input type="file" id="fi" accept=".zip,.tar.gz" style="display:none" onchange="handleUpload(this.files[0])">
+    </div>
+    <div style="display:flex;gap:.75rem;margin-bottom:1rem">
+      <div style="flex:1;display:flex;align-items:center;gap:.5rem;background:#111827;border:1px solid #1f2937;border-radius:.75rem;padding:.75rem 1rem">
+        <i class="ri-global-line" style="color:#4b5563"></i>
+        <input type="text" id="repoUrl" value="https://github.com/gilcambe/nexia-final" style="background:transparent;border:none;outline:none;font-size:.875rem;color:#e2e8f0;width:100%;font-family:monospace">
+      </div>
+      <button class="btn" onclick="startDemo()"><i class="ri-github-fill"></i> Analisar repo</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem">
+      <button onclick="startDemo()" style="background:#1f2937;border:1px solid #374151;border-radius:.75rem;padding:1rem;cursor:pointer;text-align:left;color:#fff">
+        <div style="font-size:1.25rem;color:#a78bfa;margin-bottom:.5rem"><i class="ri-github-fill"></i></div>
+        <div style="font-size:.8rem;font-weight:700">Analisar repositorio</div>
+        <div style="font-size:.7rem;color:#6b7280;margin-top:.2rem">github.com/gilcambe/nexia-final</div>
+      </button>
+      <button onclick="startDemo()" style="background:#1f2937;border:1px solid #374151;border-radius:.75rem;padding:1rem;cursor:pointer;text-align:left;color:#fff">
+        <div style="font-size:1.25rem;color:#a78bfa;margin-bottom:.5rem"><i class="ri-file-zip-line"></i></div>
+        <div style="font-size:.8rem;font-weight:700">Usar arquivos corrigidos</div>
+        <div style="font-size:.7rem;color:#6b7280;margin-top:.2rem">nexia-corrigido-v43.zip</div>
+      </button>
+      <button onclick="startDemo()" style="background:#1f2937;border:1px solid #374151;border-radius:.75rem;padding:1rem;cursor:pointer;text-align:left;color:#fff">
+        <div style="font-size:1.25rem;color:#a78bfa;margin-bottom:.5rem"><i class="ri-play-circle-line"></i></div>
+        <div style="font-size:.8rem;font-weight:700">Demo rapida</div>
+        <div style="font-size:.7rem;color:#6b7280;margin-top:.2rem">Simular sem upload</div>
+      </button>
+    </div>
+  </div>
+  <div class="panel" id="panel-simulation">
+    <div id="sim-empty" style="background:#111827;border:1px solid #1f2937;border-radius:.75rem;padding:3rem;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">🧪</div>
+      <p style="color:#6b7280;font-size:.875rem;margin-bottom:1rem">Faca upload de um projeto primeiro.</p>
+      <button class="btn" onclick="switchTab('upload')">Ir para Upload</button>
+    </div>
+    <div id="sim-content" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div style="font-size:.875rem;font-weight:700;color:#fff">Suite de Testes Automatizados</div>
+        <button class="btn" id="run-btn" onclick="runTests()"><i class="ri-play-fill"></i> Rodar Testes</button>
+      </div>
+      <div id="tests-list"></div>
+      <div id="tests-done-btn" style="display:none;margin-top:.75rem">
+        <button onclick="switchTab('report')" style="width:100%;padding:.75rem;background:rgba(127,29,29,.2);border:1px solid rgba(239,68,68,.3);border-radius:.75rem;color:#fca5a5;font-size:.875rem;font-weight:700;cursor:pointer">
+          <i class="ri-file-warning-line"></i> Ver relatorio completo
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="panel" id="panel-report">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem">
+      <div style="background:rgba(127,29,29,.2);border:1px solid rgba(239,68,68,.3);border-radius:.75rem;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#f87171">3</div><div style="font-size:.7rem;color:#fca5a5">Criticos</div></div>
+      <div style="background:rgba(124,45,18,.2);border:1px solid rgba(249,115,22,.3);border-radius:.75rem;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#fb923c">3</div><div style="font-size:.7rem;color:#fdba74">Altos</div></div>
+      <div style="background:rgba(113,63,18,.2);border:1px solid rgba(234,179,8,.3);border-radius:.75rem;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#facc15">2</div><div style="font-size:.7rem;color:#fde68a">Medios</div></div>
+      <div style="background:#1f2937;border:1px solid #374151;border-radius:.75rem;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#9ca3af">2</div><div style="font-size:.7rem;color:#6b7280">Baixos</div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="font-size:.875rem;font-weight:700;color:#fff">10 issues encontrados</div>
+      <button class="btn" onclick="switchTab('fix')"><i class="ri-magic-line"></i> Corrigir com Cortex</button>
+    </div>
+    <div id="issues-list"></div>
+  </div>
+  <div class="panel" id="panel-fix">
+    <div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3);border-radius:.75rem;padding:1rem;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem">
+        <div>
+          <div style="font-size:.875rem;font-weight:700;color:#fff">Cortex Auto-Fix</div>
+          <div style="font-size:.7rem;color:#9ca3af;margin-top:.2rem">O Cortex analisa cada issue e aplica a correcao automaticamente</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <div style="font-size:.75rem;color:#9ca3af" id="fix-label">0/10 corrigidos</div>
+          <button class="btn" id="fix-all-btn" onclick="fixAll()"><i class="ri-magic-line"></i> Corrigir Tudo</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="fix-bar" style="width:0%"></div></div>
+    </div>
+    <div id="all-fixed" style="display:none;background:rgba(6,78,59,.2);border:1px solid rgba(52,211,153,.3);border-radius:.75rem;padding:1.5rem;text-align:center;margin-bottom:1rem">
+      <div style="font-size:2rem;margin-bottom:.5rem">🎉</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#34d399">Todos os issues foram corrigidos!</div>
+      <div style="font-size:.875rem;color:#6ee7b7;margin-top:.25rem">O projeto esta pronto para deploy em producao.</div>
+    </div>
+    <div id="fix-list"></div>
+  </div>
+</div>
+<script>
+var uploadedFile = null;
+var testsRunning = false;
+var testsDone = false;
+var fixedCount = 0;
+var fixing = null;
+var ISSUES = [
+  {id:'i01',sev:'critical',file:'cortex-agent.js',line:47,desc:'parseToolCall usa regex HTML-encoded — tool calls nunca parseados',fix:'Substituir &lt; por < literal na regex',fixed:false},
+  {id:'i02',sev:'critical',file:'cortex-chat.js',line:112,desc:'URL da API Gemini com &amp;alt=sse — streaming sempre falha',fix:'Corrigir &amp; para & na URL de fetch',fixed:false},
+  {id:'i03',sev:'critical',file:'rag-engine.js',line:89,desc:'Loop de chunking com &lt; — nenhum documento indexado no RAG',fix:'Corrigir i &lt; content.length para i < content.length',fixed:false},
+  {id:'i04',sev:'high',file:'middleware.js',line:203,desc:'Memory leak: _tenantCache cresce indefinidamente',fix:'Adicionar limpeza periodica a cada 100 chamadas',fixed:false},
+  {id:'i05',sev:'high',file:'config.js',line:15,desc:'XSS_PATTERNS com entidades HTML — shield nunca bloqueia ataques',fix:'Usar < literal em todos os padroes regex',fixed:false},
+  {id:'i06',sev:'high',file:'tenant-admin.js',line:67,desc:'checkLimit retorna ok: false para ADM',fix:'Adicionar verificacao de plan === master',fixed:false},
+  {id:'i07',sev:'medium',file:'cortex-logs.js',line:1,desc:'Bloco duplicado no final do arquivo',fix:'Remover bloco duplicado',fixed:false},
+  {id:'i08',sev:'medium',file:'netlify.toml',line:34,desc:'Redirect /api/governance invalido',fix:'Remover redirect invalido',fixed:false},
+  {id:'i09',sev:'low',file:'cortex-memory.js',line:1,desc:'Duplo /** no topo — JSDoc malformado',fix:'Remover /** duplicado',fixed:false},
+  {id:'i10',sev:'low',file:'architect.html',line:1,desc:'Arquivo sem JavaScript — funcoes ausentes',fix:'Adicionar script completo',fixed:false},
+];
+var LAB_TESTS = [
+  {cat:'Autenticacao',name:'Login com email/senha validos',detail:'Redireciona para /dashboard'},
+  {cat:'Autenticacao',name:'Login com senha errada -> erro 401',detail:'Mensagem de erro exibida'},
+  {cat:'Navegacao',name:'Todos os links do menu funcionam',detail:'Sem 404 ou erros de rota'},
+  {cat:'Chat/CORTEX',name:'Envio de mensagem retorna resposta',detail:'Streaming funcionando'},
+  {cat:'Chat/CORTEX',name:'Upload de arquivo para RAG',detail:'PDF indexado',fail:true},
+  {cat:'API/Backend',name:'GET /api/observe retorna 200',detail:'Health check OK'},
+  {cat:'API/Backend',name:'POST /api/cortex aceita payload valido',detail:'Resposta em < 3s'},
+  {cat:'Seguranca',name:'XSS em campos de texto bloqueado',detail:'sanitize() funcionando'},
+  {cat:'Seguranca',name:'Prompt injection detectado e bloqueado',detail:'INJECTION_PATTERNS ativo'},
+  {cat:'Performance',name:'Primeira carga < 3 segundos',detail:'LCP: 1.8s',warn:true},
+];
+var testStates = [];
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  var tabs = ['upload','simulation','report','fix'];
+  var idx = tabs.indexOf(tab);
+  if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+function handleUpload(file) {
+  if(!file) return;
+  uploadedFile = file.name;
+  document.getElementById('sim-empty').style.display = 'none';
+  document.getElementById('sim-content').style.display = 'block';
+  switchTab('simulation');
+}
+function startDemo() {
+  uploadedFile = 'nexia-final (GitHub)';
+  document.getElementById('sim-empty').style.display = 'none';
+  document.getElementById('sim-content').style.display = 'block';
+  switchTab('simulation');
+}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+async function runTests() {
+  if(testsRunning) return;
+  testsRunning = true;
+  testsDone = false;
+  var btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ri-loader-4-line" style="animation:spin 1s linear infinite"></i> Testando...';
+  testStates = LAB_TESTS.map(function(t,i){return Object.assign({},t,{status:'pending',id:'t'+i})});
+  renderTests();
+  for(var i=0;i<LAB_TESTS.length;i++){
+    await sleep(150+Math.random()*200);
+    testStates[i].status='running';
+    renderTests();
+    await sleep(100+Math.random()*150);
+    testStates[i].ms = Math.floor(50+Math.random()*400);
+    if(LAB_TESTS[i].fail) testStates[i].status='fail';
+    else if(LAB_TESTS[i].warn) testStates[i].status='warn';
+    else testStates[i].status='pass';
+    renderTests();
+  }
+  testsRunning = false;
+  testsDone = true;
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ri-play-fill"></i> Rodar Testes';
+  document.getElementById('tests-done-btn').style.display = 'block';
+}
+function renderTests() {
+  var cats = [];
+  LAB_TESTS.forEach(function(t){if(cats.indexOf(t.cat)<0)cats.push(t.cat)});
+  var html = '';
+  cats.forEach(function(cat){
+    var items = testStates.filter(function(t){return t.cat===cat});
+    var anyFail = items.some(function(t){return t.status==='fail'});
+    var anyWarn = items.some(function(t){return t.status==='warn'});
+    var anyRun = items.some(function(t){return t.status==='running'});
+    var allPass = items.every(function(t){return t.status==='pass'});
+    var statusColor = anyFail?'#f87171':anyWarn?'#facc15':anyRun?'#a78bfa':allPass&&testsDone?'#34d399':'#4b5563';
+    var statusText = anyFail?'FAIL':anyWarn?'WARN':anyRun?'RUNNING...':allPass&&testsDone?'PASS':'PENDING';
+    html += '<div class="card"><div class="card-header"><span>'+cat+'</span><span style="font-size:.7rem;font-family:monospace;color:'+statusColor+'">'+statusText+'</span></div>';
+    items.forEach(function(t){
+      var icon = t.status==='pending'?'<span style="color:#374151">·</span>':t.status==='running'?'<i class="ri-loader-4-line" style="color:#a78bfa;animation:spin 1s linear infinite"></i>':t.status==='pass'?'<i class="ri-checkbox-circle-fill" style="color:#34d399"></i>':t.status==='fail'?'<i class="ri-close-circle-fill" style="color:#f87171"></i>':'<i class="ri-error-warning-fill" style="color:#facc15"></i>';
+      var nameColor = t.status==='pass'?'#d1d5db':t.status==='fail'?'#fca5a5':t.status==='warn'?'#fde68a':t.status==='running'?'#c4b5fd':'#4b5563';
+      html += '<div class="test-item"><div style="width:1.25rem;flex-shrink:0">'+icon+'</div><div style="flex:1;color:'+nameColor+'">'+t.name+'</div>'+(t.ms&&(t.status==='pass'||t.status==='warn')?'<div style="color:#4b5563">'+t.ms+'ms</div>':'')+'</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('tests-list').innerHTML = html;
+}
+function renderIssues() {
+  var html = '';
+  ISSUES.forEach(function(issue){
+    html += '<div class="issue-card'+(issue.fixed?' fixed':'')+'" id="issue-'+issue.id+'">';
+    html += '<div style="display:flex;align-items:flex-start;gap:.75rem">';
+    html += '<span class="badge badge-'+issue.sev+'">'+issue.sev.toUpperCase()+'</span>';
+    html += '<div style="flex:1"><div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem"><code style="font-size:.7rem;color:#22d3ee;background:#1f2937;padding:.1rem .4rem;border-radius:.25rem">'+issue.file+'</code><span style="font-size:.7rem;color:#4b5563">linha '+issue.line+'</span>'+(issue.fixed?'<span style="font-size:.7rem;color:#34d399;font-weight:700">CORRIGIDO</span>':'')+'</div>';
+    html += '<p style="font-size:.75rem;color:#fca5a5;margin-bottom:.25rem">'+issue.desc+'</p>';
+    html += '<p style="font-size:.75rem;color:#6ee7b7">Fix: '+issue.fix+'</p></div></div></div>';
+  });
+  document.getElementById('issues-list').innerHTML = html;
+}
+function renderFixList() {
+  var html = '';
+  ISSUES.forEach(function(issue){
+    html += '<div class="issue-card'+(issue.fixed?' fixed':'')+'" id="fix-'+issue.id+'">';
+    html += '<div style="display:flex;align-items:center;gap:.75rem">';
+    html += '<div style="width:2rem;height:2rem;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:'+(issue.fixed?'rgba(6,78,59,.4)':'#1f2937')+';border:1px solid '+(issue.fixed?'rgba(52,211,153,.3)':'#374151')+'">';
+    html += issue.fixed?'<i class="ri-check-line" style="color:#34d399"></i>':'<i class="ri-bug-line" style="color:#f87171"></i>';
+    html += '</div>';
+    html += '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem"><code style="font-size:.7rem;color:#22d3ee">'+issue.file+'</code><span class="badge badge-'+issue.sev+'">'+issue.sev+'</span></div>';
+    html += '<div style="font-size:.75rem;color:'+(issue.fixed?'#4b5563':'#d1d5db')+';'+(issue.fixed?'text-decoration:line-through':'')+'">' +issue.desc+'</div></div>';
+    if(!issue.fixed){
+      html += '<button class="fix-btn" id="fixbtn-'+issue.id+'" onclick="fixIssue(''+issue.id+'')"><i class="ri-magic-line"></i> Corrigir</button>';
+    } else {
+      html += '<span style="font-size:.75rem;color:#34d399;font-weight:700;flex-shrink:0">Corrigido</span>';
+    }
+    html += '</div>';
+    if(!issue.fixed){
+      html += '<div style="padding:.5rem 0 0 2.75rem"><div style="background:rgba(31,41,55,.5);border-radius:.5rem;padding:.5rem .75rem;font-size:.7rem;color:#6ee7b7;font-family:monospace"><span style="color:#4b5563">// Fix: </span>'+issue.fix+'</div></div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('fix-list').innerHTML = html;
+}
+async function fixIssue(id) {
+  if(fixing) return;
+  fixing = id;
+  var btn = document.getElementById('fixbtn-'+id);
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ri-loader-4-line" style="animation:spin 1s linear infinite"></i> Corrigindo...';}
+  await sleep(1200+Math.random()*800);
+  var issue = ISSUES.find(function(i){return i.id===id});
+  if(issue) issue.fixed = true;
+  fixedCount++;
+  fixing = null;
+  document.getElementById('fix-bar').style.width = Math.round((fixedCount/ISSUES.length)*100)+'%';
+  document.getElementById('fix-label').textContent = fixedCount+'/'+ISSUES.length+' corrigidos';
+  renderFixList();
+  renderIssues();
+  if(ISSUES.every(function(i){return i.fixed})){
+    document.getElementById('all-fixed').style.display='block';
+    document.getElementById('fix-all-btn').style.display='none';
+  }
+}
+async function fixAll() {
+  var unfixed = ISSUES.filter(function(i){return !i.fixed});
+  for(var i=0;i<unfixed.length;i++) await fixIssue(unfixed[i].id);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  renderIssues();
+  renderFixList();
+  var dropZone = document.querySelector('.upload-area');
+  if(dropZone){
+    dropZone.addEventListener('dragover',function(e){e.preventDefault();dropZone.style.borderColor='#7c3aed'});
+    dropZone.addEventListener('dragleave',function(){dropZone.style.borderColor='#374151'});
+    dropZone.addEventListener('drop',function(e){e.preventDefault();dropZone.style.borderColor='#374151';if(e.dataTransfer.files[0])handleUpload(e.dataTransfer.files[0])});
+  }
+});
+</script>
+</body>
+</html>

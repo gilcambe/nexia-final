@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="UTF-8">
+<title>CORTEX — NEXIA OS</title>
+<select class="model-sel" id="modelSel">
+  <option value="auto">Auto (melhor para a tarefa)</option>
+  <optgroup label="ANTHROPIC">
+    <option value="claude">Claude Sonnet 4.6</option>
+  </optgroup>
+  <optgroup label="OPENAI">
+    <option value="gpt4o">GPT-4o</option>
+  </optgroup>
+  <optgroup label="GROQ">
+    <option value="groq_llama3">Llama 3 70B</option>
+  </optgroup>
+  <optgroup label="GOOGLE">
+    <option value="gemini_flash">Gemini 2.0 Flash</option>
+  </optgroup>
+</select>
+<div class="rag-drop" id="ragDrop"
+  ondragover="event.preventDefault(); this.classList.add('drag')"
+  ondragleave="this.classList.remove('drag')"
+  ondrop="event.preventDefault(); this.classList.remove('drag'); handleFiles(event.dataTransfer.files)">
+</div>
